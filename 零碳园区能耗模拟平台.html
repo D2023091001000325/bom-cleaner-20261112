@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>零碳园区能耗模拟平台</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#F5F9FC; --card:#FFFFFF; --line:#E2E8F0; --line2:#EDF2F7;
+  --blue:#3B82F6; --blue-d:#2563EB; --blue-l:#DBEAFE; --blue-bg:#EFF6FF;
+  --text:#1E293B; --sub:#64748B; --faint:#94A3B8;
+  --green:#10B981; --red:#EF4444; --orange:#F97316; --amber:#F59E0B;
+  --cyan:#06B6D4; --gold:#EAB308; --violet:#8B5CF6;
+  --r:10px; --shadow:0 1px 2px rgba(15,23,42,.05);
+}
+html{-webkit-text-size-adjust:100%}
+body{font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;font-size:13px;color:var(--text);background:var(--bg);line-height:1.55}
+svg.ic{width:16px;height:16px;flex:none;vertical-align:-3px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+/* ---------- 顶栏 ---------- */
+.topbar{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1440px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px}
+.logo{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,#DBEAFE,#93C5FD);display:flex;align-items:center;justify-content:center;color:var(--blue-d)}
+.logo svg{width:20px;height:20px}
+.brand h1{font-size:16px;font-weight:700;letter-spacing:.5px}
+.brand p{font-size:11px;color:var(--sub)}
+.top-actions{display:flex;gap:8px;flex-wrap:wrap}
+/* ---------- 按钮 ---------- */
+.btn{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:#fff;color:var(--text);border-radius:8px;padding:6px 12px;font-size:12.5px;cursor:pointer;transition:.15s;font-family:inherit;white-space:nowrap}
+.btn:hover{border-color:var(--blue);color:var(--blue-d);background:var(--blue-bg)}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.primary:hover{background:var(--blue-d)}
+.btn.small{padding:3px 8px;font-size:11.5px;border-radius:6px}
+.btn.danger:hover{border-color:var(--red);color:var(--red);background:#FEF2F2}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+/* ---------- 布局 ---------- */
+main{max-width:1440px;margin:0 auto;padding:14px 16px 6px;display:grid;grid-template-columns:322px 1fr;gap:14px;align-items:start}
+aside{display:flex;flex-direction:column;gap:12px;position:sticky;top:64px;max-height:calc(100vh - 76px);overflow-y:auto;padding-right:2px;scrollbar-width:thin}
+.content{display:flex;flex-direction:column;gap:12px;min-width:0}
+@media(max-width:1020px){main{grid-template-columns:1fr}aside{position:static;max-height:none}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:12px 14px}
+.card h2{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px;color:var(--text);margin-bottom:10px}
+.card h2 .ic{color:var(--blue)}
+.card h2 .tag{margin-left:auto;font-size:10.5px;font-weight:500;color:var(--sub);background:var(--blue-bg);border:1px solid var(--blue-l);padding:1px 7px;border-radius:20px}
+/* ---------- 控件 ---------- */
+.ctl{margin-bottom:12px}
+.ctl:last-child{margin-bottom:2px}
+.ctl-head{display:flex;justify-content:space-between;align-items:baseline}
+.ctl-head label{font-weight:600;font-size:12.5px}
+.ctl-val{font-size:12.5px;color:var(--blue-d);font-weight:700;font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;margin:7px 0 2px;accent-color:var(--blue);height:20px;cursor:pointer}
+.ctl-meta{display:flex;justify-content:space-between;font-size:10.5px;color:var(--faint)}
+.ctl-sub{font-size:11px;color:var(--sub);margin-top:1px}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--blue-bg);border:1px solid var(--blue-l);border-radius:8px;padding:8px 10px}
+.switch{position:relative;width:38px;height:21px;flex:none}
+.switch input{opacity:0;width:0;height:0}
+.switch .track{position:absolute;inset:0;background:#CBD5E1;border-radius:20px;transition:.2s;cursor:pointer}
+.switch .track::before{content:"";position:absolute;width:15px;height:15px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.2s;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.switch input:checked+.track{background:var(--green)}
+.switch input:checked+.track::before{transform:translateX(17px)}
+/* ---------- 分项小表 ---------- */
+.tbl{width:100%;border-collapse:collapse;font-size:11.5px}
+.tbl th,.tbl td{padding:4px 6px;border-bottom:1px solid var(--line2);text-align:left}
+.tbl th{color:var(--sub);font-weight:500}
+.tbl td.num,.tbl th.num{text-align:right;font-variant-numeric:tabular-nums}
+.tbl tr:last-child td{border-bottom:none}
+.dot{display:inline-block;width:8px;height:8px;border-radius:2.5px;margin-right:5px;vertical-align:0}
+/* ---------- KPI ---------- */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:1400px){.kpi-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:760px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi-top{display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--sub)}
+.kpi-top .ic{width:14px;height:14px;color:var(--blue)}
+.kpi-num{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi-num em{font-style:normal;font-size:11px;font-weight:500;color:var(--sub);margin-left:2px}
+.kpi-sub{font-size:10.5px;color:var(--faint);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi.hi{background:linear-gradient(135deg,#EFF6FF,#F8FAFF);border-color:var(--blue-l)}
+.kpi.hi .kpi-num{color:var(--blue-d)}
+.kpi.good .kpi-num{color:#047857}
+/* ---------- 图表 ---------- */
+.chart-wrap{position:relative}
+canvas{display:block;width:100%}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:var(--sub);padding:2px 2px 6px}
+.legend span{display:inline-flex;align-items:center;gap:4px}
+.legend i{width:9px;height:9px;border-radius:2px;display:inline-block}
+.legend i.line{width:14px;height:0;border-radius:0;border-top:2.5px solid}
+/* ---------- 逐时面板 ---------- */
+.ess-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.ess-head select{border:1px solid var(--line);border-radius:7px;padding:4px 8px;font-size:12px;font-family:inherit;background:#fff;color:var(--text)}
+.ess-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:8px 0 10px}
+@media(max-width:760px){.ess-stats{grid-template-columns:repeat(2,1fr)}}
+.ess-stat{background:var(--bg);border:1px solid var(--line2);border-radius:8px;padding:7px 9px}
+.ess-stat b{display:block;font-size:15px;font-variant-numeric:tabular-nums}
+.ess-stat span{font-size:10.5px;color:var(--sub)}
+.ess-stat .vs{font-size:10px;color:var(--faint)}
+.ess-note{font-size:11px;color:var(--sub);background:var(--blue-bg);border:1px dashed var(--blue-l);border-radius:8px;padding:7px 10px;margin-top:8px}
+/* ---------- 方案库 ---------- */
+.scn-toolbar{display:flex;gap:8px;margin-bottom:9px}
+.scn-list{display:flex;flex-direction:column;gap:6px}
+.scn{border:1px solid var(--line);border-radius:8px;padding:7px 9px;transition:.15s;position:relative}
+.scn:hover{border-color:var(--blue);background:var(--blue-bg)}
+.scn.active{border-color:var(--blue);background:var(--blue-bg);box-shadow:0 0 0 1.5px var(--blue-l)}
+.scn-head{display:flex;align-items:center;gap:6px}
+.scn-id{font-size:10.5px;font-weight:700;color:var(--blue-d);background:var(--blue-l);border-radius:5px;padding:1px 6px}
+.scn-name{font-size:12px;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.scn-body{display:flex;gap:10px;font-size:10.5px;color:var(--sub);margin-top:3px;font-variant-numeric:tabular-nums;flex-wrap:wrap}
+.scn-body b{color:var(--text);font-weight:600}
+.scn-acts{display:flex;gap:5px;margin-top:5px}
+.scn .lock{color:var(--faint)}
+/* ---------- 参数区 ---------- */
+details.param{border:1px solid var(--line2);border-radius:8px;padding:0;margin-bottom:6px;background:#FBFDFF}
+details.param summary{cursor:pointer;padding:7px 10px;font-size:12px;font-weight:600;color:var(--sub);list-style:none;display:flex;align-items:center;gap:6px;user-select:none}
+details.param summary::before{content:"▸";transition:.15s;color:var(--faint)}
+details.param[open] summary::before{transform:rotate(90deg)}
+details.param .param-body{padding:4px 10px 10px}
+.pnum{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:3px 0;font-size:11.5px}
+.pnum label{color:var(--sub)}
+.pnum input{width:76px;border:1px solid var(--line);border-radius:6px;padding:3px 6px;font-size:11.5px;text-align:right;font-family:inherit;font-variant-numeric:tabular-nums}
+.pnum input:focus{outline:none;border-color:var(--blue)}
+/* ---------- 结论 ---------- */
+#ta-conclusion{width:100%;min-height:150px;border:1px solid var(--line);border-radius:8px;padding:9px 11px;font-family:inherit;font-size:12.5px;line-height:1.7;resize:vertical;color:var(--text);background:#FDFEFF}
+#ta-conclusion:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-l)}
+.concl-foot{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+#cc-count{font-size:11px;color:var(--faint);margin-left:auto}
+/* ---------- 弹窗 ---------- */
+.mb{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(15,23,42,.28)}
+.mb.open{display:flex;animation:fadeIn .18s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:rgba(255,255,255,.88);backdrop-filter:blur(16px) saturate(1.5);border:1px solid rgba(255,255,255,.85);border-radius:14px;box-shadow:0 18px 50px rgba(15,23,42,.25);max-width:720px;width:100%;max-height:86vh;display:flex;flex-direction:column;animation:pop .2s}
+@keyframes pop{from{transform:translateY(12px) scale(.98);opacity:0}to{transform:none;opacity:1}}
+.modal-head{display:flex;align-items:center;gap:8px;padding:13px 16px;border-bottom:1px solid var(--line)}
+.modal-head h3{font-size:14px;flex:1}
+.modal-head .ic{color:var(--blue)}
+.x{border:none;background:var(--bg);width:26px;height:26px;border-radius:7px;cursor:pointer;font-size:15px;color:var(--sub);line-height:1}
+.x:hover{background:#FEE2E2;color:var(--red)}
+.modal-body{padding:13px 16px;overflow-y:auto;font-size:12.5px}
+.modal-foot{padding:11px 16px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+/* 帮助公式 */
+.fml{font-family:Consolas,"JetBrains Mono",monospace;font-size:11.5px;background:var(--blue-bg);border:1px solid var(--blue-l);border-radius:7px;padding:7px 10px;margin:6px 0;overflow-x:auto;white-space:nowrap}
+.help-h{font-weight:700;margin:12px 0 5px;font-size:13px;display:flex;align-items:center;gap:5px;color:var(--blue-d)}
+.help-h:first-child{margin-top:0}
+.help-p{color:var(--sub);margin:3px 0}
+/* 校验表 */
+.vrow{display:grid;grid-template-columns:1.1fr 1fr 1fr 40px;gap:6px;align-items:center;padding:7px 8px;border-bottom:1px solid var(--line2);font-variant-numeric:tabular-nums}
+.vrow.hd{font-size:11px;color:var(--sub);font-weight:600}
+.vrow b{font-size:12.5px}
+.pass{color:var(--green);font-weight:700}
+.fail{color:var(--red);font-weight:700}
+/* 导出弹窗 */
+.exp-opt{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin-bottom:7px;cursor:pointer;transition:.15s}
+.exp-opt:hover{border-color:var(--blue);background:var(--blue-bg)}
+.exp-opt input{accent-color:var(--blue)}
+.exp-opt .fname{font-family:Consolas,monospace;font-size:11.5px;background:var(--bg);border-radius:5px;padding:1px 7px;color:var(--blue-d)}
+.exp-opt .desc{color:var(--sub);font-size:11px}
+/* toast / tooltip */
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);background:rgba(30,41,59,.94);color:#fff;padding:8px 18px;border-radius:9px;font-size:12.5px;opacity:0;pointer-events:none;transition:.25s;z-index:200;box-shadow:0 8px 24px rgba(15,23,42,.35)}
+.toast.show{opacity:1;transform:translateX(-50%)}
+.tip{position:fixed;z-index:150;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:9px;padding:8px 11px;font-size:11.5px;pointer-events:none;display:none;box-shadow:0 8px 24px rgba(15,23,42,.18);max-width:280px;line-height:1.6}
+.tip b{font-size:12px}
+.tip .trow{display:flex;justify-content:space-between;gap:14px;font-variant-numeric:tabular-nums}
+.tip .trow span:first-child{color:var(--sub)}
+footer{max-width:1440px;margin:0 auto;padding:8px 16px 18px;font-size:11px;color:var(--faint);text-align:center}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:6px}
+::-webkit-scrollbar-track{background:transparent}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+      <div>
+        <h1>零碳园区能耗模拟平台</h1>
+        <p>风光储热优化配置 · 逐时储能模拟 · 运维费用与回收期 · CSV 数据导出</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="btn" id="btn-reset"><svg class="ic" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>重置配置</button>
+      <button class="btn" id="btn-verify"><svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>综合校验</button>
+      <button class="btn" id="btn-help"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>计算逻辑</button>
+      <button class="btn primary" id="btn-export"><svg class="ic" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>导出数据</button>
+    </div>
+  </div>
+</header>
+
+<main>
+<aside>
+  <!-- 方案配置 -->
+  <section class="card">
+    <h2><svg class="ic" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>方案配置<span class="tag">拖动滑块实时计算</span></h2>
+    <div class="ctl">
+      <div class="ctl-head"><label><svg class="ic" viewBox="0 0 24 24" style="width:13px;height:13px;color:#F59E0B"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg> 屋顶光伏</label><span class="ctl-val" id="pv-val">0 kW</span></div>
+      <input type="range" id="rg-pv" min="0" max="5000" step="100" value="0">
+      <div class="ctl-meta"><span>0</span><span>5,000 kW</span></div>
+      <div class="ctl-sub" id="pv-sub">投资 0 万元 · 年发电 0 万 kWh（1100 h）</div>
+    </div>
+    <div class="ctl">
+      <div class="ctl-head"><label><svg class="ic" viewBox="0 0 24 24" style="width:13px;height:13px;color:#06B6D4"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2M9.6 4.6A2 2 0 1 1 11 8H2M12.6 19.4A2 2 0 1 0 14 16H2"/></svg> 小型风机</label><span class="ctl-val" id="wind-val">0 台</span></div>
+      <input type="range" id="rg-wind" min="0" max="10" step="1" value="0">
+      <div class="ctl-meta"><span>0</span><span>10 台（100 kW/台）</span></div>
+      <div class="ctl-sub" id="wind-sub">投资 0 万元 · 年发电 0 万 kWh（2000 h）</div>
+    </div>
+    <div class="ctl">
+      <div class="ctl-head"><label><svg class="ic" viewBox="0 0 24 24" style="width:13px;height:13px;color:#10B981"><rect x="2" y="7" width="16" height="10" rx="2"/><path d="M22 11v2M6 10.5v3M10 10.5v3M14 10.5v3"/></svg> 电池储能</label><span class="ctl-val" id="batt-val">0 kWh</span></div>
+      <input type="range" id="rg-batt" min="0" max="4500" step="500" value="0">
+      <div class="ctl-meta"><span>0</span><span>4,500 kWh（500 的整数倍）</span></div>
+      <div class="ctl-sub" id="batt-sub">投资 0 万元 · 自用率 50%</div>
+    </div>
+    <div class="ctl toggle-row">
+      <div>
+        <label style="font-weight:600;font-size:12.5px">热泵优化调试</label>
+        <div class="ctl-sub">一次性 30 万元 · 空调电耗 −15%（总电耗 −9%）</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="tk-hp"><span class="track"></span></label>
+    </div>
+  </section>
+
+  <!-- 参数 -->
+  <section class="card">
+    <h2><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>技术经济参数</h2>
+    <details class="param">
+      <summary>统一教学设定（只读）</summary>
+      <div class="param-body">
+        <table class="tbl">
+          <tr><td>购电价格</td><td class="num">0.70 元/kWh</td></tr>
+          <tr><td>电网碳因子</td><td class="num">0.55 kgCO₂/kWh</td></tr>
+          <tr><td>光伏单价 / 利用小时</td><td class="num">3500 元/kW · 1100 h</td></tr>
+          <tr><td>风机单价 / 利用小时</td><td class="num">80 万元/台 · 2000 h</td></tr>
+          <tr><td>储能单价（含安装）</td><td class="num">1200 元/kWh</td></tr>
+          <tr><td>自用率规则</td><td class="num">50% + 5%/500kWh ≤ 95%</td></tr>
+          <tr><td>热泵优化</td><td class="num">30 万元 · 空调 −15%</td></tr>
+        </table>
+      </div>
+    </details>
+    <details class="param">
+      <summary>运维费率（年，按初投资计）</summary>
+      <div class="param-body">
+        <div class="pnum"><label>光伏运维费率</label><input type="number" id="p-omPv" step="0.1" min="0" max="10" value="1.5"><span style="font-size:10px;color:var(--faint)">%/年</span></div>
+        <div class="pnum"><label>风机运维费率</label><input type="number" id="p-omWind" step="0.1" min="0" max="10" value="2.5"><span style="font-size:10px;color:var(--faint)">%/年</span></div>
+        <div class="pnum"><label>储能运维费率</label><input type="number" id="p-omBatt" step="0.1" min="0" max="10" value="2.0"><span style="font-size:10px;color:var(--faint)">%/年</span></div>
+        <div class="ctl-sub" style="margin-top:4px">年运维费计入"含运维回收期"：投资 ÷（年节省 − 年运维费）</div>
+      </div>
+    </details>
+    <details class="param">
+      <summary>逐时储能模拟参数</summary>
+      <div class="param-body">
+        <div class="pnum"><label>充放电功率倍率</label><input type="number" id="p-essC" step="0.05" min="0.05" max="2" value="0.5"><span style="font-size:10px;color:var(--faint)">C（功率=容量×倍率）</span></div>
+        <div class="pnum"><label>SOC 下限</label><input type="number" id="p-socLo" step="1" min="0" max="40" value="10"><span style="font-size:10px;color:var(--faint)">%</span></div>
+        <div class="pnum"><label>SOC 上限</label><input type="number" id="p-socHi" step="1" min="50" max="100" value="90"><span style="font-size:10px;color:var(--faint)">%</span></div>
+        <div class="pnum"><label>充/放电效率</label><input type="number" id="p-eff" step="0.5" min="80" max="100" value="95"><span style="font-size:10px;color:var(--faint)">%（单向）</span></div>
+      </div>
+    </details>
+  </section>
+
+  <!-- 方案库 -->
+  <section class="card">
+    <h2><svg class="ic" viewBox="0 0 24 24"><path d="M12 2 2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>方案库<span class="tag" id="scn-count">5 个方案</span></h2>
+    <div class="scn-toolbar">
+      <button class="btn small primary" id="btn-save" style="flex:1;justify-content:center"><svg class="ic" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>保存当前方案</button>
+      <button class="btn small" id="btn-restore" title="恢复预置方案"><svg class="ic" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>恢复预置</button>
+    </div>
+    <div class="scn-list" id="scenario-list"></div>
+  </section>
+</aside>
+
+<div class="content">
+  <!-- KPI -->
+  <section class="kpi-grid" id="kpi-grid">
+    <div class="kpi"><div class="kpi-top"><svg class="ic" viewBox="0 0 24 24"><path d="M2 20h20M4 20V8l5 4V8l5 4V4h6v16"/></svg>年电耗</div><div class="kpi-num" id="k-load">520.00 <em>万kWh</em></div><div class="kpi-sub" id="s-load">较基准 −0%</div></div>
+    <div class="kpi"><div class="kpi-top"><svg class="ic" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>绿电发电</div><div class="kpi-num" id="k-green">0.00 <em>万kWh</em></div><div class="kpi-sub" id="s-green">光伏 0 · 风机 0</div></div>
+    <div class="kpi"><div class="kpi-top"><svg class="ic" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>绿电自用</div><div class="kpi-num" id="k-selfuse">0.00 <em>万kWh</em></div><div class="kpi-sub" id="s-selfuse">逐时模拟 xx 万kWh</div></div>
+    <div class="kpi hi"><div class="kpi-top"><svg class="ic" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>绿电自用率（经验规则）</div><div class="kpi-num" id="k-sur">—</div><div class="kpi-sub" id="s-sur">逐时模拟 —</div></div>
+    <div class="kpi"><div class="kpi-top"><svg class="ic" viewBox="0 0 24 24"><path d="M2 20h20M4 20V8l5 4V8l5 4V4h6v16"/></svg>年购电</div><div class="kpi-num" id="k-import">520.00 <em>万kWh</em></div><div class="kpi-sub" id="s-import">占负荷 100%</div></div>
+    <div class="kpi"><div class="kpi-top"><svg class="ic" viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>年碳排放</div><div class="kpi-num" id="k-carbon">2,860.0 <em>吨CO₂</em></div><div class="kpi-sub" id="s-carbon">较基准 −0%</div></div>
+    <div class="kpi"><div class="kpi-top"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8.5 8l3.5 4 3.5-4M12 12v5M9 13.5h6M9 16h6"/></svg>初投资</div><div class="kpi-num" id="k-invest">0.00 <em>万元</em></div><div class="kpi-sub" id="s-invest">光伏/风机/储能/热泵 = 0</div></div>
+    <div class="kpi"><div class="kpi-top"><svg class="ic" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>年运维费</div><div class="kpi-num" id="k-om">0.00 <em>万元/年</em></div><div class="kpi-sub" id="s-om">按费率：光1.5% 风2.5% 储2.0%</div></div>
+    <div class="kpi good"><div class="kpi-top"><svg class="ic" viewBox="0 0 24 24" style="color:#10B981"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><path d="M16 13a4 4 0 1 1-8 0 4 4 0 0 1 8 0z"/></svg>年节省电费</div><div class="kpi-num" id="k-saving">0.00 <em>万元/年</em></div><div class="kpi-sub" id="s-saving">基准年电费 364 万元</div></div>
+    <div class="kpi"><div class="kpi-top"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>回收期（作业简算）</div><div class="kpi-num" id="k-payback">不适用</div><div class="kpi-sub" id="s-payback">投资 ÷ 年节省（不计运维）</div></div>
+    <div class="kpi hi"><div class="kpi-top"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>回收期（含运维）</div><div class="kpi-num" id="k-paybackom">不适用</div><div class="kpi-sub" id="s-paybackom">投资 ÷（年节省 − 年运维费）</div></div>
+    <div class="kpi good"><div class="kpi-top"><svg class="ic" viewBox="0 0 24 24" style="color:#10B981"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>减排比例</div><div class="kpi-num" id="k-cut">0.0<em>%</em></div><div class="kpi-sub" id="s-cut">基准 2,860 吨 · 年弃电 0 万kWh</div></div>
+  </section>
+
+  <!-- 月度分项电耗 -->
+  <section class="card">
+    <h2><svg class="ic" viewBox="0 0 24 24"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="7" fill="currentColor" stroke="none"/><rect x="12" y="6" width="3" height="11" fill="currentColor" stroke="none"/><rect x="17" y="13" width="3" height="4" fill="currentColor" stroke="none"/></svg>月度分项电耗<span class="tag" id="monthly-tag">2025 年 · 当前方案</span></h2>
+    <div class="legend">
+      <span><i style="background:#F97316"></i>空调系统</span>
+      <span><i style="background:#0EA5E9"></i>供水泵</span>
+      <span><i style="background:#EAB308"></i>照明</span>
+      <span><i style="background:#94A3B8"></i>办公及其他</span>
+    </div>
+    <div class="chart-wrap"><canvas id="cv-monthly" height="230"></canvas></div>
+  </section>
+
+  <!-- 方案比较 -->
+  <section class="card">
+    <h2><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v18M3 3v18h18"/><path d="M7 16l3-3 3 3 4-6"/></svg>方案比较：碳排放与回收期<span class="tag">含方案库与当前配置</span></h2>
+    <div class="legend">
+      <span><i style="background:#3B82F6"></i>年碳排放（左轴，吨）</span>
+      <span><i class="line" style="border-color:#10B981"></i>回收期（右轴，年，含运维）</span>
+    </div>
+    <div class="chart-wrap"><canvas id="cv-compare" height="240"></canvas></div>
+  </section>
+
+  <!-- 逐时储能模拟 -->
+  <section class="card">
+    <h2><svg class="ic" viewBox="0 0 24 24"><rect x="2" y="7" width="16" height="10" rx="2"/><path d="M22 11v2M6 10.5v3M10 10.5v3M14 10.5v3"/></svg>逐时储能模拟<span class="tag">典型日 × 8760 小时</span></h2>
+    <div class="ess-head">
+      <label style="font-size:12px;color:var(--sub)">代表日</label>
+      <select id="sel-month"></select>
+      <span style="font-size:11px;color:var(--faint)">每月取稳态代表日，全年按当月天数展开逐时模拟</span>
+    </div>
+    <div class="ess-stats">
+      <div class="ess-stat"><span>经验规则自用率</span><b id="hs-emp" style="color:var(--blue-d)">—</b><span class="vs">储能线性规则</span></div>
+      <div class="ess-stat"><span>逐时模拟自用率</span><b id="hs-sim" style="color:var(--green)">—</b><span class="vs">8760h 逐时平衡</span></div>
+      <div class="ess-stat"><span>全年弃电量</span><b id="hs-curt">—</b><span class="vs">富余绿电无法消纳</span></div>
+      <div class="ess-stat"><span>储能等效循环</span><b id="hs-cyc">—</b><span class="vs">放电量 ÷ 可用容量</span></div>
+    </div>
+    <div class="legend">
+      <span><i class="line" style="border-color:#334155"></i>逐时负荷</span>
+      <span><i class="line" style="border-color:#EAB308"></i>光伏出力</span>
+      <span><i class="line" style="border-color:#06B6D4"></i>风机出力</span>
+      <span><i style="background:rgba(16,185,129,.55)"></i>直接绿电消纳</span>
+      <span><i style="background:rgba(249,115,22,.55)"></i>储能放电补充</span>
+    </div>
+    <div class="chart-wrap"><canvas id="cv-hourly" height="250"></canvas></div>
+    <div class="legend" style="padding-top:8px">
+      <span><i style="background:#3B82F6"></i>储能充电（kW）</span>
+      <span><i style="background:#F97316"></i>储能放电（kW）</span>
+      <span><i class="line" style="border-color:#8B5CF6"></i>SOC 荷电状态（右轴）</span>
+    </div>
+    <div class="chart-wrap"><canvas id="cv-soc" height="130"></canvas></div>
+    <div class="ess-note" id="ess-note">逐时模拟采用典型日形状假设：负荷按"基础+空调"双形状随月混合，光伏/风机按月分配系数与逐时形状展开；储能按功率限制、SOC 区间与充放电效率逐小时充放。结果用于与经验规则对比，作业 CSV 中的 self_use_rate 仍采用经验规则口径。</div>
+  </section>
+
+  <!-- 结论 -->
+  <section class="card">
+    <h2><svg class="ic" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>分析结论<span class="tag">作业要求 200—300 字</span></h2>
+    <textarea id="ta-conclusion" placeholder="点击「生成结论草稿」自动撰写，或在此直接编辑……"></textarea>
+    <div class="concl-foot">
+      <button class="btn small" id="btn-genconcl"><svg class="ic" viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>生成结论草稿</button>
+      <button class="btn small primary" id="btn-expconcl"><svg class="ic" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>导出结论 txt</button>
+      <span id="cc-count">0 字</span>
+    </div>
+  </section>
+</div>
+</main>
+
+<footer>零碳园区能耗模拟平台 · 教学作业工具 · 全部计算在浏览器本地完成（localStorage 持久化，不上传数据）· 导出 CSV 可直接用于 MySQL / 数据仓库课程</footer>
+
+<div class="tip" id="tip"></div>
+<div class="toast" id="toast"></div>
+
+<!-- ===== 帮助弹窗 ===== -->
+<div class="mb" id="m-help">
+  <div class="modal">
+    <div class="modal-head"><svg class="ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg><h3>计算逻辑说明</h3><button class="x" data-close="m-help">×</button></div>
+    <div class="modal-body">
+      <div class="help-h">1. 基准与月度分配</div>
+      <p class="help-p">园区 10 栋 × 8000 m²，单位电耗 65 kWh/(m²·年)，基准年电耗 520 万 kWh；空调 312 万（60%）、供水泵 26 万（5%）、照明 104 万（20%）、办公及其他 78 万（15%）。</p>
+      <div class="fml">空调月电耗 = 312万 × m月占比[8,7,6,5,7,10,13,13,10,6,7,8]% × (热泵开 ? 0.85 : 1)</div>
+      <div class="fml">其余分项月电耗 = 年分项 × 当月天数 / 365　→　各月合计 ≡ 年度结果</div>
+      <p class="help-p">基准校验：520 万 kWh × 0.55 kg/kWh = 2860 吨 CO₂；× 0.70 元 = 364 万元电费。</p>
+      <div class="help-h">2. 绿电与自用率（经验规则）</div>
+      <div class="fml">绿电发电 G = P×1100 + N×100×2000 （kWh）</div>
+      <div class="fml">自用率 S = min( 50% + B/500×5% , 95% )；绿电自用 = min(G×S, 年负荷)</div>
+      <p class="help-p">绿电自用不得超过负荷，富余绿电按弃电处理（不计售电与碳抵扣）。</p>
+      <div class="help-h">3. 平衡、投资与回收期</div>
+      <div class="fml">年购电 = 年负荷 − 绿电自用 ≥ 0；碳排放 = 年购电 × 0.55 / 1000（吨）</div>
+      <div class="fml">初投资 I = P×3500 + N×80万 + B×1200 + (热泵开 ? 30万 : 0)</div>
+      <div class="fml">年节省 F = (基准520万 − 年购电) × 0.70　（热泵优化降低的电耗同样计入节省）</div>
+      <div class="fml">回收期(简算) = I / F；回收期(含运维) = I / (F − 年运维费)</div>
+      <div class="fml">年运维费 = 光伏投资×1.5% + 风机投资×2.5% + 储能投资×2.0%（费率可调）</div>
+      <p class="help-p">F = 0 时回收期显示"无节省"（如只配储能而无绿电）；基准方案回收期显示"不适用"。</p>
+      <div class="help-h">4. 逐时储能模拟（选做增强）</div>
+      <p class="help-p">按 12 个月 × 当月天数 × 24 小时共 8760 小时滚动模拟：负荷按"基础形状 + 空调形状"按月混合；光伏按月分配系数（夏高冬低）与 6—18 时钟形展开；风机按月分配（冬春高）与昼夜形状展开。</p>
+      <div class="fml">充电 = min(绿电盈余, 0.5C×B, (SOC上限−SOC)/η)；放电 = min(缺口/η, 0.5C×B, SOC−SOC下限)</div>
+      <p class="help-p">默认功率倍率 0.5C、SOC 区间 10%—90%、单向效率 95%（可调）。逐时模拟给出更接近实际的自用率、弃电量与储能循环次数，用于与经验规则对比；CSV 导出中的 self_use_rate 仍为作业规定的经验规则口径。</p>
+      <div class="help-h">5. CSV 导出格式</div>
+      <p class="help-p"><b>energy_monthly.csv</b>：scenario_id, month(2025-01), building_id(B01—B10), category(hvac/water_pump/lighting/other), energy_kwh —— 每方案 480 行 = 12 月 × 10 栋 × 4 类；B10 行做尾差补偿，保证各月 10 栋合计与月度结果严格一致。</p>
+      <p class="help-p"><b>scenario.csv</b>：scenario_id, pv_kw, wind_count, battery_kwh, heat_pump_on(0/1), self_use_rate(百分数值), annual_load_kwh, green_generation_kwh, green_self_use_kwh, grid_import_kwh, carbon_t, investment_yuan, annual_saving_yuan, payback_years(不适用为 NA), electricity_price(0.70), carbon_factor(0.55)。</p>
+      <p class="help-p"><b>hourly_simulation.csv</b>（附加）：当前配置全年逐时模拟明细（month/day/hour/负荷/光伏/风机/充放/SOC/购电）。</p>
+      <div class="help-h">6. 综合校验例</div>
+      <p class="help-p">光伏 1000 kW、风机 2 台、储能 1000 kWh、热泵优化开 → 自用率 60%、年购电 383.2 万 kWh、年排放 2107.6 吨、初投资 660 万元、年节省 95.76 万元、回收期约 6.89 年。点击顶栏「综合校验」可自动核对。</p>
+    </div>
+    <div class="modal-foot"><button class="btn" data-close="m-help">关闭</button></div>
+  </div>
+</div>
+
+<!-- ===== 导出弹窗 ===== -->
+<div class="mb" id="m-export">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head"><svg class="ic" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg><h3>导出数据与结论</h3><button class="x" data-close="m-export">×</button></div>
+    <div class="modal-body">
+      <label class="exp-opt"><input type="checkbox" id="exp-cur" checked><div><span class="fname">当前配置</span> 若与已保存方案不同，自动分配编号一并导出</div></label>
+      <div style="font-size:11.5px;color:var(--sub);margin:8px 0 4px">将导出的方案（<b id="exp-n">5</b> 个，编号关联两个 CSV）：</div>
+      <div id="exp-list" style="max-height:200px;overflow-y:auto;border:1px solid var(--line2);border-radius:8px;padding:6px 9px;font-size:11.5px;font-variant-numeric:tabular-nums"></div>
+      <div style="margin-top:10px;display:flex;flex-direction:column;gap:6px">
+        <button class="btn" id="btn-exp-monthly" style="justify-content:flex-start"><span class="fname">energy_monthly.csv</span><span class="desc">逐方案逐月逐栋分项电耗（每方案 480 行）</span></button>
+        <button class="btn" id="btn-exp-scenario" style="justify-content:flex-start"><span class="fname">scenario.csv</span><span class="desc">方案技术经济指标汇总</span></button>
+        <button class="btn" id="btn-exp-hourly" style="justify-content:flex-start"><span class="fname">hourly_simulation.csv</span><span class="desc">当前配置全年 8760 小时逐时模拟明细（附加）</span></button>
+        <button class="btn" id="btn-exp-concl2" style="justify-content:flex-start"><span class="fname">conclusion.txt</span><span class="desc">分析结论（200—300 字说明）</span></button>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn" data-close="m-export">关闭</button></div>
+  </div>
+</div>
+
+<!-- ===== 保存方案弹窗 ===== -->
+<div class="mb" id="m-save">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head"><svg class="ic" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg><h3>保存当前方案</h3><button class="x" data-close="m-save">×</button></div>
+    <div class="modal-body">
+      <div style="font-size:12px;color:var(--sub);margin-bottom:6px">方案名称：</div>
+      <input id="save-name" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-family:inherit;font-size:12.5px" placeholder="如：风光储能加热泵优化">
+      <div id="save-sum" style="font-size:11.5px;color:var(--sub);margin-top:8px;font-variant-numeric:tabular-nums"></div>
+    </div>
+    <div class="modal-foot"><button class="btn" data-close="m-save">取消</button><button class="btn primary" id="btn-save-ok">保存</button></div>
+  </div>
+</div>
+
+<!-- ===== 校验弹窗 ===== -->
+<div class="mb" id="m-verify">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-head"><svg class="ic" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg><h3>综合校验（作业检验例）</h3><button class="x" data-close="m-verify">×</button></div>
+    <div class="modal-body">
+      <p class="help-p" style="margin-bottom:8px">校验配置：光伏 1000 kW · 风机 2 台 · 储能 1000 kWh · 热泵优化开。计算引擎独立运行，不影响当前页面配置。</p>
+      <div class="vrow hd"><span>校验项</span><span class="num">期望值</span><span class="num">计算值</span><span style="text-align:center">结果</span></div>
+      <div id="verify-rows"></div>
+      <div id="verify-sum" style="margin-top:10px;font-weight:700"></div>
+    </div>
+    <div class="modal-foot"><button class="btn" id="btn-verify-load">载入该配置</button><button class="btn primary" data-close="m-verify">关闭</button></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ============================================================
+ * 1. 常量与教学参数（统一教学设定，只读）
+ * ============================================================ */
+const DAYS = [31,28,31,30,31,30,31,31,30,31,30,31];            // 2025年，合计365
+const HVAC_SHARE = [.08,.07,.06,.05,.07,.10,.13,.13,.10,.06,.07,.08]; // 空调月度占比，合计100%
+const BASE = {
+  load: 5200000,   // 基准年电耗 kWh
+  hvac: 3120000, pump: 260000, light: 1040000, other: 780000,
+  price: 0.70,     // 元/kWh
+  cf: 0.55,        // kgCO2/kWh
+  pvPrice: 3500, pvHours: 1100,
+  windKW: 100, windPrice: 800000, windHours: 2000,
+  battPrice: 1200,
+  hpPrice: 300000, hpFactor: 0.85,   // 空调电耗×0.85（总电耗−9%）
+};
+const BASE_CARBON = BASE.load * BASE.cf / 1000;   // 2860 吨
+const BASE_FEE = BASE.load * BASE.price;          // 364 万元
+const MONTH_CN = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+
+/* ============================================================
+ * 2. 全局状态（localStorage 持久化）
+ * ============================================================ */
+const LS_SCN = 'zcp_scenarios_v1', LS_PAR = 'zcp_params_v1', LS_CON = 'zcp_conclusion_v1', LS_CFG = 'zcp_cfg_v1';
+const state = {
+  cfg: { pv: 0, wind: 0, battery: 0, hp: false },
+  params: { omPv: 0.015, omWind: 0.025, omBatt: 0.02, essC: 0.5, socLo: 0.10, socHi: 0.90, eff: 0.95 },
+  scenarios: [],   // {id,name,pv,wind,battery,hp,preset}
+  conclusion: '',
+  r: null,         // 当前计算结果
+  simMonth: 6,     // 逐时图展示月份（0基，默认7月）
+};
+
+const PRESETS = [
+  { id:'S01', name:'基准方案',           pv:0,    wind:0, battery:0,    hp:false },
+  { id:'S02', name:'增加风光',           pv:2000, wind:3, battery:0,    hp:false },
+  { id:'S03', name:'风光加储能',         pv:2000, wind:3, battery:1500, hp:false },
+  { id:'S04', name:'风光储能加热泵优化', pv:1000, wind:2, battery:1000, hp:true  },  // 作业综合校验例
+  { id:'S05', name:'储能超配反例',       pv:500,  wind:1, battery:4500, hp:false },
+];
+
+/* ============================================================
+ * 3. 工具函数
+ * ============================================================ */
+const $ = id => document.getElementById(id);
+const fmtInt = n => Math.round(n).toLocaleString('zh-CN');
+const fmtW = n => (n/10000).toLocaleString('zh-CN',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtW1 = n => (n/10000).toLocaleString('zh-CN',{minimumFractionDigits:1,maximumFractionDigits:1});
+const fmtPct = (n,d=1) => (n*100).toFixed(d)+'%';
+const round2 = v => Math.round(v*100)/100;
+const clamp = (v,a,b) => Math.max(a,Math.min(b,v));
+function saveLS(){ try{
+  localStorage.setItem(LS_SCN, JSON.stringify(state.scenarios));
+  localStorage.setItem(LS_PAR, JSON.stringify(state.params));
+  localStorage.setItem(LS_CON, state.conclusion);
+  localStorage.setItem(LS_CFG, JSON.stringify(state.cfg));
+}catch(e){} }
+function loadLS(){
+  try{
+    const s = localStorage.getItem(LS_SCN);
+    state.scenarios = s ? JSON.parse(s) : PRESETS.map(p=>({...p,preset:true}));
+    if (!Array.isArray(state.scenarios) || !state.scenarios.length) state.scenarios = PRESETS.map(p=>({...p,preset:true}));
+    const p = localStorage.getItem(LS_PAR);
+    if (p) Object.assign(state.params, JSON.parse(p));
+    state.conclusion = localStorage.getItem(LS_CON) || '';
+    const c = localStorage.getItem(LS_CFG);
+    if (c) Object.assign(state.cfg, JSON.parse(c));
+  }catch(e){ state.scenarios = PRESETS.map(p=>({...p,preset:true})); }
+}
+
+/* ============================================================
+ * 4. 月度分项电耗生成（各月合计 ≡ 年度结果）
+ * ============================================================ */
+function genMonthly(hp){
+  const f = hp ? BASE.hpFactor : 1;
+  const hvac  = HVAC_SHARE.map(s => BASE.hvac  * s * f);          // 空调按月占比
+  const pump  = DAYS.map(d => BASE.pump  * d / 365);              // 其余按天数
+  const light = DAYS.map(d => BASE.light * d / 365);
+  const other = DAYS.map(d => BASE.other * d / 365);
+  const total = hvac.map((v,i) => v + pump[i] + light[i] + other[i]);
+  return { hvac, pump, light, other, total };
+}
+
+/* ============================================================
+ * 5. 经验规则年度计算（作业口径）
+ * ============================================================ */
+function calcBase(cfg){
+  const monthly = genMonthly(cfg.hp);
+  const sum = a => a.reduce((x,y)=>x+y,0);
+  const annualLoad = sum(monthly.hvac)+sum(monthly.pump)+sum(monthly.light)+sum(monthly.other);
+
+  const pvGen   = cfg.pv   * BASE.pvHours;
+  const windGen = cfg.wind * BASE.windKW * BASE.windHours;
+  const greenGen = pvGen + windGen;
+
+  // 自用率经验规则：无储能50%，每500kWh +5pp，上限95%
+  let surEmp = 0;
+  if (greenGen > 0) surEmp = clamp(0.50 + cfg.battery/500*0.05, 0, 0.95);
+  const greenSelfUse = Math.min(greenGen * surEmp, annualLoad);   // 不得超过负荷
+  const surActual = greenGen > 0 ? greenSelfUse/greenGen : 0;
+  const gridImport = annualLoad - greenSelfUse;                   // ≥0
+  const carbon = gridImport * BASE.cf / 1000;
+
+  const inv = {
+    pv:   cfg.pv     * BASE.pvPrice,
+    wind: cfg.wind   * BASE.windPrice,
+    batt: cfg.battery* BASE.battPrice,
+    hp:   cfg.hp     ? BASE.hpPrice : 0,
+  };
+  const invest = inv.pv + inv.wind + inv.batt + inv.hp;
+
+  // 运维费用维度：按年运维费率计
+  const om = inv.pv*state.params.omPv + inv.wind*state.params.omWind + inv.batt*state.params.omBatt;
+
+  const saving = (BASE.load - gridImport) * BASE.price;   // 相对基准的年电费节省
+  let payback, paybackOm;
+  if (invest === 0){ payback = '不适用'; paybackOm = '不适用'; }
+  else if (saving <= 0){ payback = '无节省'; paybackOm = '无法回收'; }
+  else {
+    payback = invest / saving;
+    paybackOm = (saving - om) > 0 ? invest / (saving - om) : '无法回收';
+  }
+  return { monthly, annualLoad, pvGen, windGen, greenGen, surEmp, surActual, greenSelfUse,
+           gridImport, carbon, inv, invest, om, saving, payback, paybackOm,
+           cut: 1 - carbon/BASE_CARBON, curtailEmp: greenGen - greenSelfUse };
+}
+
+/* ============================================================
+ * 6. 逐时储能模拟（典型日 × 全年8760h）
+ * ============================================================ */
+const norm = a => { const s = a.reduce((x,y)=>x+y,0); return a.map(v=>v/s); };
+// 光伏逐时形状（6—18时钟形，和=1）
+const PV_H = norm([0,0,0,0,0,0,.05,.25,.55,.80,.95,1,1,.95,.85,.65,.40,.15,0,0,0,0,0,0]);
+// 风机逐时形状（夜间强，和=1）
+const WD_H = norm([1.2,1.25,1.3,1.3,1.25,1.1,1,0.9,.8,.7,.65,.6,.6,.6,.65,.7,.75,.85,.95,1.05,1.15,1.2,1.25,1.25]);
+// 负荷基础形状（和=1）与空调形状（和=1，午间尖峰）
+const LD_H = norm([.5,.45,.42,.42,.45,.5,.6,.75,.9,1.05,1.15,1.2,1.05,1.15,1.2,1.2,1.1,.95,.8,.7,.65,.6,.55,.5]);
+const AC_H = norm([.1,.1,.1,.1,.12,.18,.3,.5,.75,1,1.25,1.45,1.6,1.7,1.7,1.6,1.4,1.1,.85,.65,.5,.4,.3,.15]);
+// 月度分配：光伏夏高冬低 / 风电冬春高夏低（各和=1）
+const PV_M = norm([.6,.7,.85,1,1.15,1.2,1.25,1.2,1,.85,.65,.55]);
+const WD_M = norm([1.2,1.15,1.1,1,.9,.75,.7,.7,.8,.95,1.05,1.2]);
+
+/**
+ * 逐时储能模拟
+ * @param cfg 配置；monthly 月度结果；collect 是否收集全年逐时序列（导出用）
+ */
+function simulateHourly(cfg, monthly, collect){
+  const p = state.params;
+  const B = cfg.battery;
+  const pMax  = B * p.essC;               // 充放电功率上限 kW
+  const socLo = B * p.socLo, socHi = B * p.socHi;
+  const eff = p.eff;                      // 单向效率
+  let soc = B > 0 ? B * 0.5 : 0;          // 期初 50%
+  const pvGen = cfg.pv * BASE.pvHours, windGen = cfg.wind * BASE.windKW * BASE.windHours;
+  const greenGen = pvGen + windGen;
+  let curtailed=0, selfUse=0, chargeT=0, disBusT=0, disBatT=0, gridT=0;
+  const profiles = [];                    // 每月稳态代表日（取各月最后一天）
+  const hours = collect ? [] : null;
+  for (let m=0;m<12;m++){
+    const days = DAYS[m];
+    const dLoad = monthly.total[m]/days;
+    const dPv = pvGen*PV_M[m]/days, dWd = windGen*WD_M[m]/days;
+    const acShare = monthly.total[m]>0 ? monthly.hvac[m]/monthly.total[m] : 0;
+    const lShape = LD_H.map((b,h)=> b*(1-acShare) + AC_H[h]*acShare);   // 月负荷形状（和=1）
+    const prof = [];
+    for (let d=0; d<days; d++){
+      for (let h=0; h<24; h++){
+        const load = dLoad*lShape[h];
+        const pv = dPv*PV_H[h], wd = dWd*WD_H[h];
+        const green = pv + wd;
+        const direct = Math.min(load, green);
+        let charge = 0, disBus = 0;
+        const surplus = green - load;
+        if (surplus > 0 && B > 0){
+          charge = Math.min(surplus, pMax, (socHi - soc)/eff);
+          soc += charge * eff;
+          curtailed += surplus - charge;
+        } else if (surplus > 0){ curtailed += surplus; }
+        const deficit = load - direct;
+        if (deficit > 0 && B > 0 && soc > socLo){
+          const dBat = Math.min(deficit/eff, pMax, soc - socLo);
+          disBus = dBat * eff;
+          soc -= dBat;
+        }
+        chargeT += charge; disBusT += disBus; disBatT += disBus/eff;
+        selfUse += direct + disBus;
+        gridT += load - direct - disBus;
+        const row = { load, pv, wd, direct, charge, disBus, soc, grid: load - direct - disBus };
+        if (d === days-1) prof.push(row);
+        if (hours) hours.push([m+1, d+1, h, row]);
+      }
+    }
+    profiles.push(prof);
+  }
+  return {
+    selfUseRate: greenGen > 0 ? selfUse/greenGen : 0,
+    selfUse, curtailed, gridImport: gridT,
+    cycles: B > 0 ? disBatT / (B * (p.socHi - p.socLo)) : 0,
+    chargeT, disBusT, socEnd: soc, socStart: B*0.5, greenGen, profiles, hours,
+  };
+}
+/* ============================================================
+ * 7. Canvas 图表（DPR 高清 · tooltip 命中检测）
+ * ============================================================ */
+const C = { hvac:'#F97316', pump:'#0EA5E9', light:'#EAB308', other:'#94A3B8',
+            blue:'#3B82F6', green:'#10B981', cyan:'#06B6D4', violet:'#8B5CF6',
+            dark:'#334155', orange:'#F97316' };
+const zones = {};                                  // canvas.id -> 命中区域
+const tipRow = (k,v) => `<div class="trow"><span>${k}</span><b>${v}</b></div>`;
+const fmtTon = n => n.toLocaleString('zh-CN',{maximumFractionDigits:1});
+function cfgLabel(cfg = state.cfg){
+  return `光${fmtInt(cfg.pv)}kW·风${cfg.wind}台·储${fmtInt(cfg.battery)}kWh${cfg.hp?'·热泵':''}`;
+}
+function niceCeil(v){
+  if (!(v>0)) return 1;
+  const e = Math.pow(10, Math.floor(Math.log10(v))), f = v/e;
+  return (f<=1?1 : f<=1.5?1.5 : f<=2?2 : f<=2.5?2.5 : f<=3?3 : f<=4?4 : f<=5?5 : f<=6?6 : f<=8?8 : 10)*e;
+}
+function setupCanvas(cv){
+  if (!cv.dataset.h) cv.dataset.h = cv.getAttribute('height') || '230';
+  const h = +cv.dataset.h;
+  const w = Math.max(cv.parentElement.clientWidth, 260);
+  const dpr = window.devicePixelRatio || 1;
+  cv.width = Math.round(w*dpr); cv.height = Math.round(h*dpr);
+  cv.style.width = w+'px'; cv.style.height = h+'px';
+  const ctx = cv.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,w,h);
+  return { ctx, w, h };
+}
+function gridY(ctx, box, yMin, yMax, fmt){
+  const [x0,y0,x1,y1] = box;
+  ctx.font = '10px system-ui';
+  for (let i=0;i<=4;i++){
+    const t = yMin+(yMax-yMin)*i/4;
+    const y = y1-(t-yMin)/(yMax-yMin)*(y1-y0);
+    ctx.strokeStyle = i===0 ? '#CBD5E1' : '#EDF2F7';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(x0, Math.round(y)+.5); ctx.lineTo(x1, Math.round(y)+.5); ctx.stroke();
+    ctx.fillStyle = '#94A3B8'; ctx.textAlign='right'; ctx.textBaseline='middle';
+    ctx.fillText(fmt(t), x0-5, y);
+  }
+}
+function xTick(ctx, x, y, text, color){
+  ctx.fillStyle = color || '#64748B'; ctx.textAlign='center'; ctx.textBaseline='top';
+  ctx.font = '10px system-ui';
+  ctx.fillText(text, x, y);
+}
+function poly(ctx, pts, color, width){
+  if (!pts.length) return;
+  ctx.save();
+  ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineJoin='round';
+  ctx.beginPath();
+  pts.forEach((p,i)=> i ? ctx.lineTo(p.x,p.y) : ctx.moveTo(p.x,p.y));
+  ctx.stroke(); ctx.restore();
+}
+
+/* ---- 7.1 月度分项电耗（堆叠柱） ---- */
+function drawMonthly(){
+  const cv = $('cv-monthly'); if (!state.r) return;
+  const {ctx,w,h} = setupCanvas(cv);
+  zones[cv.id] = [];
+  const m = state.r.monthly;
+  const box = [46,10,w-10,h-20], X0 = box[0], Y0 = box[1], X1 = box[2], Y1 = box[3];
+  const yMax = niceCeil(Math.max.apply(null, m.total)*1.02);
+  const yv = v => Y1 - v/yMax*(Y1-Y0);
+  gridY(ctx, box, 0, yMax, t=>fmtW1(t));
+  ctx.fillStyle='#94A3B8'; ctx.font='9px system-ui'; ctx.textAlign='left'; ctx.textBaseline='top';
+  ctx.fillText('万kWh', 2, Y0+2);
+  const slot = (X1-X0)/12, bw = Math.min(slot*.62, 34);
+  const cats = [['hvac',C.hvac],['pump',C.pump],['light',C.light],['other',C.other]];
+  for (let i=0;i<12;i++){
+    const cx = X0+slot*i+slot/2;
+    let acc = 0;
+    for (let k=0;k<cats.length;k++){
+      const key = cats[k][0], col = cats[k][1];
+      const yt = yv(acc+m[key][i]);
+      ctx.fillStyle = col;
+      ctx.fillRect(cx-bw/2, yt, bw, yv(acc)-yt);
+      acc += m[key][i];
+    }
+    xTick(ctx, cx, Y1+4, String(i+1));
+    zones[cv.id].push({ x0:X0+slot*i, x1:X0+slot*(i+1), y0:Y0, y1:Y1, html:
+      `<b>${MONTH_CN[i]}（${DAYS[i]} 天）</b>` +
+      tipRow('空调系统', fmtW(m.hvac[i])+' 万kWh') +
+      tipRow('供水泵', fmtW(m.pump[i])+' 万kWh') +
+      tipRow('照明', fmtW(m.light[i])+' 万kWh') +
+      tipRow('办公及其他', fmtW(m.other[i])+' 万kWh') +
+      tipRow('当月合计', fmtW(m.total[i])+' 万kWh')
+    });
+  }
+  $('monthly-tag').textContent = '2025 年 · 当前方案'+(state.cfg.hp?'（热泵优化 −9%）':'');
+}
+
+/* ---- 7.2 方案比较（碳排柱 + 回收期线） ---- */
+function compareData(){
+  const list = state.scenarios.map(s => {
+    const cfg = { pv:s.pv, wind:s.wind, battery:s.battery, hp:!!s.hp };
+    return { id:s.id, name:s.name, cfg, r:calcBase(cfg) };
+  });
+  const c = state.cfg;
+  const same = state.scenarios.some(s => s.pv===c.pv && s.wind===c.wind && s.battery===c.battery && !!s.hp===!!c.hp);
+  if (!same) list.push({ id:'当前', name:'当前配置', cfg:{pv:c.pv,wind:c.wind,battery:c.battery,hp:!!c.hp}, r:state.r });
+  return list;
+}
+function drawCompare(){
+  const cv = $('cv-compare'); if (!state.r) return;
+  const {ctx,w,h} = setupCanvas(cv);
+  zones[cv.id] = [];
+  const data = compareData();
+  const box = [48,12,w-52,h-20], X0 = box[0], Y0 = box[1], X1 = box[2], Y1 = box[3];
+  const cMax = niceCeil(Math.max(BASE_CARBON, Math.max.apply(null, data.map(d=>d.r.carbon)))*1.02);
+  const pays = data.map(d=>d.r.paybackOm).filter(v=>typeof v==='number');
+  const pMax = pays.length ? niceCeil(Math.max.apply(null, pays)*1.15) : 1;
+  const yvC = v => Y1 - v/cMax*(Y1-Y0);
+  const yvP = v => Y1 - v/pMax*(Y1-Y0);
+  gridY(ctx, box, 0, cMax, t=>fmtInt(t));
+  ctx.font='10px system-ui';
+  for (let i=0;i<=4;i++){                                   // 右轴：回收期（年）
+    const y = Y1-(Y1-Y0)*i/4;
+    ctx.fillStyle='#059669'; ctx.textAlign='left'; ctx.textBaseline='middle';
+    ctx.fillText(String(Math.round(pMax*i/4)), X1+6, y);
+  }
+  ctx.fillStyle='#94A3B8'; ctx.font='9px system-ui'; ctx.textAlign='left'; ctx.textBaseline='top';
+  ctx.fillText('吨', 2, Y0+2);
+  ctx.fillStyle='#059669'; ctx.fillText('年', w-12, Y0+2);
+  const slot = (X1-X0)/data.length, bw = Math.min(slot*.5, 44);
+  const pts = [];
+  data.forEach((d,i) => {
+    const cx = X0+slot*i+slot/2, yc = yvC(d.r.carbon);
+    ctx.fillStyle = d.id==='当前' ? '#93C5FD' : C.blue;
+    ctx.fillRect(cx-bw/2, yc, bw, Y1-yc);
+    ctx.fillStyle='#1E293B'; ctx.font='9.5px system-ui'; ctx.textAlign='center'; ctx.textBaseline='bottom';
+    ctx.fillText(fmtInt(d.r.carbon), cx, yc-2);
+    xTick(ctx, cx, Y1+4, d.id, d.id==='当前' ? '#2563EB' : '#64748B');
+    if (typeof d.r.paybackOm === 'number') pts.push({ x:cx, y:yvP(d.r.paybackOm), d });
+    zones[cv.id].push({ x0:X0+slot*i, x1:X0+slot*(i+1), y0:Y0, y1:Y1, html:
+      `<b>${d.id} · ${esc(d.name)}</b>` +
+      tipRow('配置', cfgLabel(d.cfg)) +
+      tipRow('年碳排放', fmtTon(d.r.carbon)+' 吨') +
+      tipRow('较基准减排', fmtPct(d.r.cut,1)) +
+      tipRow('初投资', fmtW(d.r.invest)+' 万元') +
+      tipRow('年节省', fmtW(d.r.saving)+' 万元') +
+      tipRow('年运维', fmtW(d.r.om)+' 万元') +
+      tipRow('回收(简算)', typeof d.r.payback==='number' ? d.r.payback.toFixed(2)+' 年' : d.r.payback) +
+      tipRow('回收(含运维)', typeof d.r.paybackOm==='number' ? d.r.paybackOm.toFixed(2)+' 年' : d.r.paybackOm)
+    });
+  });
+  if (pts.length){
+    poly(ctx, pts, C.green, 2);
+    pts.forEach(p => {
+      ctx.beginPath(); ctx.arc(p.x, p.y, 3.2, 0, 7);
+      ctx.fillStyle='#fff'; ctx.fill();
+      ctx.strokeStyle=C.green; ctx.lineWidth=2; ctx.stroke();
+      ctx.fillStyle='#047857'; ctx.font='9.5px system-ui'; ctx.textAlign='center'; ctx.textBaseline='bottom';
+      ctx.fillText(p.d.r.paybackOm.toFixed(1), p.x, p.y-6);
+    });
+  }
+}
+
+/* ---- 7.3 逐时平衡（代表日 24h） ---- */
+function drawHourly(){
+  const cv = $('cv-hourly'); if (!state.sim) return;
+  const {ctx,w,h} = setupCanvas(cv);
+  zones[cv.id] = [];
+  const prof = state.sim.profiles[state.simMonth] || [];
+  const box = [48,10,w-10,h-20], X0 = box[0], Y0 = box[1], X1 = box[2], Y1 = box[3];
+  let maxV = 1;
+  for (let i=0;i<prof.length;i++) maxV = Math.max(maxV, prof[i].load, prof[i].pv+prof[i].wd);
+  const yMax = niceCeil(maxV*1.04);
+  const yv = v => Y1 - v/yMax*(Y1-Y0);
+  gridY(ctx, box, 0, yMax, t=>fmtInt(t));
+  ctx.fillStyle='#94A3B8'; ctx.font='9px system-ui'; ctx.textAlign='left'; ctx.textBaseline='top';
+  ctx.fillText('kW', 2, Y0+2);
+  const slot = (X1-X0)/24, bw = Math.max(slot*.72, 2.5);
+  const X = h2 => X0+slot*h2+slot/2;
+  prof.forEach((r,hh) => {                                  // 填充：直接消纳 + 储能放电
+    const cx = X(hh);
+    ctx.fillStyle = 'rgba(16,185,129,.45)';
+    ctx.fillRect(cx-bw/2, yv(r.direct), bw, Y1-yv(r.direct));
+    if (r.disBus > 0){
+      ctx.fillStyle = 'rgba(249,115,22,.5)';
+      ctx.fillRect(cx-bw/2, yv(r.direct+r.disBus), bw, yv(r.direct)-yv(r.direct+r.disBus));
+    }
+  });
+  poly(ctx, prof.map((r,i)=>({x:X(i), y:yv(r.pv)})), C.light, 1.5);
+  poly(ctx, prof.map((r,i)=>({x:X(i), y:yv(r.wd)})), C.cyan, 1.5);
+  poly(ctx, prof.map((r,i)=>({x:X(i), y:yv(r.load)})), C.dark, 2);
+  const ticks = [0,4,8,12,16,20,23];
+  for (let i=0;i<ticks.length;i++) xTick(ctx, X(ticks[i]), Y1+4, String(ticks[i]));
+  const B = state.cfg.battery;
+  prof.forEach((r,hh) => {
+    zones[cv.id].push({ x0:X0+slot*hh, x1:X0+slot*(hh+1), y0:Y0, y1:Y1, html:
+      `<b>${MONTH_CN[state.simMonth]}代表日 ${String(hh).padStart(2,'0')}:00</b>` +
+      tipRow('园区负荷', fmtInt(r.load)+' kW') +
+      tipRow('光伏出力', fmtInt(r.pv)+' kW') +
+      tipRow('风机出力', fmtInt(r.wd)+' kW') +
+      tipRow('直接消纳', fmtInt(r.direct)+' kW') +
+      tipRow('储能放电', fmtInt(r.disBus)+' kW') +
+      tipRow('储能充电', fmtInt(r.charge)+' kW') +
+      tipRow('需购电', fmtInt(r.grid)+' kW') +
+      tipRow('SOC', B ? (r.soc/B*100).toFixed(0)+'%' : '—')
+    });
+  });
+}
+
+/* ---- 7.4 储能充放电与 SOC ---- */
+function drawSoc(){
+  const cv = $('cv-soc'); if (!state.sim) return;
+  const {ctx,w,h} = setupCanvas(cv);
+  zones[cv.id] = [];
+  const prof = state.sim.profiles[state.simMonth] || [];
+  const box = [48,8,w-44,h-16], X0 = box[0], Y0 = box[1], X1 = box[2], Y1 = box[3];
+  const B = state.cfg.battery;
+  let maxCh = 0, maxDis = 0;
+  for (let i=0;i<prof.length;i++){ maxCh = Math.max(maxCh, prof[i].charge); maxDis = Math.max(maxDis, prof[i].disBus); }
+  const yMax = niceCeil(maxCh*1.15 || 1);
+  const yMin = maxDis > 0 ? -niceCeil(maxDis*1.15) : 0;
+  const yv = v => Y1 - (v-yMin)/(yMax-yMin)*(Y1-Y0);
+  ctx.font='10px system-ui';
+  for (let i=0;i<=4;i++){
+    const t = yMin+(yMax-yMin)*i/4, y = yv(t);
+    ctx.strokeStyle = Math.abs(t)<1e-9 ? '#CBD5E1' : '#EDF2F7';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(X0, Math.round(y)+.5); ctx.lineTo(X1, Math.round(y)+.5); ctx.stroke();
+    ctx.fillStyle='#94A3B8'; ctx.textAlign='right'; ctx.textBaseline='middle';
+    ctx.fillText(fmtInt(t), X0-5, y);
+  }
+  for (let i=0;i<=2;i++){                                  // 右轴：SOC 0—100%
+    const y = Y1-(Y1-Y0)*i/2;
+    ctx.fillStyle='#7C3AED'; ctx.textAlign='left'; ctx.textBaseline='middle';
+    ctx.fillText((i*50)+'%', X1+6, y);
+  }
+  const slot = (X1-X0)/24, bw = Math.max(slot*.6, 2.5);
+  const X = h2 => X0+slot*h2+slot/2;
+  prof.forEach((r,hh) => {
+    const cx = X(hh);
+    if (r.charge > 0){ ctx.fillStyle=C.blue;   ctx.fillRect(cx-bw/2, yv(r.charge), bw, yv(0)-yv(r.charge)); }
+    if (r.disBus > 0){ ctx.fillStyle=C.orange; ctx.fillRect(cx-bw/2, yv(0), bw, yv(-r.disBus)-yv(0)); }
+  });
+  if (B > 0){
+    const ys = p => Y1 - p*(Y1-Y0);
+    poly(ctx, prof.map((r,i)=>({x:X(i), y:ys(r.soc/B)})), C.violet, 1.8);
+  } else {
+    ctx.fillStyle='#94A3B8'; ctx.font='11px system-ui'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('当前方案未配置储能', (X0+X1)/2, (Y0+Y1)/2);
+  }
+  const ticks = [0,4,8,12,16,20,23];
+  for (let i=0;i<ticks.length;i++) xTick(ctx, X(ticks[i]), Y1+3, String(ticks[i]));
+  prof.forEach((r,hh) => {
+    zones[cv.id].push({ x0:X0+slot*hh, x1:X0+slot*(hh+1), y0:Y0, y1:Y1, html:
+      `<b>${String(hh).padStart(2,'0')}:00</b>` +
+      tipRow('储能充电', fmtInt(r.charge)+' kW') +
+      tipRow('储能放电', fmtInt(r.disBus)+' kW') +
+      tipRow('SOC', B ? (r.soc/B*100).toFixed(1)+'%（'+fmtInt(r.soc)+' kWh）' : '—')
+    });
+  });
+}
+
+/* ---- 7.5 tooltip / toast / 自适应重绘 ---- */
+function bindTip(cv){
+  cv.addEventListener('mousemove', e => {
+    const zs = zones[cv.id] || [];
+    const rc = cv.getBoundingClientRect();
+    const x = e.clientX-rc.left, y = e.clientY-rc.top;
+    let hit = null;
+    for (let i=0;i<zs.length;i++){
+      const z = zs[i];
+      if (x>=z.x0 && x<z.x1 && y>=z.y0 && y<=z.y1){ hit = z; break; }
+    }
+    const tip = $('tip');
+    if (!hit){ tip.style.display='none'; return; }
+    tip.innerHTML = hit.html;
+    tip.style.display='block';
+    let tx = e.clientX+14, ty = e.clientY+12;
+    if (tx+tip.offsetWidth > innerWidth-8) tx = e.clientX-tip.offsetWidth-14;
+    if (ty+tip.offsetHeight > innerHeight-8) ty = e.clientY-tip.offsetHeight-14;
+    tip.style.left = tx+'px'; tip.style.top = ty+'px';
+  });
+  cv.addEventListener('mouseleave', ()=>{ $('tip').style.display='none'; });
+}
+function drawAll(){ drawMonthly(); drawCompare(); drawHourly(); drawSoc(); }
+let rsT;
+window.addEventListener('resize', ()=>{ clearTimeout(rsT); rsT = setTimeout(()=>{ if (state.r) drawAll(); }, 160); });
+let toastT;
+function toast(msg){
+  const t = $('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(()=>t.classList.remove('show'), 2400);
+}
+/* ============================================================
+ * 8. 渲染：配置 / KPI / 逐时面板 / 方案库
+ * ============================================================ */
+const esc = s => String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+
+function renderCfg(){
+  const c = state.cfg;
+  $('rg-pv').value = c.pv; $('rg-wind').value = c.wind; $('rg-batt').value = c.battery; $('tk-hp').checked = !!c.hp;
+  $('pv-val').textContent = fmtInt(c.pv)+' kW';
+  $('pv-sub').textContent = `投资 ${fmtW(c.pv*BASE.pvPrice)} 万元 · 年发电 ${fmtW(c.pv*BASE.pvHours)} 万kWh`;
+  $('wind-val').textContent = c.wind+' 台';
+  $('wind-sub').textContent = `投资 ${fmtW(c.wind*BASE.windPrice)} 万元 · 年发电 ${fmtW(c.wind*BASE.windKW*BASE.windHours)} 万kWh`;
+  $('batt-val').textContent = fmtInt(c.battery)+' kWh';
+  $('batt-sub').textContent = c.battery
+    ? `投资 ${fmtW(c.battery*BASE.battPrice)} 万元 · 规则自用率上限 ${Math.round(Math.min(95, 50+c.battery/500*5))}%`
+    : '投资 0 万元 · 未配置储能';
+}
+
+function renderEssNote(){
+  const s = state.sim, r = state.r;
+  $('ess-note').innerHTML =
+    `逐时模拟结果：自用率 <b>${fmtPct(s.selfUseRate,1)}</b>（经验规则 ${fmtPct(r.surActual,1)}），` +
+    `全年弃电 <b>${fmtW(s.curtailed)} 万kWh</b>，储能等效循环 <b>${state.cfg.battery ? s.cycles.toFixed(1)+' 次/年' : '—'}</b>。` +
+    `负荷按"基础+空调"双形状随月混合，光伏/风机按月分配系数与逐时形状展开，储能按功率上限、SOC 区间与充放电效率逐小时平衡。` +
+    `逐时结果用于对比验证，作业 CSV 中的 self_use_rate 仍采用经验规则口径。`;
+}
+
+function renderKPI(){
+  const r = state.r, s = state.sim, c = state.cfg, p = state.params;
+  $('k-load').innerHTML = fmtW(r.annualLoad)+' <em>万kWh</em>';
+  $('s-load').textContent = c.hp ? '较基准 −9%（热泵优化开启）' : '与基准一致';
+  $('k-green').innerHTML = fmtW(r.greenGen)+' <em>万kWh</em>';
+  $('s-green').textContent = `光伏 ${fmtW(r.pvGen)} · 风机 ${fmtW(r.windGen)}`;
+  $('k-selfuse').innerHTML = fmtW(r.greenSelfUse)+' <em>万kWh</em>';
+  $('s-selfuse').textContent = `逐时模拟 ${fmtW(s.selfUse)} 万kWh`;
+  $('k-sur').innerHTML = r.greenGen>0 ? fmtPct(r.surActual) : '—';
+  $('s-sur').textContent = r.greenGen>0 ? `逐时模拟 ${fmtPct(s.selfUseRate)}` : '绿电为零';
+  $('k-import').innerHTML = fmtW(r.gridImport)+' <em>万kWh</em>';
+  $('s-import').textContent = `占负荷 ${fmtPct(r.gridImport/r.annualLoad,1)}`;
+  $('k-carbon').innerHTML = fmtTon(r.carbon)+' <em>吨CO₂</em>';
+  $('s-carbon').textContent = `较基准 −${fmtPct(r.cut,1)}`;
+  $('k-invest').innerHTML = fmtW(r.invest)+' <em>万元</em>';
+  $('s-invest').textContent = `光/风/储/热泵 ${fmtW(r.inv.pv)} / ${fmtW(r.inv.wind)} / ${fmtW(r.inv.batt)} / ${fmtW(r.inv.hp)}`;
+  $('k-om').innerHTML = fmtW(r.om)+' <em>万元/年</em>';
+  $('s-om').textContent = `费率：光${(p.omPv*100).toFixed(1)}% · 风${(p.omWind*100).toFixed(1)}% · 储${(p.omBatt*100).toFixed(1)}%`;
+  $('k-saving').innerHTML = fmtW(r.saving)+' <em>万元/年</em>';
+  $('s-saving').textContent = r.saving>0 ? '基准年电费 364 万元' : 'F=0：无绿电自用，无节省';
+  const pbTxt = v => typeof v==='number' ? v.toFixed(2)+' <em>年</em>' : v;
+  $('k-payback').innerHTML = pbTxt(r.payback);
+  $('k-paybackom').innerHTML = pbTxt(r.paybackOm);
+  $('k-cut').innerHTML = (r.cut*100).toFixed(1)+'<em>%</em>';
+  $('s-cut').textContent = `基准 2,860 吨 · 经验弃电 ${fmtW(r.curtailEmp)} 万kWh`;
+  $('hs-emp').textContent = r.greenGen>0 ? fmtPct(r.surEmp) : '—';
+  $('hs-sim').textContent = r.greenGen>0 ? fmtPct(s.selfUseRate) : '—';
+  $('hs-curt').textContent = fmtW(s.curtailed)+' 万kWh';
+  $('hs-cyc').textContent = c.battery ? s.cycles.toFixed(1)+' 次' : '—';
+  renderEssNote();
+}
+
+/* ---- 方案库 ---- */
+function activeScenarioId(){
+  const c = state.cfg;
+  const s = state.scenarios.find(s => s.pv===c.pv && s.wind===c.wind && s.battery===c.battery && !!s.hp===!!c.hp);
+  return s ? s.id : null;
+}
+function updateActive(){
+  const aid = activeScenarioId();
+  document.querySelectorAll('#scenario-list .scn').forEach(el => el.classList.toggle('active', el.dataset.id===aid));
+}
+function renderScenarioList(){
+  const box = $('scenario-list');
+  box.innerHTML = '';
+  state.scenarios.forEach(s => {
+    const r = calcBase({pv:s.pv, wind:s.wind, battery:s.battery, hp:!!s.hp});
+    const el = document.createElement('div');
+    el.className = 'scn'; el.dataset.id = s.id;
+    el.innerHTML =
+      `<div class="scn-head"><span class="scn-id">${s.id}</span><span class="scn-name">${esc(s.name)}</span>${s.preset?'<span class="lock">预置</span>':''}</div>` +
+      `<div class="scn-body"><span>光 <b>${fmtInt(s.pv)}</b>kW</span><span>风 <b>${s.wind}</b>台</span><span>储 <b>${fmtInt(s.battery)}</b>kWh</span><span>热泵 <b>${s.hp?'开':'关'}</b></span></div>` +
+      `<div class="scn-body"><span>碳 <b>${fmtTon(r.carbon)}</b> 吨（−${fmtPct(r.cut,0)}）</span><span>回收(含运维) <b>${typeof r.paybackOm==='number' ? r.paybackOm.toFixed(1)+' 年' : r.paybackOm}</b></span></div>` +
+      `<div class="scn-acts"><button class="btn small" data-act="load">载入</button><button class="btn small" data-act="del">删除</button></div>`;
+    el.querySelector('[data-act=load]').onclick = () => {
+      state.cfg = { pv:s.pv, wind:s.wind, battery:s.battery, hp:!!s.hp };
+      recalc(); toast('已载入 '+s.id+' '+s.name);
+    };
+    el.querySelector('[data-act=del]').onclick = ev => armDelete(s.id, ev.currentTarget);
+    box.appendChild(el);
+  });
+  $('scn-count').textContent = state.scenarios.length+' 个方案';
+  updateActive();
+}
+let delArmId = null, delTimer = null;
+function armDelete(id, btn){
+  if (delArmId === id){
+    state.scenarios = state.scenarios.filter(s => s.id !== id);
+    delArmId = null; clearTimeout(delTimer);
+    saveLS(); renderScenarioList(); drawCompare();
+    toast('已删除方案 '+id+'（预置方案可点「恢复预置」找回）');
+    return;
+  }
+  delArmId = id; clearTimeout(delTimer);
+  btn.textContent = '确认删除?'; btn.style.color = '#EF4444'; btn.style.borderColor = '#EF4444';
+  delTimer = setTimeout(()=>{ delArmId = null; renderScenarioList(); }, 2200);
+}
+function nextId(){
+  let mx = 0;
+  state.scenarios.forEach(s => { const m = /^S(\d+)$/.exec(s.id); if (m) mx = Math.max(mx, +m[1]); });
+  return 'S'+String(mx+1).padStart(2,'0');
+}
+function openSave(){
+  const c = state.cfg, r = state.r;
+  $('save-name').value = `光${fmtInt(c.pv)}kW·风${c.wind}台·储${fmtInt(c.battery)}kWh${c.hp?'·热泵':''}`;
+  $('save-sum').innerHTML =
+    `年购电 <b>${fmtW(r.gridImport)} 万kWh</b> · 碳 <b>${fmtTon(r.carbon)} 吨</b> · 投资 <b>${fmtW(r.invest)} 万元</b>` +
+    ` · 年节省 <b>${fmtW(r.saving)} 万元</b> · 回收(含运维) <b>${typeof r.paybackOm==='number' ? r.paybackOm.toFixed(1)+' 年' : r.paybackOm}</b>`;
+  openM('m-save');
+  setTimeout(()=>$('save-name').select(), 60);
+}
+function doSave(){
+  const id = nextId();
+  const c = state.cfg;
+  const name = $('save-name').value.trim() || ('方案 '+id);
+  state.scenarios.push({ id, name, pv:c.pv, wind:c.wind, battery:c.battery, hp:!!c.hp, preset:false });
+  saveLS(); renderScenarioList(); drawCompare();
+  closeM('m-save'); toast('已保存方案 '+id+'：'+name);
+}
+
+/* ============================================================
+ * 9. CSV 导出 / 结论 / 综合校验
+ * ============================================================ */
+function downloadText(name, content){
+  const blob = new Blob(['\ufeff'+content], {type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 400);
+}
+const csvCell = v => { v = String(v); return /[",\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; };
+
+/* 每方案 480 行：12 月 × 10 栋 × 4 类；B10 做尾差补偿，保证 10 栋合计 ≡ 月度值 */
+function monthlyRows(sid, hp){
+  const m = genMonthly(hp), rows = [];
+  for (let mo=0; mo<12; mo++){
+    const monthStr = '2025-'+String(mo+1).padStart(2,'0');
+    for (let b=0; b<10; b++){
+      const bid = 'B'+String(b+1).padStart(2,'0');
+      const cats = [['hvac',m.hvac[mo]],['water_pump',m.pump[mo]],['lighting',m.light[mo]],['other',m.other[mo]]];
+      for (let k=0;k<cats.length;k++){
+        const v = cats[k][1], per = round2(v/10);
+        rows.push([sid, monthStr, bid, cats[k][0], b<9 ? per : round2(v - 9*per)]);
+      }
+    }
+  }
+  return rows;
+}
+function scenarioRowStr(sid, cfg){
+  const r = calcBase(cfg);
+  const pb = typeof r.payback==='number' ? round2(r.payback) : 'NA';
+  return [sid, cfg.pv, cfg.wind, cfg.battery, cfg.hp?1:0,
+    round2(r.surActual*100).toFixed(2),
+    Math.round(r.annualLoad), Math.round(r.greenGen), Math.round(r.greenSelfUse), Math.round(r.gridImport),
+    round2(r.carbon), Math.round(r.invest), round2(r.saving), pb, BASE.price, BASE.cf]
+    .map(csvCell).join(',');
+}
+function exportList(){
+  const list = state.scenarios.map(s => ({ id:s.id, name:s.name, cfg:{pv:s.pv,wind:s.wind,battery:s.battery,hp:!!s.hp} }));
+  if ($('exp-cur').checked && !activeScenarioId()){
+    const c = state.cfg;
+    list.push({ id:nextId(), name:'当前配置', cfg:{pv:c.pv,wind:c.wind,battery:c.battery,hp:!!c.hp}, temp:true });
+  }
+  return list;
+}
+function renderExportModal(){
+  const list = exportList();
+  $('exp-n').textContent = list.length;
+  $('exp-list').innerHTML = list.map(x =>
+    `<div style="padding:2.5px 0;border-bottom:1px dashed var(--line2)"><b style="color:var(--blue-d)">${x.id}</b> ${esc(x.name)} — 光${fmtInt(x.cfg.pv)}kW·风${x.cfg.wind}台·储${fmtInt(x.cfg.battery)}kWh·热泵${x.cfg.hp?'开':'关'}${x.temp?' <span style="color:var(--amber)">（当前配置，临时编号）</span>':''}</div>`
+  ).join('');
+}
+function exportMonthlyCsv(){
+  const list = exportList();
+  const lines = ['scenario_id,month,building_id,category,energy_kwh'];
+  list.forEach(x => monthlyRows(x.id, x.cfg.hp).forEach(r => lines.push(r.map(csvCell).join(','))));
+  downloadText('energy_monthly.csv', lines.join('\n'));
+  toast(`已导出 energy_monthly.csv：${list.length} 方案 × 480 行`);
+}
+function exportScenarioCsv(){
+  const list = exportList();
+  const lines = ['scenario_id,pv_kw,wind_count,battery_kwh,heat_pump_on,self_use_rate,annual_load_kwh,green_generation_kwh,green_self_use_kwh,grid_import_kwh,carbon_t,investment_yuan,annual_saving_yuan,payback_years,electricity_price,carbon_factor'];
+  list.forEach(x => lines.push(scenarioRowStr(x.id, x.cfg)));
+  downloadText('scenario.csv', lines.join('\n'));
+  toast('已导出 scenario.csv：'+list.length+' 个方案');
+}
+function exportHourlyCsv(){
+  const sim = simulateHourly(state.cfg, state.r.monthly, true);
+  const lines = ['month,day,hour,load_kwh,pv_kwh,wind_kwh,direct_selfuse_kwh,battery_charge_kwh,battery_discharge_kwh,soc_kwh,grid_import_kwh'];
+  sim.hours.forEach(row =>
+    lines.push([row[0], row[1], row[2], round2(row[3].load), round2(row[3].pv), round2(row[3].wd), round2(row[3].direct), round2(row[3].charge), round2(row[3].disBus), round2(row[3].soc), round2(row[3].grid)].join(',')));
+  downloadText('hourly_simulation.csv', lines.join('\n'));
+  toast('已导出 hourly_simulation.csv：8760 行逐时明细');
+}
+function exportConclusion(){
+  const t = $('ta-conclusion').value.trim();
+  if (!t){ toast('结论为空：请先点击「生成结论草稿」或直接输入'); return; }
+  downloadText('conclusion.txt',
+    '零碳园区能耗模拟平台 · 分析结论\n================================\n生成配置：'+cfgLabel()+'\n\n'+t+'\n');
+  toast('已导出 conclusion.txt');
+}
+
+/* ---- 结论草稿（200—300 字，自动回答两个分析题） ---- */
+const ccLen = t => t.replace(/\s/g,'').length;
+function updateCC(){ $('cc-count').textContent = ccLen($('ta-conclusion').value)+' 字'; }
+function genConclusion(){
+  const list = compareData();
+  const bestCut = list.reduce((a,b)=> b.r.cut > a.r.cut ? b : a);
+  const withPay = list.filter(d=>typeof d.r.paybackOm==='number');
+  const bestPay = withPay.length ? withPay.reduce((a,b)=> b.r.paybackOm < a.r.paybackOm ? b : a) : null;
+  let t = `园区共10栋建筑、年电耗520万kWh、基准碳排放2860吨。模拟表明：减碳最多的是${bestCut.id}（${cfgLabel(bestCut.cfg)}，年减碳${fmtTon(BASE_CARBON-bestCut.r.carbon)}吨、降幅${fmtPct(bestCut.r.cut,1)}），`;
+  t += bestPay
+    ? `回收最快的却是${bestPay.id}（含运维${bestPay.r.paybackOm.toFixed(1)}年），两者并非同一方案——前者风光规模大、减排彻底但投资高，后者配置均衡、经济性更优，减排最大化与投资效率存在权衡。`
+    : `当前方案库中尚无可回收投资的配置，需扩大绿电规模后再评估权衡。`;
+  const batts = list.filter(d=>d.cfg.battery>0).sort((a,b)=>a.cfg.battery-b.cfg.battery);
+  if (batts.length >= 2){
+    const lo = batts[0], hi = batts[batts.length-1];
+    t += `储能对比：${lo.id}配${fmtInt(lo.cfg.battery)}kWh时规则自用率${fmtPct(lo.r.surEmp,0)}、回收${lo.r.paybackOm.toFixed(1)}年；放大到${hi.id}的${fmtInt(hi.cfg.battery)}kWh后自用率仅${fmtPct(hi.r.surEmp,0)}，回收期反增至${hi.r.paybackOm.toFixed(1)}年——储能超出风光盈余后边际收益递减，并非越大越划算。`;
+  } else {
+    t += `储能自用率上限为95%，容量一旦超过风光盈余与负荷缺口所需，边际收益迅速递减，并非越大越划算。`;
+  }
+  t += `综上，"适度风光＋规模匹配的储能＋热泵优化"兼顾经济与减碳，是本园区较优的零碳路径。`;
+  $('ta-conclusion').value = t;
+  state.conclusion = t; saveLS(); updateCC();
+  toast('已生成结论草稿（'+ccLen(t)+' 字），可编辑后导出');
+}
+
+/* ---- 综合校验（作业检验例，独立计算） ---- */
+function runVerify(){
+  const r = calcBase({ pv:1000, wind:2, battery:1000, hp:true });
+  const cases = [
+    ['绿电自用率 %', '60.00', 60, r.surActual*100],
+    ['年购电 万kWh', '383.20', 383.2, r.gridImport/10000],
+    ['年碳排放 吨', '2107.60', 2107.6, r.carbon],
+    ['初投资 万元', '660.00', 660, r.invest/10000],
+    ['年节省电费 万元', '95.76', 95.76, r.saving/10000],
+    ['回收期 年(简算)', '6.89', 6.89, typeof r.payback==='number' ? round2(r.payback) : NaN],
+  ];
+  let pass = 0;
+  $('verify-rows').innerHTML = cases.map(([name, disp, exp, got]) => {
+    const ok = Number.isFinite(got) && Math.abs(got-exp) < 0.005;
+    if (ok) pass++;
+    return `<div class="vrow"><span>${name}</span><span class="num">${disp}</span><span class="num">${Number.isFinite(got)?got.toFixed(2):'—'}</span><span style="text-align:center" class="${ok?'pass':'fail'}">${ok?'✓':'✗'}</span></div>`;
+  }).join('');
+  $('verify-sum').innerHTML = pass===cases.length
+    ? `<span class="pass">✓ ${pass}/${cases.length} 项全部通过，计算引擎符合作业要求</span>`
+    : `<span class="fail">✗ ${pass}/${cases.length} 项通过，存在偏差请检查</span>`;
+}
+
+/* ============================================================
+ * 10. 事件绑定与初始化
+ * ============================================================ */
+function openM(id){ $(id).classList.add('open'); }
+function closeM(id){ $(id).classList.remove('open'); }
+function recalc(){
+  state.r = calcBase(state.cfg);
+  state.sim = simulateHourly(state.cfg, state.r.monthly, false);
+  saveLS();
+  renderCfg(); renderKPI(); drawAll(); updateActive();
+}
+function syncParamInputs(){
+  const p = state.params;
+  $('p-omPv').value = (p.omPv*100).toFixed(1);
+  $('p-omWind').value = (p.omWind*100).toFixed(1);
+  $('p-omBatt').value = (p.omBatt*100).toFixed(1);
+  $('p-essC').value = p.essC;
+  $('p-socLo').value = Math.round(p.socLo*100);
+  $('p-socHi').value = Math.round(p.socHi*100);
+  $('p-eff').value = Math.round(p.eff*100);
+}
+function fillMonthSelect(){
+  const sel = $('sel-month');
+  sel.innerHTML = MONTH_CN.map((n,i)=>`<option value="${i}">${n}（${DAYS[i]}天）代表日</option>`).join('');
+  sel.value = state.simMonth;
+}
+function bindAll(){
+  // 设备滑块
+  $('rg-pv').addEventListener('input', e => { state.cfg.pv = +e.target.value; recalc(); });
+  $('rg-wind').addEventListener('input', e => { state.cfg.wind = +e.target.value; recalc(); });
+  $('rg-batt').addEventListener('input', e => { state.cfg.battery = +e.target.value; recalc(); });
+  $('tk-hp').addEventListener('change', e => { state.cfg.hp = e.target.checked; recalc(); });
+  $('sel-month').addEventListener('change', e => { state.simMonth = +e.target.value; drawHourly(); drawSoc(); });
+  // 运维费率与逐时储能参数（输入框为百分数/C 倍率，state 内为小数）
+  const pmap = [
+    ['p-omPv','omPv',100,0,10], ['p-omWind','omWind',100,0,10], ['p-omBatt','omBatt',100,0,10],
+    ['p-essC','essC',1,0.05,2], ['p-socLo','socLo',100,0,40], ['p-socHi','socHi',100,50,100], ['p-eff','eff',100,80,100],
+  ];
+  pmap.forEach(([id,key,div,lo,hi]) => {
+    $(id).addEventListener('change', e => {
+      let v = parseFloat(e.target.value);
+      if (!Number.isFinite(v)) v = state.params[key]*div;
+      state.params[key] = clamp(v/div, lo/div, hi/div);
+      syncParamInputs(); saveLS(); recalc();
+    });
+  });
+  // 顶栏
+  $('btn-reset').onclick = () => { state.cfg = {pv:0,wind:0,battery:0,hp:false}; recalc(); toast('已重置为基准方案（S01）'); };
+  $('btn-help').onclick = () => openM('m-help');
+  $('btn-verify').onclick = () => { runVerify(); openM('m-verify'); };
+  $('btn-verify-load').onclick = () => { state.cfg = {pv:1000,wind:2,battery:1000,hp:true}; recalc(); closeM('m-verify'); toast('已载入综合校验例配置'); };
+  $('btn-export').onclick = () => { renderExportModal(); openM('m-export'); };
+  // 弹窗关闭（按钮 + 遮罩点击）
+  document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', ()=>closeM(b.dataset.close)));
+  document.querySelectorAll('.mb').forEach(m => m.addEventListener('mousedown', e => { if (e.target===m) m.classList.remove('open'); }));
+  // 方案库
+  $('btn-save').onclick = openSave;
+  $('btn-save-ok').onclick = doSave;
+  $('btn-restore').onclick = () => {
+    state.scenarios = PRESETS.map(p=>({...p, preset:true}));
+    saveLS(); renderScenarioList(); drawCompare(); toast('已恢复 5 个预置方案');
+  };
+  // 导出
+  $('exp-cur').addEventListener('change', renderExportModal);
+  $('btn-exp-monthly').onclick = exportMonthlyCsv;
+  $('btn-exp-scenario').onclick = exportScenarioCsv;
+  $('btn-exp-hourly').onclick = exportHourlyCsv;
+  $('btn-exp-concl2').onclick = exportConclusion;
+  // 结论
+  $('btn-genconcl').onclick = genConclusion;
+  $('btn-expconcl').onclick = exportConclusion;
+  $('ta-conclusion').addEventListener('input', e => { state.conclusion = e.target.value; saveLS(); updateCC(); });
+  // 图表 tooltip
+  ['cv-monthly','cv-compare','cv-hourly','cv-soc'].forEach(id => bindTip($(id)));
+}
+function init(){
+  loadLS();
+  fillMonthSelect();
+  bindAll();
+  syncParamInputs();
+  $('ta-conclusion').value = state.conclusion || '';
+  updateCC();
+  renderScenarioList();
+  recalc();
+}
+init();
+</script>
+</body>
+</html>

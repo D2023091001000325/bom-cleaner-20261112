@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MathCheck · 国际数模赛事合规服务（拓展更新版）· 商业计划书 · 赛历自动翻新</title>
+<style>
+:root{
+  --pri:#2f6fb7;--pri-d:#1d4e8a;--pri-xl:#eef4fb;--pri-xxl:#f7fafd;
+  --tx:#1f2d3d;--tx2:#5b6b80;--bd:#dce5f0;--bg:#f5f8fc;
+  --ok:#2e7d32;--ok-xl:#e9f5ea;--warn:#b26a00;--warn-xl:#fdf4e7;
+  --gold:#8a6d1a;--gold-xl:#faf5e4;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Segoe UI","Microsoft YaHei",system-ui,sans-serif;color:var(--tx);background:var(--bg);line-height:1.75;font-size:14.5px}
+.wrap{max-width:1080px;margin:0 auto;padding:28px 20px 60px}
+header.hero{background:linear-gradient(135deg,#2f6fb7 0%,#1d4e8a 100%);color:#fff;border-radius:16px;padding:34px 36px;margin-bottom:22px}
+header.hero .kicker{font-size:12.5px;letter-spacing:2px;opacity:.85;margin-bottom:8px}
+header.hero h1{font-size:26px;font-weight:800;letter-spacing:.5px;margin-bottom:10px}
+header.hero .sub{font-size:15px;opacity:.92;max-width:820px}
+header.hero .tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+header.hero .tags span{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);padding:4px 12px;border-radius:99px;font-size:12.5px}
+h2.sec{font-size:19px;font-weight:800;color:var(--pri-d);margin:34px 0 14px;padding-left:12px;border-left:5px solid var(--pri);line-height:1.4}
+h2.sec small{display:block;font-size:12px;color:var(--tx2);font-weight:500;margin-top:2px;letter-spacing:.5px}
+.panel{background:#fff;border:1px solid var(--bd);border-radius:14px;padding:22px 24px;margin-bottom:14px;box-shadow:0 1px 3px rgba(31,45,61,.04)}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.g4{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.card{border:1px solid var(--bd);border-radius:12px;padding:16px 18px;background:var(--pri-xxl)}
+.card h4{font-size:14.5px;color:var(--pri-d);margin-bottom:8px}
+.card p{font-size:13px;color:var(--tx2);line-height:1.7}
+.stat{border:1px solid var(--bd);border-radius:12px;padding:16px;text-align:center;background:#fff}
+.stat .num{font-size:22px;font-weight:800;color:var(--pri-d);line-height:1.2}
+.stat .label{font-size:11.5px;color:var(--tx2);margin-top:6px}
+table{width:100%;border-collapse:collapse;font-size:13px;background:#fff}
+th{background:var(--pri-xl);color:var(--pri-d);font-weight:700;text-align:left;padding:9px 12px;border-bottom:2px solid var(--bd);font-size:12.5px}
+td{padding:9px 12px;border-bottom:1px solid var(--bd);vertical-align:top}
+td.f{background:var(--pri-xxl);color:var(--pri-d);font-weight:700;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+.note{background:var(--warn-xl);border:1px solid #f0dcb8;border-radius:10px;padding:12px 16px;font-size:12.8px;color:#7a5a12;margin-top:12px}
+.note.blue{background:var(--pri-xl);border-color:#c9dcf2;color:var(--pri-d)}
+.note.green{background:var(--ok-xl);border-color:#c8e6c9;color:var(--ok)}
+.versus{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.versus .col{border-radius:12px;padding:16px 18px;border:1px solid var(--bd)}
+.versus .col.old{background:#f7f7f7;border-color:#e0e0e0}
+.versus .col.new{background:var(--pri-xl);border-color:#c9dcf2}
+.versus h4{font-size:14px;margin-bottom:8px}
+.versus .col.old h4{color:#777}
+.versus .col.new h4{color:var(--pri-d)}
+.versus ul{padding-left:18px;font-size:12.8px;color:var(--tx2)}
+.versus ul li{margin-bottom:6px}
+.rolltimeline{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:6px}
+.rolltimeline .rp{background:#fff;border:1px solid var(--bd);border-radius:10px;padding:12px}
+.rolltimeline .rp .mo{font-size:11px;font-weight:800;color:#fff;background:var(--pri);border-radius:6px;display:inline-block;padding:2px 9px;margin-bottom:7px}
+.rolltimeline .rp b{display:block;font-size:13px;color:var(--pri-d);margin-bottom:4px}
+.rolltimeline .rp span{font-size:11.8px;color:var(--tx2);line-height:1.6;display:block}
+ul.list{padding-left:20px}
+ul.list li{margin-bottom:8px;font-size:13.5px}
+ul.list li b{color:var(--pri-d)}
+footer.ft{margin-top:36px;padding-top:18px;border-top:1px solid var(--bd);font-size:12px;color:var(--tx2);text-align:center;line-height:1.9}
+a{color:var(--pri);text-decoration:none}
+a:hover{text-decoration:underline}
+.toc{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;font-size:13px}
+.toc a{display:block;padding:8px 12px;background:var(--pri-xxl);border:1px solid var(--bd);border-radius:8px}
+.pill{display:inline-block;font-size:11.5px;font-weight:700;padding:2px 10px;border-radius:99px;margin-right:6px}
+.pill.p{background:var(--pri-xl);color:var(--pri-d)}
+.pill.g{background:var(--ok-xl);color:var(--ok)}
+.pill.w{background:var(--warn-xl);color:var(--warn)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <div class="kicker">MATHCHECK · 拓展更新版 · 商业计划书 · 2026 年 10 月</div>
+  <h1>会自己过季的工具，才是长期资产<br>—— 赛历自动翻新引擎的商业价值</h1>
+  <div class="sub">拓展更新版在拓展版（五大赛事 + COMAP 全景）之上，只做一件事：<b>让赛历自己翻页</b>。各赛事窗口关闭后的下月 1 日 00:00（北京时间）准点翻新——HiMCM/MidMCM、SCUDEM → 12 月 1 日；美赛 → 3 月 1 日；IMMC → 5 月 1 日。历史前移、最老出列、推估滚入新届，「现在报名」永远指向后一届。模板与规则不随赛历翻新——保鲜的只有数据，稳定的是信任。</div>
+  <div class="tags">
+    <span>拓展更新版 v1.0 · 185KB</span><span>四翻新点 · 北京时间准点</span><span>队列滚动 + 惯例推估</span><span>覆盖机制联动翻新时点</span><span>单文件零依赖</span>
+  </div>
+</header>
+
+<div class="panel">
+  <div class="toc">
+    <a href="#s1">一、执行摘要</a>
+    <a href="#s2">二、产品定义：唯一变量是赛历</a>
+    <a href="#s3">三、翻新引擎技术方案</a>
+    <a href="#s4">四、为什么「保鲜」值钱</a>
+    <a href="#s5">五、全年四个翻新运营节点</a>
+    <a href="#s6">六、商业模式（常青版）</a>
+    <a href="#s7">七、三版本矩阵与分发策略</a>
+    <a href="#s8">八、启动路径</a>
+    <a href="#s9">九、风险与合规</a>
+    <a href="#s10">十、财务里程碑</a>
+    <a href="#s11">附录：数据与验证</a>
+  </div>
+</div>
+
+<!-- ================= 1 ================= -->
+<h2 class="sec" id="s1">一、执行摘要 <small>静态工具的「保质期问题」与本版的解法</small></h2>
+<div class="panel">
+  <div class="grid g4">
+    <div class="stat"><div class="num">4 个</div><div class="label">全年翻新时点（12-01 / 03-01 / 05-01 / 12-01）</div></div>
+    <div class="stat"><div class="num">≤1 秒</div><div class="label">页面常开到点即时生效误差</div></div>
+    <div class="stat"><div class="num">6 届</div><div class="label">滚动队列（2 历史 + 1 当前 + 3 未来）</div></div>
+    <div class="stat"><div class="num">0</div><div class="label">版本迭代之外的维护发布需求</div></div>
+  </div>
+  <div class="note blue" style="margin-top:14px">
+    <b>一句话定位：</b>静态版工具每过一个赛季就会「过期」——倒计时指向已结束的比赛、报名入口提示窗口已关闭，用户流失且品牌受损。拓展更新版用一套内置于单文件的翻新引擎，把工具的保质期从「一个赛季」拉长到「多年」：每年四个翻新时点自动滚动六届赛季队列，<b>永不发版也能永远新鲜</b>。对获客、留存与 B 端订阅，这是从「一次性工具」到「常青基础设施」的质变。
+  </div>
+  <ul class="list" style="margin-top:12px">
+    <li><b>已落地并实测：</b>翻新引擎随拓展版全功能一并交付（185KB 单文件、零依赖、纯本地）；Playwright 实测覆盖：初始等价性、四大翻新点跨点翻新、翻新点前 1 秒不翻新的准点边界、远期 2030 年队列滚动与推估、用户覆盖联动翻新时点、翻新后校验 / 历史复盘 / 模板全链路回归。</li>
+    <li><b>克制的产品哲学：</b>翻新只作用于赛历——组队模板（含 curTeamTpl 六套模板体系）、规则快照、防误触链、成绩评估全部冻结不变。用户在任何时点打开，得到的规则体验与拓展版完全一致，变化的只有「现在报名指向哪一届」。</li>
+    <li><b>商业主张：</b>「常青」直接回答 B 端采购最关心的问题——<i>这工具明年还能用吗？</i>答案是：不需要我们做任何事，它自己会翻页。这是 SaaS 订阅（而非买断）的产品基础。</li>
+  </ul>
+</div>
+
+<!-- ================= 2 ================= -->
+<h2 class="sec" id="s2">二、产品定义：唯一变量是赛历 <small>与拓展版的差异收敛到一条时间轴</small></h2>
+<div class="panel">
+  <div class="versus">
+    <div class="col old">
+      <h4>拓展版 v1.0（静态快照）</h4>
+      <ul>
+        <li>六届赛季（前两届 + 下一届 + 后三届）为 2026 年 10 月手工快照</li>
+        <li>赛季结束后不自动滚动：12 月起「现在报名」仍指向已结束的 2026 赛季，倒计时归零、注册关闭提示常驻</li>
+        <li>保鲜依赖发新版：每个赛季需要重新制作分发文件</li>
+        <li>适合：当季一次性使用、线下分发、演示与教学场景</li>
+      </ul>
+    </div>
+    <div class="col new">
+      <h4>拓展更新版 v1.0（自动翻新）</h4>
+      <ul>
+        <li>同一份静态快照作为「基准」，运行时按当前北京时间动态计算当前届</li>
+        <li>四个翻新时点（北京时间准点）：HiMCM/MidMCM 与 SCUDEM → <b>12 月 1 日 00:00</b>；美赛 → <b>3 月 1 日 00:00</b>；IMMC → <b>5 月 1 日 00:00</b></li>
+        <li>翻新动作：原「下一届」转最新历史 → 历史前移一位、最老一届出列 → 按惯例推估滚入新一届未来 →「现在报名」自动切到后一届</li>
+        <li>页面常开 ≤1 秒生效；重新打开按当前时间自动对齐；翻新时点尊重用户「按官方通知覆盖」修正后的真实关闭时间</li>
+      </ul>
+    </div>
+  </div>
+  <div class="note green" style="margin-top:12px"><b>等价性保证（关键设计约束）：</b>在未跨过任何翻新时点时，拓展更新版的行为与拓展版<b>逐字节等价</b>（实测验证：五赛事赛季队列完全一致）。这意味着：今天分发的同一份文件，用户今天用得到拓展版体验，明年 12 月用得到自动翻新后的体验——<b>分发出去的每一个副本都是常青资产</b>。</div>
+</div>
+
+<!-- ================= 3 ================= -->
+<h2 class="sec" id="s3">三、翻新引擎技术方案 <small>把「发版更新」变成「时间函数」</small></h2>
+<div class="panel">
+  <table>
+    <thead><tr><th style="width:20%">机制</th><th>实现要点</th></tr></thead>
+    <tbody>
+      <tr><td class="f">翻新时点推算</td><td>统一算法：取该届窗口关闭时刻（含用户覆盖值）→ 北京时间所在月的<b>下一个月 1 日 00:00</b>。该单一规则自然导出四个时点（11 月关闭 → 12-01；2 月关闭 → 03-01；4 月关闭 → 05-01），未来官方调整赛期时无需改代码</td></tr>
+      <tr><td class="f">队列滚动</td><td>每赛事维护六届滚动队列：翻新时原 next → 最新历史，历史前移（最老出列），按惯例推估生成新 future 届滚入；「历史复盘」下拉、「未来规划」下拉、首页倒计时、校验引擎全部基于同一队列自动联动</td></tr>
+      <tr><td class="f">惯例推估</td><td>新届时间按各赛官方惯例生成：HiMCM/MidMCM = 11 月第一个周三（自动判美东夏冬令时偏移）；美赛 = 1 月最后周四北京 06:00 + 96 小时窗口；IMMC = 2 月 1 日 → 4 月下旬；SCUDEM = 10 月第三个周六 + 16 天提交期。全部标注「默认时间为预估」，官方公告后仍可覆盖</td></tr>
+      <tr><td class="f">准点驱动</td><td>实时时钟（秒级）驱动检查：缓存「下一次翻新时刻」，平时 O(1) 判定；跨点瞬间重算并全站重渲染（重置防误触临时确认态，避免旧确认跨届残留）；重开页面按当前时间初始化对齐</td></tr>
+      <tr><td class="f">冻结边界</td><td>翻新仅重写赛季队列数据结构——TEAM_TPL 六套组队模板（curTeamTpl 体系）、规则速查、BASIS 依据、防误触链、成绩评估、汇率档案全部不随赛历翻新（实测验证：模板内容逐字不变）</td></tr>
+    </tbody>
+  </table>
+  <div class="note blue" style="margin-top:12px"><b>对用户的透明呈现：</b>赛季日历新增「赛历自动翻新」面板：四行赛事各自展示翻新规则、下一次翻新北京时间与倒计时、翻新动作说明——机制可见、可预期、可验证，而不是黑盒魔法。</div>
+</div>
+
+<!-- ================= 4 ================= -->
+<h2 class="sec" id="s4">四、为什么「保鲜」值钱 <small>三个被静态版卡死的商业环节被打开</small></h2>
+<div class="panel">
+  <div class="grid g3">
+    <div class="card">
+      <h4>① 分发资产不折旧</h4>
+      <p>静态工具的分发有「半衰期」：文件传出去三个月后一半场景已过期，传播越广、过期副本越多，甚至反向损害品牌（用户看到过期的倒计时）。常青版的每一次转发、每一次网盘存档、每一次 U 盘拷贝都是<b>永久有效的获客触点</b>——微信裂变与校内口口相传第一次成为可持续渠道。</p>
+    </div>
+    <div class="card">
+      <h4>② 留存跨越赛季</h4>
+      <p>学生的数模参赛周期天然跨越多年（MidMCM → HiMCM → 美赛 / IMMC → SCUDEM）。静态版每个赛季都要「重新获客一次」；常青版让同一用户在四个翻新时点被工具自动拉回（翻新 = 天然回访理由），配合「我的队伍」本地档案形成跨赛季连续服务关系。</p>
+    </div>
+    <div class="card">
+      <h4>③ B 端敢买了</h4>
+      <p>学校与机构采购最怕「明年还要再买一次 / 还要等供应商发新版」。常青版把「更新」内置为时间函数：<b>不依赖我方任何服务器与运营动作</b>（纯本地、零依赖），采购一次长期有效——这正是年度订阅定价（而非一次性买断）的产品正当性。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 5 ================= -->
+<h2 class="sec" id="s5">五、全年四个翻新运营节点 <small>工具自动翻页，运营跟着节奏走</small></h2>
+<div class="panel">
+  <div class="rolltimeline">
+    <div class="rp"><span class="mo">12-01 00:00</span><b>HiMCM / MidMCM + SCUDEM 翻新</b><span>年末赛后复盘季：历史复盘功能自然承接（「查一下我们队当时的资格口径」）；同步推送下赛季（2027 赛季）早鸟规划</span></div>
+    <div class="rp"><span class="mo">03-01 00:00</span><b>美赛翻新</b><span>美赛赛季收官 + 成绩等待期：复盘与「美赛获奖 → 保研综测」内容营销窗口；下一届未来规划启动</span></div>
+    <div class="rp"><span class="mo">05-01 00:00</span><b>IMMC 翻新</b><span>国际赛程结束：中华区队伍履历沉淀期；暑期集训营招生窗口正式打开（5-8 月转化主场）</span></div>
+    <div class="rp"><span class="mo">次年 12-01</span><b>循环往复</b><span>四个时点把全年切成四个「赛后复盘 → 下季规划」的自然运营周期，与 B 端订阅的年度续费节奏同构</span></div>
+  </div>
+  <div class="note blue" style="margin-top:12px"><b>翻新即运营钩子：</b>每次自动翻新都伴随全站内容刷新（倒计时重置、历史下拉更新、未来规划下拉新增一届）——工具自己制造了四个「值得再打开一次看看」的时刻。对 C 端是回访理由，对 B 端是「服务仍在保鲜」的可见证据，对内容营销是固定的全年选题日历。</div>
+</div>
+
+<!-- ================= 6 ================= -->
+<h2 class="sec" id="s6">六、商业模式（常青版） <small>订阅正当性来自「永远新鲜」</small></h2>
+<div class="panel">
+  <table>
+    <thead><tr><th style="width:13%">层级</th><th style="width:35%">产品 / 服务</th><th style="width:22%">目标客群</th><th>收费形态（相较拓展版的变化）</th></tr></thead>
+    <tbody>
+      <tr><td class="f">C 端 · 免费</td><td>常青校验引擎（自动翻新）：跨赛季持续可用的资格校验 / 赛季日历 / 未来规划 / 历史复盘</td><td>学生队长、家长、指导老师</td><td>永久免费不变；新增价值 = <b>一个文件用多年</b>，分发与口碑资产持续复利</td></tr>
+      <tr><td class="f">C 端 · 增值</td><td>报名协助、本校顾问对接、赛前培训营、合规报告解读——按翻新节点排期：12 月 HiMCM 复盘 + SCUDEM 规划、3 月美赛复盘、5 月 IMMC 复盘 + 暑期集训</td><td>报名季确认参赛的家庭</td><td>服务包不变；<b>转化窗口从 2 个赛季峰扩展为 4 个翻新周期</b>，年度 LTV 显著提升</td></tr>
+      <tr><td class="f">B 端 · 订阅</td><td>advisor 工作台（多队管理 / 截止时间线 / 批量校验）、校级竞赛日历 SaaS、白标常青版（印学校 Logo 的「永远新鲜」工具）</td><td>国际学校、国际部、留学与竞赛培训机构</td><td><b>由买断改订阅的核心依据</b>：工具自带跨年保鲜能力 + 每年四次的可见翻新证据；白标版可嵌入学校升学指导体系多年</td></tr>
+      <tr><td class="f">数据 · 增值<span class="pill w">新增</span></td><td>规则保鲜服务：每年四个翻新节点做一次官方规则校对（与推估差异比对），差异报告推送订阅学校——把「覆盖机制」运营化</td><td>订阅 B 端、重度 C 端</td><td>订阅制下的持续价值交付内容（人肉校对 + 自动推送，边际成本极低）</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ================= 7 ================= -->
+<h2 class="sec" id="s7">七、三版本矩阵与分发策略 <small>一条产品线，三种保鲜度，三种打法</small></h2>
+<div class="panel">
+  <table>
+    <thead><tr><th style="width:16%">版本</th><th style="width:30%">定位</th><th style="width:27%">适用场景</th><th>分发策略</th></tr></thead>
+    <tbody>
+      <tr><td class="f">建议规划版 v2.8</td><td>COMAP 四赛基础版 · 国内高校叙事（保研综测）</td><td>国内高校学生、校内社团、指导老师初次接触</td><td>赛季内微信群 / 校内网盘分发（当季有效即可）</td></tr>
+      <tr><td class="f">拓展版 v1.0</td><td>五赛事全景 + COMAP 生态导流 · 静态快照</td><td>国际学校当季使用、挑战杯演示物料、教学案例</td><td>当季集中投放；作为「生态完整性」的展示件</td></tr>
+      <tr><td class="f">拓展更新版 v1.0<span class="pill g">主力</span></td><td>五赛事 + 赛历自动翻新 · 常青版</td><td>一切需要「长期可依赖」的场景：B 端白标、顾问长期工具、口碑传播</td><td><b>全渠道默认分发件</b>：转发即永久获客触点；B 端订阅的产品载体</td></tr>
+    </tbody>
+  </table>
+  <div class="note" style="margin-top:12px">三版本并行不互斥（文件名独立、互不覆盖，localStorage 键位一致可互通）：建议规划版守国内高校心智，拓展版做当季深度，拓展更新版承担全部长期分发与 B 端转化——<b>「静态版拉新、常青版留存与变现」</b>。</div>
+</div>
+
+<!-- ================= 8 ================= -->
+<h2 class="sec" id="s8">八、启动路径 <small>以最近翻新点为第一个里程碑</small></h2>
+<div class="panel">
+  <div class="grid g3">
+    <div class="card">
+      <h4>阶段一 · 校内挑战杯与孵化申报<span class="pill p">现在 → 12-01</span></h4>
+      <p>以三版本矩阵 + 翻新引擎为申报主体：亮点叙事 = 「工具会自己过季吗？我们的不会」——可现场演示跨翻新点行为（内置时间模拟钩子，评审面前直接跳到 12 月 1 日看队列滚动）。首个自然里程碑：<b>2026-12-01 00:00 首次线上自动翻新</b>，翻新后收集首批真实用户反馈。</p>
+    </div>
+    <div class="card">
+      <h4>阶段二 · 国际学校试点 + 首轮翻新运营<span class="pill w">12 月 → 次年 5 月</span></h4>
+      <p>12 月翻新后启动 1-3 所国际学校试点（advisor 工作台雏形）；3 月美赛翻新节点做第一波复盘内容营销；5 月 IMMC 翻新 + 暑期集训营招生。每个翻新点都是一次「工具又刷新了」的用户触达实验，跑通翻新节点的运营 SOP。</p>
+    </div>
+    <div class="card">
+      <h4>阶段三 · 常青订阅上线<span class="pill g">次年 5 月起</span></h4>
+      <p>以一个完整翻新年（12-01 → 03-01 → 05-01 → 12-01）的数据为基础推出 B 端订阅：白标常青版 + advisor 工作台 + 规则保鲜服务；C 端增值服务按四节点排期常态化。目标：跑通「免费常青工具 → 四周期转化 → 年度订阅」的单位经济。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ================= 9 ================= -->
+<h2 class="sec" id="s9">九、风险与合规 <small>自动化的边界与兜底</small></h2>
+<div class="panel">
+  <table>
+    <thead><tr><th style="width:22%">风险</th><th style="width:38%">情形</th><th>应对（产品内已落实）</th></tr></thead>
+    <tbody>
+      <tr><td class="f">推估偏差</td><td>滚入的新一届时间为惯例推估（如 HiMCM 11 月第一个周三），官方实际日期可能有出入</td><td>所有推估届强制标注「默认时间为预估」+ 保留「按官方通知覆盖」机制；覆盖后的时间直接联动翻新时点推算（实测验证）；每年四个节点做一次官方规则校对（运营 SOP）</td></tr>
+      <tr><td class="f">时钟依赖</td><td>翻新基于本机时钟，用户改系统时间可触发非真实翻新</td><td>纯本地工具本就以用户设备为准（与倒计时 / 年龄核算同一口径）；翻新仅影响展示层级与队列状态，不产生任何官方效力；页脚明确「重新打开页面按当前北京时间自动对齐」</td></tr>
+      <tr><td class="f">翻新瞬间状态残留</td><td>跨点时用户可能正持有旧届的校验结果 / 防误触确认</td><td>翻新时自动重置防误触临时确认态并全站重渲染（实测验证）；已生成的历史报告保留编号可追溯，用户重跑即按新届核算</td></tr>
+      <tr><td class="f">官方规则变动</td><td>组队政策 / 年龄口径调整（翻新只动赛历，不动规则）</td><td>设计使然：规则快照与赛历解耦——规则更新仍走版本迭代（建议规划版 → 拓展版的既有路径），赛历保鲜不承诺规则保鲜，边界诚实标注</td></tr>
+      <tr><td class="f">其余风险面</td><td>代写红线、数据隐私、SCUDEM 网络风险等</td><td>与拓展版完全一致：纯本地零上传、不代写、SCUDEM 仅风险提示不提供规避方案；本版未引入任何新的数据流向（翻新计算也在本地完成）</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ================= 10 ================= -->
+<h2 class="sec" id="s10">十、财务里程碑 <small>以翻新周期为刻度</small></h2>
+<div class="panel">
+  <table>
+    <thead><tr><th style="width:16%">阶段</th><th style="width:30%">关键动作</th><th style="width:30%">里程碑（验证目标）</th><th>成本结构</th></tr></thead>
+    <tbody>
+      <tr><td class="f">M0-M2<br>申报与首发</td><td>挑战杯 / 创业赛申报；拓展更新版作为默认分发件全渠道替换；12-01 首次翻新观测</td><td>累计校验队伍数持续增长且<b>翻新后 7 日留存为正</b>（静态版此时已失效，常青版数据不回落即为验证）</td><td>近零成本（学生团队人力）</td></tr>
+      <tr><td class="f">M3-M8<br>四节点运营</td><td>12 月翻新 → 学校试点启动；3 月美赛翻新 → 复盘内容 + C 端增值首峰；5 月 IMMC 翻新 → 暑期集训转化</td><td>试点学校 ≥2 所续用；四节点回访率与转化率跑出基准；B 端订阅意向名单成型</td><td>试点人力 + 轻量服务器（官网与内容站）</td></tr>
+      <tr><td class="f">M9-M14<br>订阅上线</td><td>完整翻新周年数据支撑 B 端报价；白标常青版 + advisor 工作台 + 规则保鲜服务打包</td><td>3-5 所付费订阅学校；「翻新保鲜」成为销售演示的核心环节（现场跳时间演示）</td><td>分成制顾问池 + 1-2 人规则校对</td></tr>
+      <tr><td class="f">Y2+<br>常青复利</td><td>订阅续费（续费理由 = 又一年四次可见翻新）；版本矩阵滚动迭代（规则更新仍走发版，赛历永远自动）</td><td>B 端订阅收入占比过半；分发副本数成为「永久获客资产」的可量化指标</td><td>内容与校对团队维持 1-2 人</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ================= 附录 ================= -->
+<h2 class="sec" id="s11">附录：数据与验证 <small>本计划书全部关键论断的可复核依据</small></h2>
+<div class="panel">
+  <ul class="list">
+    <li><b>翻新时点（北京时间）：</b>HiMCM/MidMCM 2026 赛季关闭北京 2026-11-18 → 翻新 2026-12-01 00:00；美赛 2027 届关闭北京 2027-02-01 → 翻新 2027-03-01 00:00；IMMC 2027 届关闭北京 2027-04-26 → 翻新 2027-05-01 00:00；SCUDEM 2026 届关闭北京 2026-11-02 → 翻新 2026-12-01 00:00（均为「窗口关闭后下月 1 日」统一算法导出）。</li>
+    <li><b>工程实测（Playwright 端到端）：</b>① 初始等价性：五赛事赛季队列与拓展版逐项一致；② 跨点翻新：mock 时间跨 12-01 / 03-01 / 05-01 / 远期 2030-12-01，队列滚动与推估全部正确（美赛 2031 届推估 01-30 开赛 / 01-23 注册 / 02-03 关闭，符合 1 月最后周四惯例）；③ 准点边界：2026-11-30 23:59:59 不翻新、2026-12-01 00:00:01 精准翻新；④ 覆盖联动：himcm 2027 关闭覆盖至 2027-12-15 后，翻新点自动变为 2028-01-01 并实测生效；⑤ 翻新后回归：校验 / 历史复盘（2026/2025）/ 六套组队模板全部正常且模板内容逐字不变。</li>
+    <li><b>市场规模数据：</b>美赛 2026 届全球 32,213 队 / 93,977 人 / 28 国家地区（中国约 2.5 万支，占全球约 77%）；HiMCM 全球年约 1,000+ 队（中国队伍约 85%）；IMMC 2015 首届 10 国中华区 60 支 → 2024 第十届中华区 310 支晋级国际赛程——口径以 COMAP 与各组委会官方为准，详见拓展版商业计划书附录。</li>
+    <li><b>配套交付物：</b>《国际数学竞赛合规校验引擎-建议规划版.html》（v2.8，153KB）、《国际数学竞赛合规校验引擎-拓展版.html》（v1.0，175KB）、《国际数学竞赛合规校验引擎-拓展更新版.html》（v1.0，185KB）——三版本文件独立、互不覆盖。</li>
+    <li><b>官方站点：</b><a href="https://www.comap.com" target="_blank" rel="noopener">comap.com</a> · <a href="https://www.immchallenge.org" target="_blank" rel="noopener">immchallenge.org</a> · <a href="https://www.simiode.org" target="_blank" rel="noopener">simiode.org</a></li>
+  </ul>
+</div>
+
+<footer class="ft">
+  MathCheck 商业计划书（拓展更新版 · 赛历自动翻新）· 2026 年 10 月 · 配套交付：《国际数学竞赛合规校验引擎-拓展更新版.html》<br>
+  本计划书基于可运行产品与端到端实测撰写，市场规模与财务里程碑为验证目标而非收益承诺；统计口径以 COMAP 及各赛事组委会官方发布为准。
+</footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>交通·餐饮·生活费相关性计算器（汇率抓取×购结汇建议）</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#2f7fc1; --blue-d:#14568f; --blue-l:#eaf3fc; --line:#dbe9f7;
+  --ink:#17334e; --sub:#5b7a97;
+}
+html{scroll-behavior:smooth}
+body{font-family:"Segoe UI","Microsoft YaHei",system-ui,sans-serif;background:linear-gradient(180deg,#f0f7ff 0%,#f7fbff 240px,#f7fbff 100%);color:var(--ink);font-size:14px;line-height:1.6}
+.wrap{max-width:1180px;margin:0 auto;padding:0 18px}
+/* ===== header ===== */
+header{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.8);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.hd{display:flex;align-items:center;gap:12px;padding:10px 0;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;color:var(--blue-d);font-size:16px}
+.brand .logo{width:30px;height:30px;flex:none}
+.brand small{display:block;font-weight:400;color:var(--sub);font-size:11.5px}
+.hd-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;white-space:nowrap}
+.b-good{background:#e3f5e8;color:#1e7a37}
+.b-mid{background:#fdf3e0;color:#9a6b0a}
+.b-wait{background:#fdeaea;color:#b23b3b}
+.b-neutral{background:var(--blue-l);color:var(--blue-d)}
+.btn{border:none;border-radius:9px;padding:6px 13px;font-size:13px;cursor:pointer;background:var(--blue);color:#fff;transition:.15s}
+.btn:hover{background:var(--blue-d)}
+.btn.ghost{background:#fff;color:var(--blue-d);border:1px solid #b9d6ee}
+.btn.ghost:hover{background:var(--blue-l)}
+.btn.mini{padding:4px 10px;font-size:12px}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+/* ===== 汇率看板 ===== */
+.fxboard{padding:14px 0 4px}
+.fxgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:10px}
+.fxcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px;box-shadow:0 1px 3px rgba(30,80,140,.06)}
+.fxcard .row1{display:flex;justify-content:space-between;align-items:baseline}
+.fxcode{font-weight:700;color:var(--blue-d)}
+.fxcode small{font-weight:400;color:var(--sub);margin-left:4px}
+.fxval{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums}
+.fxval small{font-size:11px;color:var(--sub);font-weight:400}
+.fxband{font-size:11px;color:var(--sub);margin-top:1px;font-variant-numeric:tabular-nums}
+.pos-track{position:relative;height:8px;border-radius:6px;background:linear-gradient(90deg,#d9f0dd 0%,#e8f0fa 50%,#fadddb 100%);margin:7px 0 2px}
+.pos-marker{position:absolute;top:-3px;width:14px;height:14px;border-radius:50%;background:var(--blue);border:3px solid #fff;box-shadow:0 0 0 1px var(--blue),0 1px 3px rgba(0,0,0,.25);transform:translateX(-50%);transition:left .4s}
+.pos-zone{display:flex;justify-content:space-between;font-size:10px;color:#8aa4bd}
+.fxstat{margin-top:6px}
+/* ===== tabs ===== */
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:12px 0 8px;position:sticky;top:52px;background:rgba(247,251,255,.92);backdrop-filter:blur(8px);z-index:40}
+.tab-btn{white-space:nowrap;padding:7px 14px;border-radius:9px;border:1px solid transparent;background:#fff;color:#3f6284;cursor:pointer;font-size:13px;display:inline-flex;align-items:center;gap:6px;box-shadow:0 1px 2px rgba(30,80,140,.05)}
+.tab-btn svg{width:14px;height:14px;flex:none}
+.tab-btn.active{border-color:var(--blue);color:var(--blue-d);background:var(--blue-l);font-weight:600}
+/* ===== panels & cards ===== */
+main{padding:6px 0 20px}
+.panel{display:none;animation:fadein .18s}
+.panel.active{display:block}
+@keyframes fadein{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:0 1px 3px rgba(30,80,140,.06);margin-bottom:14px}
+h2.sec{font-size:15px;color:var(--blue-d);margin:0 0 10px;display:flex;align-items:center;gap:8px;font-weight:700}
+h2.sec svg{width:16px;height:16px}
+h3.sub{font-size:13px;color:var(--blue-d);margin:12px 0 6px}
+.grid2{display:grid;grid-template-columns:5fr 7fr;gap:14px}
+.grid2 > .card{margin-bottom:14px}
+@media(max-width:900px){.grid2{grid-template-columns:1fr}.tabs{top:96px}}
+.field{margin-bottom:8px}
+.field label{display:block;font-size:12px;color:var(--sub);margin-bottom:3px}
+.field input,.field select,textarea{width:100%;padding:6px 9px;border:1px solid #c9dcf0;border-radius:8px;background:#fbfdff;font-size:13px;font-family:inherit;color:var(--ink)}
+.field input:focus,.field select:focus,textarea:focus{outline:2px solid #9cc4e8;border-color:#9cc4e8}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.frow3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.chk{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--sub);margin:4px 0}
+.chk input{width:auto}
+.note{font-size:11.5px;color:#7d99b4;line-height:1.6}
+/* 结果 */
+.kv{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px dashed #e3eef9;font-size:13px}
+.kv:last-child{border-bottom:none}
+.kv b{font-variant-numeric:tabular-nums;color:#123c5e;font-size:13.5px}
+.kv .big{font-size:18px;color:var(--blue-d)}
+.kv .up{color:#1e7a37}.kv .down{color:#b23b3b}
+.advice{margin-top:10px;padding:10px 13px;border-radius:10px;background:linear-gradient(90deg,#eaf3fc,#f6fbff);border:1px dashed #b9d6ee;font-size:13px;line-height:1.75}
+.advice .badge{margin-right:6px}
+ul.insights{list-style:none}
+ul.insights li{padding:5px 0 5px 20px;position:relative;font-size:13px;border-bottom:1px dashed #e9f1fa}
+ul.insights li:last-child{border-bottom:none}
+ul.insights li::before{content:"";position:absolute;left:4px;top:12px;width:7px;height:7px;border-radius:50%;background:var(--blue)}
+/* 表格 */
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbl th,.tbl td{border:1px solid #e3eef9;padding:4px 7px;text-align:right;font-variant-numeric:tabular-nums}
+.tbl th{background:var(--blue-l);color:#2b5f8f;font-weight:600;text-align:center;white-space:nowrap}
+.tbl td:first-child,.tbl td:nth-child(2),.tbl td:nth-child(3){text-align:left}
+.hm{border-collapse:collapse;width:100%}
+.hm th,.hm td{border:1px solid #e3eef9;padding:5px 6px;text-align:center;font-size:12px}
+.hm th{background:var(--blue-l);color:#2b5f8f;font-weight:600}
+.hm td{font-variant-numeric:tabular-nums;color:#0e3a63;font-weight:600}
+.sens{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:4px}
+.sens th,.sens td{border:1px solid #e0ecf8;padding:4px 7px;text-align:right;font-variant-numeric:tabular-nums}
+.sens th{background:var(--blue-l);text-align:center}
+.tblwrap{overflow-x:auto}
+/* 统计小卡 */
+.statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:8px 0}
+.stat{background:var(--blue-l);border-radius:10px;padding:8px 10px;text-align:center}
+.stat .v{font-size:17px;font-weight:700;color:var(--blue-d);font-variant-numeric:tabular-nums}
+.stat .k{font-size:11px;color:var(--sub)}
+canvas{max-width:100%;border:1px solid var(--line);border-radius:10px;background:#fff;display:block}
+/* modal */
+.modal-mask{position:fixed;inset:0;background:rgba(190,215,240,.4);backdrop-filter:blur(6px);display:none;align-items:flex-start;justify-content:center;z-index:100;padding:44px 16px}
+.modal-mask.show{display:flex}
+.modal{background:rgba(255,255,255,.94);border:1px solid #d5e6f5;border-radius:14px;max-width:660px;width:100%;max-height:82vh;overflow:auto;padding:18px 22px 22px;box-shadow:0 12px 40px rgba(20,60,110,.2)}
+.modal h3{color:var(--blue-d);font-size:15px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.modal .x{cursor:pointer;border:none;background:var(--blue-l);color:var(--blue-d);border-radius:8px;width:26px;height:26px;font-size:14px}
+.modal p{font-size:13px;margin-bottom:8px}
+.modal .mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:10px 0}
+.modal .mgrid label{font-size:11.5px;color:var(--sub);display:block;margin-bottom:2px}
+.modal .mgrid input{width:100%;padding:5px 8px;border:1px solid #c9dcf0;border-radius:8px;font-size:13px;background:#fbfdff}
+footer{border-top:1px solid var(--line);margin-top:10px;padding:14px 0 26px;color:#7d99b4;font-size:11.5px;line-height:1.8}
+.copy-ok{color:#1e7a37;font-size:12px}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap hd">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 24 24" fill="none" stroke="#2f7fc1" stroke-width="1.7" stroke-linecap="round"><path d="M3 17l5-6 4 3 6-8"/><path d="M3 21h18"/><circle cx="8" cy="11" r="1.3" fill="#2f7fc1" stroke="none"/><circle cx="12" cy="14" r="1.3" fill="#2f7fc1" stroke="none"/><circle cx="18" cy="6" r="1.3" fill="#2f7fc1" stroke="none"/></svg>
+      <div>交通 · 餐饮 · 生活费相关性计算器
+        <small>汇率实时抓取 × 六大场景购结汇建议（本地 / 留学 / 出国游 / 入境接待 / 出口 / 进口）</small>
+      </div>
+    </div>
+    <div class="hd-right">
+      <span id="fx-status" class="badge b-neutral">初始化…</span>
+      <button id="btn-refresh" class="btn ghost mini">↻ 抓取最新汇率</button>
+      <button id="btn-manual" class="btn ghost mini">✎ 手动校准</button>
+      <button id="btn-help" class="btn ghost mini">? 说明</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap fxboard">
+  <div id="fxgrid" class="fxgrid"></div>
+  <div class="note" id="fx-note" style="margin:8px 2px 0"></div>
+</div>
+
+<div class="wrap">
+  <nav class="tabs" id="tabs">
+    <button class="tab-btn active" data-tab="corr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 20V4M4 20h16"/><path d="M7 15l4-5 3 3 5-7"/></svg>相关性分析</button>
+    <button class="tab-btn" data-tab="local"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>本地生活</button>
+    <button class="tab-btn" data-tab="study"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M2 9l10-4 10 4-10 4z"/><path d="M6 11v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/><path d="M22 9v6"/></svg>留学预算</button>
+    <button class="tab-btn" data-tab="travel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M21 3l-9 9"/><path d="M21 3l-6.5 18-3.5-8.5L3 9z"/></svg>出国旅游</button>
+    <button class="tab-btn" data-tab="inbound"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="5" y="8" width="14" height="12" rx="2"/><path d="M9 8V5a2 2 0 012-2h2a2 2 0 012 2v3"/><path d="M9 13h6"/></svg>入境接待</button>
+    <button class="tab-btn" data-tab="export"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 8V6a2 2 0 012-2h12a2 2 0 012 2v2"/><path d="M12 5v12"/><path d="M8.5 13.5L12 17l3.5-3.5"/></svg>出口企业</button>
+    <button class="tab-btn" data-tab="import"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 8V6a2 2 0 012-2h12a2 2 0 012 2v2"/><path d="M12 17V5"/><path d="M8.5 8.5L12 5l3.5 3.5"/></svg>进口企业</button>
+    <button class="tab-btn" data-tab="summary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>购结汇总览</button>
+  </nav>
+
+  <main>
+  <!-- ============ 相关性分析 ============ -->
+  <section class="panel active" id="panel-corr">
+    <div class="card">
+      <h2 class="sec">内置样本：22 城市「交通 / 餐饮 / 住宿 / 其他」月度生活成本（人民币元/月，单身青年典型水平）</h2>
+      <div class="tblwrap"><table class="tbl" id="tb-cities"></table></div>
+    <p class="note" style="margin-top:6px">* 依据公开生活成本指数口径估算的演示样本，境外城市按内置基准汇率折算为人民币；实际因消费习惯而异，可在下方输入自己的样本做相关分析。</p>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2 class="sec">相关系数矩阵（Pearson r）</h2>
+        <div class="tblwrap"><table class="hm" id="tb-matrix"></table></div>
+        <p class="note">颜色越深表示正相关越强。对角线为 1。r ≥ 0.7 强相关，0.4–0.7 中等，&lt;0.4 弱。</p>
+      </div>
+      <div class="card">
+        <h2 class="sec">关键发现</h2>
+        <ul class="insights" id="ul-insights"></ul>
+      </div>
+    </div>
+    <div class="card">
+      <h2 class="sec">自定义相关分析（输入你自己的两组数据）</h2>
+      <div class="grid2">
+        <div>
+          <div class="field"><label>X 数据（交通成本示例，逗号/空格分隔）</label><textarea id="ta-x" rows="4"></textarea></div>
+          <div class="field"><label>Y 数据（餐饮成本示例，与 X 等长）</label><textarea id="ta-y" rows="4"></textarea></div>
+          <div style="display:flex;gap:8px">
+            <button class="btn mini" id="btn-corr-sample">载入内置样本（交通×餐饮）</button>
+            <button class="btn mini ghost" id="btn-corr-save">保存我的数据</button>
+            <button class="btn mini ghost" id="btn-corr-clear">清空</button>
+          </div>
+          <p class="note" style="margin-top:6px">保存于浏览器本地（localStorage），刷新不丢失。</p>
+        </div>
+        <div>
+          <div class="statgrid" id="stat-corr"></div>
+          <canvas id="cv-scatter" width="640" height="330"></canvas>
+          <div id="corr-verdict" class="advice"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 本地生活 ============ -->
+  <section class="panel" id="panel-local">
+    <div class="grid2">
+      <div class="card">
+        <h2 class="sec">本地生活成本计算</h2>
+        <div class="field"><label>城市（选择后自动带出样本值，可修改）</label><select id="sel-city"></select></div>
+        <div class="frow">
+          <div class="field"><label>交通（元/月）</label><input type="number" id="in-t" min="0"></div>
+          <div class="field"><label>餐饮（元/月）</label><input type="number" id="in-f" min="0"></div>
+        </div>
+        <div class="frow">
+          <div class="field"><label>住宿/房租（元/月）</label><input type="number" id="in-r" min="0"></div>
+          <div class="field"><label>其他日用（元/月）</label><input type="number" id="in-m" min="0"></div>
+        </div>
+        <div class="field"><label>税后月收入（元）</label><input type="number" id="in-income" value="8000" min="0"></div>
+      </div>
+      <div class="card">
+        <h2 class="sec">结果与建议</h2>
+        <div id="out-local"></div>
+        <div id="bar-local" class="advice"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 留学 ============ -->
+  <section class="panel" id="panel-study">
+    <div class="grid2">
+      <div class="card">
+        <h2 class="sec">留学总预算与购汇计划</h2>
+        <div class="frow3">
+          <div class="field"><label>留学国家/地区</label><select id="sel-country"></select></div>
+          <div class="field"><label>目的地城市</label><select id="sel-scity"></select></div>
+          <div class="field"><label>留学年限</label><select id="sel-years"></select></div>
+        </div>
+        <div class="frow">
+          <div class="field"><label>学费（当地货币/年）</label><input type="number" id="in-tuition" min="0"></div>
+          <div class="field"><label>生活费（当地货币/月）</label><input type="number" id="in-slife" min="0"></div>
+        </div>
+        <div class="frow">
+          <div class="field"><label>机票/签证/保险等一次性费用（人民币）</label><input type="number" id="in-onetime" value="10000" min="0"></div>
+          <div class="field"><label>当前汇率（自动）</label><input type="text" id="in-srate" readonly></div>
+        </div>
+        <label class="chk"><input type="checkbox" id="chk-spread" checked> 按银行卖出价购汇（含约 0.25% 点差）</label>
+        <p class="note">生活费默认按目的地城市样本（人民币）÷ 当前汇率折算为当地货币，可手动修改。</p>
+      </div>
+      <div class="card">
+        <h2 class="sec">留学总费用 &amp; 汇率敏感性</h2>
+        <div id="out-study"></div>
+        <div id="bar-study" class="advice"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 出国旅游 ============ -->
+  <section class="panel" id="panel-travel">
+    <div class="grid2">
+      <div class="card">
+        <h2 class="sec">出国旅游换汇计算</h2>
+        <div class="field"><label>目的地</label><select id="sel-dest"></select></div>
+        <div class="frow3">
+          <div class="field"><label>天数</label><input type="number" id="in-days" value="7" min="1"></div>
+          <div class="field"><label>人数</label><input type="number" id="in-ppl" value="2" min="1"></div>
+          <div class="field"><label>预算缓冲 %</label><input type="number" id="in-buffer" value="10" min="0"></div>
+        </div>
+        <div class="frow">
+          <div class="field"><label>住宿（当地货币/人/天）</label><input type="number" id="in-lodge" min="0"></div>
+          <div class="field"><label>餐饮（当地货币/人/天）</label><input type="number" id="in-food" min="0"></div>
+        </div>
+        <div class="frow">
+          <div class="field"><label>市内交通（当地货币/人/天）</label><input type="number" id="in-transit" min="0"></div>
+          <div class="field"><label>门票娱乐购物（当地货币/人/天）</label><input type="number" id="in-fun" min="0"></div>
+        </div>
+        <label class="chk"><input type="checkbox" id="chk-tspread" checked> 按银行卖出价购汇（含约 0.25% 点差）</label>
+      </div>
+      <div class="card">
+        <h2 class="sec">旅行预算 &amp; 换汇建议</h2>
+        <div id="out-travel"></div>
+        <div id="bar-travel" class="advice"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 入境接待 ============ -->
+  <section class="panel" id="panel-inbound">
+    <div class="grid2">
+      <div class="card">
+        <h2 class="sec">外国人入境接待成本（迎外宾 / 入境游报价）</h2>
+        <div class="frow3">
+          <div class="field"><label>客人结算货币</label><select id="sel-gcur"></select></div>
+          <div class="field"><label>接待档位</label><select id="sel-tier"></select></div>
+          <div class="field"><label>利润率 %（对外报价加成）</label><input type="number" id="in-hmargin" value="15" min="0"></div>
+        </div>
+        <div class="frow">
+          <div class="field"><label>人数</label><input type="number" id="in-hppl" value="4" min="1"></div>
+          <div class="field"><label>天数</label><input type="number" id="in-hdays" value="5" min="1"></div>
+        </div>
+        <div class="frow">
+          <div class="field"><label>住宿（人民币/人/天）</label><input type="number" id="in-hl" min="0"></div>
+          <div class="field"><label>餐饮（人民币/人/天）</label><input type="number" id="in-hf" min="0"></div>
+        </div>
+        <div class="frow">
+          <div class="field"><label>交通（人民币/人/天）</label><input type="number" id="in-ht" min="0"></div>
+          <div class="field"><label>门票娱乐（人民币/人/天）</label><input type="number" id="in-he" min="0"></div>
+        </div>
+        <p class="note">接待成本均以人民币计价（境外客人在华消费实际以人民币结算）。</p>
+      </div>
+      <div class="card">
+        <h2 class="sec">接待成本 &amp; 对外报价</h2>
+        <div id="out-inbound"></div>
+        <div id="bar-inbound" class="advice"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 出口企业 ============ -->
+  <section class="panel" id="panel-export">
+    <div class="grid2">
+      <div class="card">
+        <h2 class="sec">出口企业：收汇结汇测算</h2>
+        <div class="frow">
+          <div class="field"><label>收汇币种</label><select id="sel-ecur"></select></div>
+          <div class="field"><label>合同金额（外币）</label><input type="number" id="in-eamt" value="100000" min="0"></div>
+        </div>
+        <div class="frow">
+          <div class="field"><label>收款账期（天）</label><input type="number" id="in-edays" value="60" min="0"></div>
+          <div class="field"><label>国内总成本（人民币）</label><input type="number" id="in-ecost" value="600000" min="0"></div>
+        </div>
+        <label class="chk"><input type="checkbox" id="chk-espread" checked> 按银行现汇买入价结汇（含约 0.25% 点差）</label>
+        <p class="note">汇率使用上方看板实时值；点击「↻ 抓取最新汇率」可刷新。</p>
+      </div>
+      <div class="card">
+        <h2 class="sec">结汇收入 &amp; 敞口风险</h2>
+        <div id="out-export"></div>
+        <div id="bar-export" class="advice"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 进口企业 ============ -->
+  <section class="panel" id="panel-import">
+    <div class="grid2">
+      <div class="card">
+        <h2 class="sec">进口企业：购汇付汇测算</h2>
+        <div class="frow">
+          <div class="field"><label>付汇币种</label><select id="sel-icur"></select></div>
+          <div class="field"><label>进口货值（外币）</label><input type="number" id="in-iamt" value="100000" min="0"></div>
+        </div>
+        <div class="frow">
+          <div class="field"><label>综合税负率 %（关税+增值税等，按货值计）</label><input type="number" id="in-itax" value="20" min="0"></div>
+          <div class="field"><label>物流/其他费用（人民币）</label><input type="number" id="in-iother" value="8000" min="0"></div>
+        </div>
+        <div class="frow">
+          <div class="field"><label>国内预计销售总额（人民币）</label><input type="number" id="in-isale" value="950000" min="0"></div>
+          <div class="field"><label>付款账期（天）</label><input type="number" id="in-idays" value="30" min="0"></div>
+        </div>
+        <label class="chk"><input type="checkbox" id="chk-ispread" checked> 按银行现汇卖出价购汇（含约 0.25% 点差）</label>
+      </div>
+      <div class="card">
+        <h2 class="sec">进口成本 &amp; 购汇建议</h2>
+        <div id="out-import"></div>
+        <div id="bar-import" class="advice"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 购结汇总览 ============ -->
+  <section class="panel" id="panel-summary">
+    <div class="card">
+      <h2 class="sec">汇率位置总览</h2>
+      <div id="out-sumtable" class="tblwrap"></div>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2 class="sec">五类人群当前策略</h2>
+        <div id="out-sumpeople"></div>
+      </div>
+      <div class="card">
+        <h2 class="sec">合规与风险提示</h2>
+        <ul class="insights" id="ul-compliance"></ul>
+      </div>
+    </div>
+  </section>
+  </main>
+
+  <footer>
+    <b>数据与免责声明：</b>汇率来自公开免费接口（在线抓取），失败时自动使用内置基准（2026-10 参考值），均仅供测算演示，实际请以银行/牌价成交价为准；生活成本为演示样本估算值；参考波动区间为演示口径，不构成任何投资、交易或购结汇决策建议。个人年度购汇便利化额度等值 5 万美元，超出需按外汇管理要求提供材料。所有输入与自定义数据仅保存在你的浏览器本地。
+  </footer>
+</div>
+
+<!-- 手动校准弹窗 -->
+<div class="modal-mask" id="modal-manual">
+  <div class="modal">
+    <h3>手动校准汇率 <button class="x" data-close="modal-manual">✕</button></h3>
+    <p>直接输入「1 外币 = ? 人民币」（按银行中间价或你常用的牌价），保存后立即生效并覆盖在线/缓存值。留空表示不覆盖。</p>
+    <div class="mgrid" id="mgrid-rates"></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn mini" id="btn-manual-save">保存校准值</button>
+      <button class="btn mini ghost" id="btn-manual-clear">清除全部校准</button>
+    </div>
+  </div>
+</div>
+
+<!-- 说明弹窗 -->
+<div class="modal-mask" id="modal-help">
+  <div class="modal">
+    <h3>使用说明 <button class="x" data-close="modal-help">✕</button></h3>
+    <p><b>① 汇率抓取：</b>打开页面自动尝试 3 个公开免费接口（无密钥）；成功显示「在线」并缓存 6 小时；联网失败自动降级为内置基准；可点「↻ 抓取」强制刷新，或「✎ 手动校准」输入自定牌价。</p>
+    <p><b>② 位置条：</b>每个币种给出近期参考波动区间，标记当前汇率位置——靠右=人民币偏弱（利于结汇/出口收汇），靠左=人民币偏强（利于购汇/进口付汇/留学旅游换汇）。</p>
+    <p><b>③ 点差：</b>结汇按「现汇买入价 ≈ 中间价 − 0.25%」估算，购汇按「现汇卖出价 ≈ 中间价 + 0.25%」估算，可在各场景勾选开关。</p>
+    <p><b>④ 相关性：</b>皮尔逊相关系数 r、决定系数 r²、一元回归 y = a + bx、t 检验（α=0.05，查表临界值）；内置 22 城样本，也可输入自己的数据。</p>
+    <p><b>⑤ 场景：</b>本地生活 / 留学 / 出国旅游 / 入境接待 / 出口企业 / 进口企业，实时计算金额、汇率敏感性（±2%、±5%）与分批购结汇、锁汇比例建议。</p>
+    <p><b>⑥ 合规：</b>个人购汇便利化额度等值 5 万美元/年；携带外币现钞 ≤ 等值 5000 美元出境免申报，5000–10000 美元需银行《携带外汇出境许可证》，超 10000 美元需外汇局许可。</p>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ================= 内置数据 ================= */
+const BASE_RATES = { USD:6.72, EUR:7.55, GBP:8.95, JPY:0.0435, AUD:4.68, CAD:4.78, HKD:0.86, SGD:5.25, KRW:0.0051, THB:0.207, MYR:1.64 };
+const RATE_BANDS = { USD:[6.45,7.05], EUR:[7.20,7.80], GBP:[8.60,9.25], JPY:[0.0400,0.0465], AUD:[4.40,4.95], CAD:[4.50,5.00], HKD:[0.82,0.90], SGD:[5.05,5.45], KRW:[0.0048,0.0054], THB:[0.195,0.215], MYR:[1.45,1.72] };
+const CUR_NAME = { USD:'美元', EUR:'欧元', GBP:'英镑', JPY:'日元', AUD:'澳元', CAD:'加元', HKD:'港币', SGD:'新加坡元', KRW:'韩元', THB:'泰铢', MYR:'林吉特' };
+const PER_UNIT = { JPY:100, KRW:100 };
+const CITIES = [
+ {name:'北京',country:'中国',traffic:320,food:2200,rent:4500,misc:1500},
+ {name:'上海',country:'中国',traffic:350,food:2400,rent:4800,misc:1600},
+ {name:'广州',country:'中国',traffic:280,food:1900,rent:3600,misc:1300},
+ {name:'深圳',country:'中国',traffic:320,food:2100,rent:4200,misc:1500},
+ {name:'杭州',country:'中国',traffic:300,food:2000,rent:3900,misc:1400},
+ {name:'成都',country:'中国',traffic:220,food:1500,rent:2500,misc:1100},
+ {name:'西安',country:'中国',traffic:200,food:1300,rent:2200,misc:1000},
+ {name:'香港',country:'中国香港',traffic:800,food:4500,rent:9500,misc:3000},
+ {name:'东京',country:'日本',traffic:600,food:3200,rent:6500,misc:2500},
+ {name:'大阪',country:'日本',traffic:480,food:2700,rent:5000,misc:2000},
+ {name:'首尔',country:'韩国',traffic:450,food:2800,rent:5200,misc:2000},
+ {name:'新加坡',country:'新加坡',traffic:700,food:3600,rent:8000,misc:2800},
+ {name:'悉尼',country:'澳大利亚',traffic:750,food:3800,rent:7800,misc:2600},
+ {name:'墨尔本',country:'澳大利亚',traffic:650,food:3400,rent:6800,misc:2300},
+ {name:'纽约',country:'美国',traffic:900,food:5200,rent:12000,misc:3800},
+ {name:'洛杉矶',country:'美国',traffic:650,food:4000,rent:9000,misc:3200},
+ {name:'伦敦',country:'英国',traffic:1000,food:4800,rent:10500,misc:3500},
+ {name:'巴黎',country:'法国',traffic:550,food:3600,rent:7800,misc:2600},
+ {name:'多伦多',country:'加拿大',traffic:700,food:3400,rent:7500,misc:2500},
+ {name:'柏林',country:'德国',traffic:420,food:2900,rent:5600,misc:2100},
+ {name:'曼谷',country:'泰国',traffic:300,food:1800,rent:3500,misc:1200},
+ {name:'吉隆坡',country:'马来西亚',traffic:260,food:1600,rent:2800,misc:1000}
+];
+const STUDY = {
+ '美国':{cur:'USD',tuition:45000,cities:['纽约','洛杉矶']},
+ '英国':{cur:'GBP',tuition:22000,cities:['伦敦']},
+ '澳大利亚':{cur:'AUD',tuition:38000,cities:['悉尼','墨尔本']},
+ '加拿大':{cur:'CAD',tuition:35000,cities:['多伦多']},
+ '日本':{cur:'JPY',tuition:1200000,cities:['东京','大阪']},
+ '韩国':{cur:'KRW',tuition:12000000,cities:['首尔']},
+ '德国':{cur:'EUR',tuition:3000,cities:['柏林']},
+ '法国':{cur:'EUR',tuition:4000,cities:['巴黎']},
+ '新加坡':{cur:'SGD',tuition:30000,cities:['新加坡']},
+ '中国香港':{cur:'HKD',tuition:150000,cities:['香港']},
+ '马来西亚':{cur:'MYR',tuition:15000,cities:['吉隆坡']},
+ '泰国':{cur:'THB',tuition:120000,cities:['曼谷']}
+};
+const TRAVEL = {
+ '日本':{cur:'JPY',lodge:12000,food:5500,transit:1800,fun:3000},
+ '泰国':{cur:'THB',lodge:1800,food:800,transit:500,fun:800},
+ '美国':{cur:'USD',lodge:180,food:80,transit:40,fun:60},
+ '欧元区（法德意等）':{cur:'EUR',lodge:140,food:60,transit:30,fun:40},
+ '英国':{cur:'GBP',lodge:130,food:60,transit:25,fun:35},
+ '韩国':{cur:'KRW',lodge:110000,food:55000,transit:15000,fun:25000},
+ '新加坡':{cur:'SGD',lodge:220,food:90,transit:20,fun:40},
+ '澳大利亚':{cur:'AUD',lodge:190,food:95,transit:25,fun:50},
+ '马来西亚':{cur:'MYR',lodge:350,food:150,transit:80,fun:100},
+ '中国香港':{cur:'HKD',lodge:900,food:400,transit:120,fun:200}
+};
+const HOST_TIER = {
+ '经济型':{lodge:350,food:150,transit:100,fun:80},
+ '舒适型':{lodge:600,food:260,transit:200,fun:150},
+ '高端型':{lodge:1200,food:450,transit:400,fun:300}
+};
+const T05={1:12.706,2:4.303,3:3.182,4:2.776,5:2.571,6:2.447,7:2.365,8:2.306,9:2.262,10:2.228,11:2.201,12:2.179,13:2.160,14:2.145,15:2.131,16:2.120,17:2.110,18:2.101,19:2.093,20:2.086,21:2.080,22:2.074,23:2.069,24:2.064,25:2.060,26:2.056,27:2.052,28:2.048,29:2.045,30:2.042,40:2.021,60:2.000,120:1.980};
+const LS_CACHE='fxcal_v1_cache', LS_MANUAL='fxcal_v1_manual', LS_CORR='fxcal_v1_corr';
+
+/* ================= 状态 ================= */
+let RATES = Object.assign({}, BASE_RATES);
+let MANUAL = {};
+let CACHE = null;   // {rates, ts, src, date}
+let FX_MODE = 'base'; // base | online | cache | manual
+
+/* ================= 工具函数 ================= */
+function $(id){ return document.getElementById(id); }
+function num(id, def){ const v=parseFloat($(id).value); return isFinite(v)? v : (def||0); }
+function fmt(n, d){ if(!isFinite(n)) return '—'; return Number(n).toLocaleString('zh-CN',{minimumFractionDigits:d==null?0:d,maximumFractionDigits:d==null?0:d}); }
+function curRate(cur){ if(cur==='CNY') return 1; return RATES[cur]||BASE_RATES[cur]||1; }
+function buyRate(cur, sp){ const r=curRate(cur); return sp? r*(1-0.0025) : r; }   // 结汇（银行买入外币）
+function sellRate(cur, sp){ const r=curRate(cur); return sp? r*(1+0.0025) : r; }  // 购汇（银行卖出外币）
+function chk(id){ const el=$(id); return !!(el&&el.checked); }
+function rateState(cur){
+  const r=curRate(cur), b=RATE_BANDS[cur];
+  if(!b) return {pos:0.5, level:'neutral'};
+  const pos=Math.min(1,Math.max(0,(r-b[0])/(b[1]-b[0])));
+  const level = pos>0.75 ? 'weak' : (pos<0.25 ? 'strong' : 'neutral');
+  return {pos, level};
+}
+function levelText(lv){
+  return lv==='weak' ? '人民币偏弱' : lv==='strong' ? '人民币偏强' : '中性区间';
+}
+function posBadgeCls(lv){ return lv==='weak' ? 'b-wait' : lv==='strong' ? 'b-good' : 'b-mid'; }
+
+/* ================= 购结汇建议引擎 ================= */
+function adviceFor(cur, dir){ // dir: 'buy'购汇 | 'sell'结汇
+  const lv=rateState(cur).level, cn=CUR_NAME[cur]||cur;
+  if(dir==='sell'){
+    if(lv==='weak') return {label:'建议尽快结汇', cls:'b-good',
+      text:`当前 ${cn}兑人民币处于参考区间上沿（${levelText(lv)}），结汇划算。建议即期结汇，或对 60–80% 敞口办理远期结汇锁定汇率。`};
+    if(lv==='neutral') return {label:'建议分批结汇', cls:'b-mid',
+      text:`汇率处于中性区间，建议分批结汇（如先结 40%、其余逢高分批），并对部分敞口远期锁汇平滑波动。`};
+    return {label:'可暂缓结汇', cls:'b-wait',
+      text:`人民币偏强、${cn}兑人民币处于低位，结汇不划算。刚性资金需求部分可先结 30–50%，其余可暂缓或考虑远期价合适时再锁（注意持有敞口风险）。`};
+  } else {
+    if(lv==='strong') return {label:'建议尽快购汇', cls:'b-good',
+      text:`人民币偏强，购汇成本处于低位。建议一次性或分 2 批完成购汇，刚性支出可全额锁定。`};
+    if(lv==='neutral') return {label:'建议分批购汇', cls:'b-mid',
+      text:`汇率中性，建议按用途分批购汇（如先购 40%、逢低补齐），并预留 5–10% 缓冲。`};
+    return {label:'延后 / 部分购汇', cls:'b-wait',
+      text:`人民币偏弱，购汇成本偏高。非紧急用汇可延后分批；刚性支出建议「即期 + 远期」组合锁定，避免追高。`};
+  }
+}
+function hedgeRatio(pos, days){
+  let base = pos>0.75?0.8 : pos<0.25?0.35 : 0.55;
+  if(days>90) base=Math.min(0.95, base+0.1);
+  if(days<30) base=Math.max(0.2, base-0.1);
+  return base;
+}
+function adviceBarHtml(cur, dir, extra){
+  const a=adviceFor(cur,dir), st=rateState(cur);
+  return `<span class="badge ${a.cls}">${a.label}</span><b>${CUR_NAME[cur]||cur} 现状：</b>${levelText(st.level)}（区间位置 ${Math.round(st.pos*100)}%）→ ${a.text} ${extra||''}`;
+}
+
+/* ================= 汇率：缓存 / 抓取 ================= */
+function loadLS(k){ try{ return JSON.parse(localStorage.getItem(k)||'null'); }catch(e){ return null; } }
+function saveLS(k,v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+
+function applyRates(){
+  RATES = Object.assign({}, BASE_RATES);
+  if(CACHE && CACHE.rates) Object.assign(RATES, CACHE.rates);
+  Object.assign(RATES, MANUAL);
+  FX_MODE = Object.keys(MANUAL).length ? 'manual' : (CACHE ? (CACHE.online?'online':'cache') : 'base');
+}
+function setStatus(){
+  const el=$('fx-status'), note=$('fx-note');
+  if(FX_MODE==='online'){
+    el.className='badge b-good'; el.textContent='在线 · '+(CACHE.src||'')+(CACHE.date?' · '+CACHE.date:'');
+    note.textContent='汇率为公开接口实时数据（中间价口径），仅供参考，实际以银行牌价为准。';
+  } else if(FX_MODE==='manual'){
+    el.className='badge b-neutral'; el.textContent='手动校准生效中';
+    note.textContent='当前使用你手动输入的牌价（'+Object.keys(MANUAL).join('、')+'），可在「✎ 手动校准」中清除恢复在线/基准值。';
+  } else if(FX_MODE==='cache'){
+    const t=new Date(CACHE.ts);
+    el.className='badge b-mid'; el.textContent='缓存 '+('0'+t.getHours()).slice(-2)+':'+('0'+t.getMinutes()).slice(-2);
+    note.textContent='使用 '+CACHE.src+' 的缓存数据（6 小时内），点击「↻ 抓取」可强制刷新。';
+  } else {
+    el.className='badge b-wait'; el.textContent='离线 · 内置基准（2026-10 参考值）';
+    note.textContent='联网抓取失败或未联网，已使用内置基准汇率。联网后点「↻ 抓取最新汇率」可获取实时数据，或「✎ 手动校准」输入实际牌价。';
+  }
+}
+async function tryFetch(){
+  const sources=[
+    {src:'open.er-api.com', url:'https://open.er-api.com/v6/latest/CNY', p:d=>fromBase(d.rates)},
+    {src:'currency-api/jsdelivr', url:'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/cny.json', p:d=>fromBase(d.cny,true)},
+    {src:'currency-api/pages.dev', url:'https://latest.currency-api.pages.dev/v1/currencies/cny.json', p:d=>fromBase(d.cny,true)}
+  ];
+  for(const s of sources){
+    try{
+      const ctrl=new AbortController();
+      const timer=setTimeout(()=>ctrl.abort(), 9000);
+      const resp=await fetch(s.url, {signal:ctrl.signal});
+      clearTimeout(timer);
+      if(!resp.ok) continue;
+      const d=await resp.json();
+      const rates=s.p(d);
+      if(rates && isFinite(rates.USD) && rates.USD>0){
+        return {rates, src:s.src, date:String(d.time_last_update_utc||d.date||'').slice(0,16)};
+      }
+    }catch(e){ /* 尝试下一个源 */ }
+  }
+  return null;
+}
+function fromBase(base, lower){
+  if(!base) return null;
+  const o={};
+  for(const k of Object.keys(BASE_RATES)){
+    const key = lower ? k.toLowerCase() : k;
+    if(base[key] && base[key]>0) o[k]=1/base[key];
+  }
+  return Object.keys(o).length>=8 ? o : null;
+}
+async function refreshRates(force){
+  const btn=$('btn-refresh');
+  btn.disabled=true; btn.textContent='抓取中…';
+  const now=Date.now();
+  const cached=loadLS(LS_CACHE);
+  if(!force && cached && cached.online && (now-cached.ts)<6*3600*1000){
+    CACHE=cached; applyRates(); setStatus(); renderAll(); btn.disabled=false; btn.textContent='↻ 抓取最新汇率'; return;
+  }
+  const res=await tryFetch();
+  if(res){
+    CACHE={rates:res.rates, ts:Date.now(), src:res.src, date:res.date, online:true};
+    saveLS(LS_CACHE, CACHE);
+  } else if(cached){
+    CACHE=Object.assign({}, cached, {online:false});
+  } else {
+    CACHE=null;
+  }
+  applyRates(); setStatus(); renderAll();
+  btn.disabled=false; btn.textContent='↻ 抓取最新汇率';
+}
+
+/* ================= 汇率看板 ================= */
+function renderRateBoard(){
+  const grid=$('fxgrid');
+  let html='';
+  for(const cur of Object.keys(BASE_RATES)){
+    const r=curRate(cur), b=RATE_BANDS[cur], st=rateState(cur), pu=PER_UNIT[cur]||1;
+    const disp=(pu===1) ? (r>=1? r.toFixed(3): r.toFixed(4)) : (r*pu).toFixed(pu===100?2:1);
+    const lo=(b[0]*pu).toFixed(pu===100?2:(b[0]>=1?3:4)), hi=(b[1]*pu).toFixed(pu===100?2:(b[1]>=1?3:4));
+    const posCls = st.level==='weak'?'b-wait':(st.level==='strong'?'b-good':'b-mid');
+    const posTxt = st.level==='weak'?'偏弱·利结汇':(st.level==='strong'?'偏强·利购汇':'中性');
+    html+=`<div class="fxcard">
+      <div class="row1"><span class="fxcode">${cur}<small>${CUR_NAME[cur]}</small></span><span class="badge ${posCls}">${posTxt}</span></div>
+      <div class="fxval">${pu===100?'100':1} ${cur} ≈ ${disp} <small>CNY</small></div>
+      <div class="fxband">参考区间 ${lo} – ${hi}</div>
+      <div class="pos-track"><div class="pos-marker" style="left:${(st.pos*100).toFixed(1)}%"></div></div>
+      <div class="pos-zone"><span>人民币偏强</span><span>人民币偏弱</span></div>
+    </div>`;
+  }
+  grid.innerHTML=html;
+}
+
+/* ================= 统计：Pearson / 回归 / t ================= */
+function pearson(x,y){
+  const n=Math.min(x.length,y.length);
+  if(n<3) return NaN;
+  let mx=0,my=0;
+  for(let i=0;i<n;i++){ mx+=x[i]; my+=y[i]; }
+  mx/=n; my/=n;
+  let sxy=0,sxx=0,syy=0;
+  for(let i=0;i<n;i++){ const dx=x[i]-mx, dy=y[i]-my; sxy+=dx*dy; sxx+=dx*dx; syy+=dy*dy; }
+  if(sxx<=0||syy<=0) return NaN;
+  return sxy/Math.sqrt(sxx*syy);
+}
+function linreg(x,y){
+  const n=Math.min(x.length,y.length);
+  if(n<3) return null;
+  let mx=0,my=0;
+  for(let i=0;i<n;i++){ mx+=x[i]; my+=y[i]; }
+  mx/=n; my/=n;
+  let sxy=0,sxx=0,syy=0;
+  for(let i=0;i<n;i++){ const dx=x[i]-mx, dy=y[i]-my; sxy+=dx*dy; sxx+=dx*dx; syy+=dy*dy; }
+  if(sxx<=0||syy<=0) return null;
+  const b=sxy/sxx, a=my-b*mx;
+  const r=sxy/Math.sqrt(sxx*syy);
+  const df=n-2;
+  const t=Math.abs(r)*Math.sqrt(df/Math.max(1e-12,1-r*r));
+  return {n, a, b, r, r2:r*r, t, df, sig:(t>tCrit05(df))};
+}
+function tCrit05(df){
+  if(df<=0) return Infinity;
+  if(df>120) return 1.96;
+  if(T05[df]) return T05[df];
+  let best=1;
+  for(const k of Object.keys(T05)){ const kk=+k; if(kk<=df) best=kk; }
+  return T05[best];
+}
+function rLabel(r){
+  const a=Math.abs(r);
+  if(a>=0.9) return '极强'; if(a>=0.7) return '强'; if(a>=0.5) return '中等';
+  if(a>=0.3) return '弱'; return a>=0.1?'微弱':'几乎不相关';
+}
+function cityTotal(c){ return c.traffic+c.food+c.rent+c.misc; }
+function fieldVals(key){ return key==='total' ? CITIES.map(cityTotal) : CITIES.map(c=>c[key]); }
+
+/* ================= 相关性面板 ================= */
+function renderCorrBuiltins(){
+  const tb=$('tb-cities');
+  tb.innerHTML='<tr><th>#</th><th>城市</th><th>国家/地区</th><th>交通</th><th>餐饮</th><th>住宿</th><th>其他</th><th>合计</th></tr>'+
+    CITIES.map((c,i)=>`<tr><td>${i+1}</td><td>${c.name}</td><td>${c.country}</td><td>${fmt(c.traffic)}</td><td>${fmt(c.food)}</td><td>${fmt(c.rent)}</td><td>${fmt(c.misc)}</td><td><b>${fmt(cityTotal(c))}</b></td></tr>`).join('');
+  const fs=[['traffic','交通'],['food','餐饮'],['rent','住宿'],['misc','其他'],['total','合计']];
+  const M={};
+  for(const a of fs){ M[a[0]]={}; for(const b of fs){ M[a[0]][b[0]]=pearson(fieldVals(a[0]),fieldVals(b[0])); } }
+  const heat=r=> r<0 ? 'rgba(239,68,68,.5)' : (r>=1? '#c9dff2' : 'rgba(47,127,193,'+Math.min(1,0.12+Math.max(0,(r-0.55))/0.45*0.85).toFixed(2)+')');
+  let mh='<tr><th style="min-width:44px">r</th>'+fs.map(f=>`<th>${f[1]}</th>`).join('')+'</tr>';
+  for(const a of fs){
+    mh+='<tr><th>'+a[1]+'</th>';
+    for(const b of fs){
+      const v=M[a[0]][b[0]];
+      mh+=`<td style="background:${heat(v)}" title="${a[1]} × ${b[1]}">${isFinite(v)?v.toFixed(2):'—'}</td>`;
+    }
+    mh+='</tr>';
+  }
+  $('tb-matrix').innerHTML=mh;
+
+  // 关键发现
+  const pairs=[];
+  for(let i=0;i<fs.length;i++) for(let j=i+1;j<fs.length;j++)
+    pairs.push({a:fs[i][1],b:fs[j][1],r:M[fs[i][0]][fs[j][0]]});
+  pairs.sort((p,q)=>q.r-p.r);
+  const meanShare=k=>{ const vs=fieldVals(k); const ts=fieldVals('total'); return vs.reduce((s,v,i)=>s+v/ts[i],0)/vs.length; };
+  const regFF=linreg(fieldVals('food'),fieldVals('total'));
+  const regRF=linreg(fieldVals('rent'),fieldVals('total'));
+  const sorted=[...CITIES].sort((a,b)=>cityTotal(a)-cityTotal(b));
+  const cheapest=sorted.slice(0,3).map(c=>c.name+'（'+fmt(cityTotal(c))+'）').join('、');
+  const dearest=sorted.slice(-3).reverse().map(c=>c.name+'（'+fmt(cityTotal(c))+'）').join('、');
+  const li=[];
+  li.push(`最强相关：<b>${pairs[0].a} × ${pairs[0].b}（r = ${pairs[0].r.toFixed(3)}）</b> —— 各分项高度同向变动，由城市整体物价水平共同驱动。`);
+  li.push(`最弱相关：<b>${pairs[pairs.length-1].a} × ${pairs[pairs.length-1].b}（r = ${pairs[pairs.length-1].r.toFixed(3)}）</b> —— ${pairs[pairs.length-1].r>0.7?'即便最弱仍是强正相关，体现"高物价城市各项皆贵"的规模效应。':'该对存在城市间结构性差异（如洛杉矶油价低但房租高）。'}`);
+  li.push(`平均构成：餐饮 ${(meanShare('food')*100).toFixed(1)}%｜住宿 ${(meanShare('rent')*100).toFixed(1)}%｜交通 ${(meanShare('traffic')*100).toFixed(1)}%｜其他 ${(meanShare('misc')*100).toFixed(1)}% —— 住宿是生活费的最大权重项。`);
+  li.push(`弹性（回归）：餐饮每 +100 元/月，总生活费平均 <b>+${Math.round(regFF.b*100)} 元</b>；住宿每 +100 元/月，总生活费平均 <b>+${Math.round(regRF.b*100)} 元</b>（交通占比低、离差大，不宜直接线性外推）。`);
+  li.push(`最贵城市：${dearest}｜最省城市：${cheapest}，二者差距约 ${(cityTotal(sorted[sorted.length-1])/cityTotal(sorted[0])).toFixed(1)} 倍。`);
+  li.push(`应用：做预算时可用回归方程「合计 = ${Math.round(regRF.a)} + ${regRF.b.toFixed(2)} × 住宿」快速估算，或用相关矩阵选择合并预测变量以避免重复计权。`);
+  $('ul-insights').innerHTML=li.map(t=>'<li>'+t+'</li>').join('');
+}
+
+function parseNumList(s){
+  return (s||'').split(/[，,;、\s]+/).map(v=>parseFloat(v)).filter(v=>isFinite(v));
+}
+function renderCustom(){
+  const xs=parseNumList($('ta-x').value), ys=parseNumList($('ta-y').value);
+  const n=Math.min(xs.length, ys.length);
+  const stats=$('stat-corr'), verdict=$('corr-verdict');
+  if(n<3){
+    stats.innerHTML='<div class="note">输入至少 3 组对应数据即可计算。</div>';
+    verdict.innerHTML='<span class="badge b-neutral">待输入</span> 请在左侧输入 X、Y 两组等长数据（逗号/空格分隔）。';
+    drawScatter(null,null,null);
+    return;
+  }
+  const reg=linreg(xs.slice(0,n), ys.slice(0,n));
+  if(!reg){
+    stats.innerHTML='<div class="note">数据无变异（某组为常数），无法计算相关系数。</div>';
+    return;
+  }
+  stats.innerHTML=`
+    <div class="stat"><div class="v">${reg.n}</div><div class="k">样本量 n</div></div>
+    <div class="stat"><div class="v">${reg.r.toFixed(3)}</div><div class="k">Pearson r</div></div>
+    <div class="stat"><div class="v">${reg.r2.toFixed(3)}</div><div class="k">决定系数 r²</div></div>
+    <div class="stat"><div class="v">${reg.t.toFixed(2)}</div><div class="k">t 统计量</div></div>`;
+  const eq=`y = ${reg.a.toFixed(1)} ${reg.b>=0?'+':'−'} ${Math.abs(reg.b).toFixed(3)}x`;
+  verdict.innerHTML=`<span class="badge ${reg.sig?'b-good':'b-wait'}">${reg.sig?'α=0.05 显著':'α=0.05 不显著'}</span>
+    <b>相关强度：${rLabel(reg.r)}${reg.r>=0?'正':'负'}相关</b>（r=${reg.r.toFixed(3)}，df=${reg.df}，t=${reg.t.toFixed(2)} vs 临界 ${tCrit05(reg.df).toFixed(3)}）。
+    回归方程 <b>${eq}</b>：X 每增加 1 单位，Y 平均变动 ${reg.b.toFixed(3)} 单位；r²=${reg.r2.toFixed(3)} 表示 X 可解释 Y 约 ${(reg.r2*100).toFixed(1)}% 的变异。${n!==xs.length||n!==ys.length?'（注：两组长度不一致，仅取前 '+n+' 组）':''}`;
+  drawScatter(xs.slice(0,n), ys.slice(0,n), reg);
+}
+function drawScatter(xs, ys, reg){
+  const cv=$('cv-scatter'), ctx=cv.getContext('2d');
+  const W=cv.width, H=cv.height, L=56, R=16, T=16, B=40;
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,W,H);
+  if(!xs||!ys){ ctx.fillStyle='#8aa4bd'; ctx.font='13px sans-serif'; ctx.fillText('输入数据后显示散点图与回归线',W/2-110,H/2); return; }
+  let xmin=Math.min(...xs), xmax=Math.max(...xs), ymin=Math.min(...ys), ymax=Math.max(...ys);
+  if(xmax-xmin<1e-9) xmax=xmin+1;
+  if(ymax-ymin<1e-9) ymax=ymin+1;
+  const padx=(xmax-xmin)*0.1, pady=(ymax-ymin)*0.1;
+  xmin-=padx; xmax+=padx; ymin-=pady; ymax+=pady;
+  const X=v=>L+(v-xmin)/(xmax-xmin)*(W-L-R);
+  const Y=v=>H-B-(v-ymin)/(ymax-ymin)*(H-T-B);
+  ctx.strokeStyle='#e6eff9'; ctx.lineWidth=1;
+  for(let i=0;i<=5;i++){
+    const gx=L+(W-L-R)*i/5; ctx.beginPath(); ctx.moveTo(gx,T); ctx.lineTo(gx,H-B); ctx.stroke();
+    const gy=T+(H-T-B)*i/5; ctx.beginPath(); ctx.moveTo(L,gy); ctx.lineTo(W-R,gy); ctx.stroke();
+  }
+  ctx.fillStyle='#6b8aa8'; ctx.font='10px sans-serif';
+  for(let i=0;i<=5;i++){
+    const vx=xmin+(xmax-xmin)*i/5, vy=ymin+(ymax-ymin)*i/5;
+    ctx.fillText(Math.abs(vx)>=1000?fmt(Math.round(vx)):vx.toFixed(1), L+(W-L-R)*i/5-14, H-B+14);
+    ctx.fillText(Math.abs(vy)>=1000?fmt(Math.round(vy)):vy.toFixed(1), 6, Y(vy)+3);
+  }
+  ctx.strokeStyle='#b9d6ee'; ctx.beginPath(); ctx.moveTo(L,T); ctx.lineTo(L,H-B); ctx.lineTo(W-R,H-B); ctx.stroke();
+  if(reg){
+    ctx.strokeStyle='#e2823a'; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(X(xmin),Y(reg.a+reg.b*xmin)); ctx.lineTo(X(xmax),Y(reg.a+reg.b*xmax)); ctx.stroke();
+  }
+  for(let i=0;i<xs.length;i++){
+    ctx.beginPath(); ctx.arc(X(xs[i]),Y(ys[i]),3.2,0,6.2832);
+    ctx.fillStyle='rgba(47,127,193,.75)'; ctx.fill();
+  }
+  ctx.fillStyle='#14568f'; ctx.font='bold 12px sans-serif';
+  ctx.fillText(reg?('r = '+reg.r.toFixed(3)+'　y = '+reg.a.toFixed(1)+(reg.b>=0?' + ':' − ')+Math.abs(reg.b).toFixed(2)+'x'):'', L+8, T+14);
+}
+
+/* ================= 本地生活 ================= */
+function renderLocal(){
+  const t=num('in-t'), f=num('in-f'), r=num('in-r'), m=num('in-m'), income=num('in-income');
+  const total=t+f+r+m;
+  const avg=CITIES.reduce((s,c)=>s+cityTotal(c),0)/CITIES.length;
+  const ratio=income>0? total/income : NaN;
+  const engel=total>0? f/total : 0, tShare=total>0? t/total : 0;
+  let tone, txt;
+  if(!isFinite(ratio)){ tone='b-neutral'; txt='请输入收入以评估占比。'; }
+  else if(ratio<=0.4){ tone='b-good'; txt='生活费占收入 '+ (ratio*100).toFixed(0)+'%，结余充裕，建议将结余的 20% 以上做定投/储蓄。'; }
+  else if(ratio<=0.6){ tone='b-good'; txt='生活费占收入 '+ (ratio*100).toFixed(0)+'%，结构稳健，可持续积累应急金（3–6 个月生活费）。'; }
+  else if(ratio<=0.8){ tone='b-mid'; txt='生活费占收入 '+ (ratio*100).toFixed(0)+'%，偏紧。建议优先压缩住宿（占比最大项）或选择通勤性价比更高的住址。'; }
+  else { tone='b-wait'; txt='生活费占收入 '+ (ratio*100).toFixed(0)+'%，存在超支风险。按样本回归，住宿每降 500 元/月约可拉低总成本 500 元以上。'; }
+  $('out-local').innerHTML=`
+    <div class="kv"><span>月生活费合计</span><b class="big">¥ ${fmt(Math.round(total))}</b></div>
+    <div class="kv"><span>其中：交通 / 餐饮 / 住宿 / 其他</span><b>${fmt(t)} / ${fmt(f)} / ${fmt(r)} / ${fmt(m)}</b></div>
+    <div class="kv"><span>恩格尔系数（餐饮占比）</span><b>${(engel*100).toFixed(1)}%</b></div>
+    <div class="kv"><span>交通占生活费</span><b>${(tShare*100).toFixed(1)}%</b></div>
+    <div class="kv"><span>对比 22 城样本均值</span><b>${(total/avg).toFixed(2)} 倍（均值 ¥${fmt(Math.round(avg))}）</b></div>
+    <div class="kv"><span>月结余</span><b class="${income-total>=0?'up':'down'}">¥ ${fmt(Math.round(income-total))}</b></div>
+    <div class="kv"><span>生活费 / 收入</span><b>${isFinite(ratio)? (ratio*100).toFixed(1)+'%':'—'}</b></div>`;
+  $('bar-local').innerHTML=`<span class="badge ${tone}">建议</span>${txt}${engel>0.4?'<br>提示：恩格尔系数 >40%，食品支出偏高，可关注餐饮预算。':''}${tShare>0.15?'<br>提示：交通占比 >15%，通勤成本偏高，可考虑搬近通勤节点。':''}`;
+}
+
+/* ================= 留学 ================= */
+function fillStudyDeps(){
+  const c=$('sel-country').value, cfg=STUDY[c];
+  const sc=$('sel-scity');
+  sc.innerHTML=cfg.cities.map(x=>`<option value="${x}">${x}</option>`).join('');
+  $('in-tuition').value=cfg.tuition;
+  const city=CITIES.find(x=>x.name===sc.value);
+  const life=city? Math.round(cityTotal(city)/sellRate(cfg.cur, chk('chk-spread'))) : 0;
+  $('in-slife').value=life;
+  renderStudy();
+}
+function renderStudy(){
+  const c=$('sel-country').value, cfg=STUDY[c];
+  const cur=cfg.cur, years=parseInt($('sel-years').value,10);
+  const tuition=num('in-tuition'), life=num('in-slife'), onetime=num('in-onetime');
+  const sp=chk('chk-spread');
+  const rate=sellRate(cur, sp);
+  $('in-srate').value='1 '+cur+' ≈ '+rate.toFixed(4)+' CNY（'+(sp?'含点差卖出价':'中间价')+'）';
+  const yTotal=tuition+life*12;
+  const gTotal=yTotal*years;
+  const cny=gTotal*rate+onetime;
+  const d95=gTotal*rate*0.95+onetime, d105=gTotal*rate*1.05+onetime, d97=gTotal*rate*0.97+onetime, d103=gTotal*rate*1.03+onetime;
+  const usdEq=(yTotal*rate)/curRate('USD');
+  const st=rateState(cur), pos=st.pos;
+  let plan;
+  if(st.level==='strong') plan='当前人民币偏强、购汇成本处于低位：建议首年学费+生活费一次性或 2 批内购齐（首批 ≥70%），其后按学年补充。';
+  else if(st.level==='weak') plan='当前人民币偏弱、购汇成本偏高：建议按学期分 4–8 批小额购汇摊薄成本，避免一次性高位购入。';
+  else plan='建议分 2–3 批购汇（首年先购约 40–50%，剩余逢低分批），兼顾成本与流动性。';
+  $('out-study').innerHTML=`
+    <div class="kv"><span>年度小计（学费+12 个月生活费）</span><b>${fmt(Math.round(yTotal))} ${cur}</b></div>
+    <div class="kv"><span>${years} 年外币合计</span><b class="big">${fmt(Math.round(gTotal))} ${cur}</b></div>
+    <div class="kv"><span>人民币总成本（含一次性费用）</span><b class="big">¥ ${fmt(Math.round(cny))}</b></div>
+    <div class="kv"><span>月均人民币成本</span><b>¥ ${fmt(Math.round(cny/years/12))}</b></div>
+    <div class="kv"><span>汇率 −3% / +3% 时总成本</span><b class="down">¥ ${fmt(Math.round(d97))}</b> / <b class="up">¥ ${fmt(Math.round(d103))}</b></div>
+    <div class="kv"><span>汇率 −5% / +5% 时总成本</span><b class="down">¥ ${fmt(Math.round(d95))}</b> / <b class="up">¥ ${fmt(Math.round(d105))}</b></div>
+    <div class="kv"><span>年度等值美元（额度检查）</span><b>$ ${fmt(Math.round(usdEq))} ${usdEq>50000?'<span class="down">超出便利化额度</span>':'<span class="up">在额度内</span>'}</b></div>`;
+  $('bar-study').innerHTML=adviceBarHtml(cur,'buy',
+    `<br><b>购汇计划：</b>${plan}` + (usdEq>50000?'<br><b>额度提示：</b>年度换汇超等值 5 万美元，超出部分需凭学费缴费单、录取通知书等材料在银行办理，不占用便利化额度的凭证实单购汇不受限。':'') +
+    '<br>推荐渠道对比：银行电汇（大额学费）/ 留学缴费平台 / 双币卡消费（小额日常），优先比较总点差与电报费。');
+}
+
+/* ================= 出国旅游 ================= */
+function fillTravelDeps(){
+  const d=$('sel-dest').value, cfg=TRAVEL[d];
+  $('in-lodge').value=cfg.lodge; $('in-food').value=cfg.food;
+  $('in-transit').value=cfg.transit; $('in-fun').value=cfg.fun;
+  renderTravel();
+}
+function renderTravel(){
+  const d=$('sel-dest').value, cfg=TRAVEL[d], cur=cfg.cur;
+  const days=num('in-days',1), ppl=num('in-ppl',1), buf=num('in-buffer')/100;
+  const lodge=num('in-lodge'), food=num('in-food'), transit=num('in-transit'), fun=num('in-fun');
+  const sp=chk('chk-tspread');
+  const rate=sellRate(cur, sp);
+  const perDay=lodge+food+transit+fun;
+  const perPerson=perDay*days*(1+buf);
+  const totalLocal=perPerson*ppl;
+  const totalCny=totalLocal*rate;
+  const cashLocal=Math.round(perPerson*0.15);
+  const capLocal=5000*curRate('USD')/rate;
+  const cash=Math.min(cashLocal, capLocal);
+  $('out-travel').innerHTML=`
+    <div class="kv"><span>人均日预算</span><b>${fmt(perDay)} ${cur}</b></div>
+    <div class="kv"><span>人均总预算（含缓冲 ${(buf*100).toFixed(0)}%）</span><b>${fmt(Math.round(perPerson))} ${cur}</b></div>
+    <div class="kv"><span>全队外币预算（${ppl} 人 × ${days} 天）</span><b class="big">${fmt(Math.round(totalLocal))} ${cur}</b></div>
+    <div class="kv"><span>对应人民币（按银行卖出价）</span><b class="big">¥ ${fmt(Math.round(totalCny))}</b></div>
+    <div class="kv"><span>建议随身现金（人均约 15%）</span><b>${fmt(cash)} ${cur} ≈ ¥ ${fmt(Math.round(cash*rate))}</b></div>
+    <div class="kv"><span>汇率 −3% / +3% 波动</span><b class="down">¥ ${fmt(Math.round(totalCny*0.97))}</b> / <b class="up">¥ ${fmt(Math.round(totalCny*1.03))}</b></div>`;
+  $('bar-travel').innerHTML=adviceBarHtml(cur,'buy',
+    `<br><b>携带与支付：</b>现金建议不超过等值 5,000 美元（超出需银行《携带外汇出境许可证》）；大额消费用双币信用卡/外卡 + 目的地交通卡；提醒开通境外支付与盗刷保险。`+
+    `<br><b>小技巧：</b>金额较小的旅行用汇可一次购齐并留 10% 缓冲；若持卡消费为主，现金按人均 2–3 天餐费标准即可。`);
+}
+
+/* ================= 入境接待 ================= */
+function fillHostDeps(){
+  const t=$('sel-tier').value, cfg=HOST_TIER[t];
+  $('in-hl').value=cfg.lodge; $('in-hf').value=cfg.food;
+  $('in-ht').value=cfg.transit; $('in-he').value=cfg.fun;
+  renderInbound();
+}
+function renderInbound(){
+  const gcur=$('sel-gcur').value;
+  const ppl=num('in-hppl',1), days=num('in-hdays',1), margin=num('in-hmargin')/100;
+  const perDay=num('in-hl')+num('in-hf')+num('in-ht')+num('in-he');
+  const totalCny=perDay*days*ppl;
+  const quote=totalCny*(1+margin);
+  const grate=curRate(gcur);
+  const guest=quote/grate;
+  const pu=gcur==='CNY'?1:(PER_UNIT[gcur]||1);
+  $('out-inbound').innerHTML=`
+    <div class="kv"><span>人均日接待成本</span><b>¥ ${fmt(perDay)}</b></div>
+    <div class="kv"><span>接待总成本（${ppl} 人 × ${days} 天）</span><b class="big">¥ ${fmt(Math.round(totalCny))}</b></div>
+    <div class="kv"><span>对外报价（含 ${ (margin*100).toFixed(0)}% 利润）</span><b class="big">¥ ${fmt(Math.round(quote))}</b></div>
+    <div class="kv"><span>折算客方货币（${gcur}）</span><b class="big">${gcur==='CNY'?'¥ '+fmt(Math.round(guest)):fmt(Math.round(guest))+' '+gcur}</b></div>
+    <div class="kv"><span>人均全程（客方视角）</span><b>${gcur==='CNY'?'¥ '+fmt(Math.round(quote/ppl)):fmt(Math.round(guest/ppl))+' '+gcur} / 人</b></div>`;
+  let extra='<br><b>结算方式：</b>境内消费以人民币计价，可直接收取人民币（推荐引导客人绑定支付宝/微信国际版、外卡 POS）；若合同以外币结算，需按当日牌价结汇。';
+  if(gcur!=='CNY') extra='<br>'+adviceBarHtml(gcur,'sell',' 收到外币货款后建议按上表策略结汇。');
+  $('bar-inbound').innerHTML=(gcur==='CNY'?'<span class="badge b-neutral">人民币直接结算</span>：成本与报价均为人民币口径，无汇兑环节。':adviceBarHtml(gcur,'sell',' 若客人以外币支付，按上述结汇策略处理。'))+extra+
+    '<br><b>报价建议：</b>对长账期或外币报价的团组，建议报价有效期 ≤14 天并注明"汇率变动超 ±3% 时价格调整"条款。';
+}
+
+/* ================= 出口企业 ================= */
+function renderExport(){
+  const cur=$('sel-ecur').value;
+  const amt=num('in-eamt'), days=num('in-edays'), cost=num('in-ecost');
+  const sp=chk('chk-espread');
+  const rate=buyRate(cur, sp);
+  const rev=amt*rate, profit=rev-cost, marg=rev>0? profit/rev : NaN;
+  const rows=[0.95,0.98,1.00,1.02,1.05].map(k=>{
+    const r2=rate*k, rev2=amt*r2, p2=rev2-cost;
+    return `<tr><td>${((k-1)*100>0?'+':'')+((k-1)*100).toFixed(0)}%</td><td>${r2.toFixed(4)}</td><td>¥ ${fmt(Math.round(rev2))}</td><td class="${p2>=0?'':'down'}">¥ ${fmt(Math.round(p2))}</td><td>${rev2>0?(p2/rev2*100).toFixed(1)+'%':'—'}</td></tr>`;
+  }).join('');
+  const st=rateState(cur), hr=hedgeRatio(st.pos, days);
+  const hrPct=Math.round(hr*100);
+  $('out-export').innerHTML=`
+    <div class="kv"><span>结汇汇率（现汇买入价口径）</span><b>1 ${cur} ≈ ${rate.toFixed(4)} CNY</b></div>
+    <div class="kv"><span>预计结汇收入</span><b class="big">¥ ${fmt(Math.round(rev))}</b></div>
+    <div class="kv"><span>预计毛利 / 毛利率</span><b class="${profit>=0?'up':'down'}">¥ ${fmt(Math.round(profit))}（${isFinite(marg)?(marg*100).toFixed(1)+'%':'—'}）</b></div>
+    <div class="kv"><span>汇率每波动 1% 的利润影响</span><b>± ¥ ${fmt(Math.round(rev*0.01))}</b></div>
+    <table class="sens"><tr><th>汇率变动</th><th>结汇价</th><th>结汇收入</th><th>毛利</th><th>毛利率</th></tr>${rows}</table>`;
+  $('bar-export').innerHTML=adviceBarHtml(cur,'sell',
+    `<br><b>锁汇方案：</b>账期 ${days} 天，建议对 <b>${hrPct}%</b> 收汇敞口办理远期结汇锁定（当前远期价可在银行询价），其余敞口保留弹性。`+
+    `<br><b>报价条款：</b>新订单报价有效期缩短至 ≤7 天；长单建议加注"人民币汇率波动超 ±3% 时价格联动调整"或改报人民币计价；同时优先选择即期信用证/T/T 缩短敞口时间。`+
+    (profit<0?'<br><b class="down">警示：当前汇率下合同亏损，需重谈价格或锁汇后核算。</b>':''));
+}
+
+/* ================= 进口企业 ================= */
+function renderImport(){
+  const cur=$('sel-icur').value;
+  const amt=num('in-iamt'), taxP=num('in-itax')/100, other=num('in-iother'), sale=num('in-isale'), days=num('in-idays');
+  const sp=chk('chk-ispread');
+  const rate=sellRate(cur, sp);
+  const goods=amt*rate, tax=goods*taxP;
+  const landed=goods+tax+other;
+  const profit=sale-landed, marg=sale>0? profit/sale : NaN;
+  const rows=[0.95,0.98,1.00,1.02,1.05].map(k=>{
+    const g2=amt*rate*k, l2=g2+g2*taxP+other, p2=sale-l2;
+    return `<tr><td>${((k-1)*100>0?'+':'')+((k-1)*100).toFixed(0)}%</td><td>${(rate*k).toFixed(4)}</td><td>¥ ${fmt(Math.round(l2))}</td><td class="${p2>=0?'':'down'}">¥ ${fmt(Math.round(p2))}</td><td>${sale>0?(p2/sale*100).toFixed(1)+'%':'—'}</td></tr>`;
+  }).join('');
+  const st=rateState(cur), hr=hedgeRatio(1-st.pos, days);
+  const hrPct=Math.round(hr*100);
+  $('out-import').innerHTML=`
+    <div class="kv"><span>购汇汇率（现汇卖出价口径）</span><b>1 ${cur} ≈ ${rate.toFixed(4)} CNY</b></div>
+    <div class="kv"><span>货值人民币 / 税负</span><b>¥ ${fmt(Math.round(goods))} / ¥ ${fmt(Math.round(tax))}</b></div>
+    <div class="kv"><span>到岸总成本（含税含物流）</span><b class="big">¥ ${fmt(Math.round(landed))}</b></div>
+    <div class="kv"><span>预计毛利 / 毛利率</span><b class="${profit>=0?'up':'down'}">¥ ${fmt(Math.round(profit))}（${isFinite(marg)?(marg*100).toFixed(1)+'%':'—'}）</b></div>
+    <div class="kv"><span>汇率每波动 1% 的成本影响</span><b>± ¥ ${fmt(Math.round(goods*0.01*(1+taxP)))}</b></div>
+    <table class="sens"><tr><th>汇率变动</th><th>购汇价</th><th>到岸成本</th><th>毛利</th><th>毛利率</th></tr>${rows}</table>`;
+  $('bar-import').innerHTML=adviceBarHtml(cur,'buy',
+    `<br><b>锁汇方案：</b>付款账期 ${days} 天，建议对 <b>${hrPct}%</b> 付汇需求办理远期购汇锁定（银行询价），若为预付货款可在低位即期购汇。`+
+    `<br><b>商务建议：</b>与外商谈判争取更长账期/分期付款以摊薄单点汇率风险；国内售价建议预留 ≥3% 汇率缓冲或采用"汇率联动"调价条款。`+
+    (profit<0?'<br><b class="down">警示：当前汇率下进口亏损，建议推迟采购、锁汇后重核价格。</b>':''));
+}
+
+/* ================= 购结汇总览 ================= */
+function renderSummary(){
+  let html='<table class="tbl"><tr><th>币种</th><th>名称</th><th>当前中间价</th><th>参考区间</th><th>区间位置</th><th>状态</th></tr>';
+  let posSum=0, cnt=0;
+  for(const cur of ['USD','EUR','JPY','GBP','AUD']){
+    const st=rateState(cur); posSum+=st.pos; cnt++;
+  }
+  const mainPos=posSum/cnt;
+  for(const cur of Object.keys(BASE_RATES)){
+    const st=rateState(cur), b=RATE_BANDS[cur], pu=PER_UNIT[cur]||1;
+    const disp=pu===100? (curRate(cur)*100).toFixed(2)+' /100'+cur : curRate(cur).toFixed(curRate(cur)>=1?3:4);
+    const lo=(b[0]*pu).toFixed(pu===100?2:(b[0]>=1?3:4)), hi=(b[1]*pu).toFixed(pu===100?2:(b[1]>=1?3:4));
+    html+=`<tr><td><b>${cur}</b></td><td>${CUR_NAME[cur]}</td><td>${disp}</td><td>${lo} – ${hi}</td><td>${Math.round(st.pos*100)}%</td><td><span class="badge ${posBadgeCls(st.level)}">${levelText(st.level)}</span></td></tr>`;
+  }
+  html+='</table>';
+  $('out-sumtable').innerHTML=html;
+  const dirs=[
+    {k:'出口企业（收美元/欧元结汇）', cur:'USD', dir:'sell', note:'收汇→结汇'},
+    {k:'进口企业（购汇付货款）', cur:'USD', dir:'buy', note:'购汇→付汇'},
+    {k:'留学家庭（购汇缴学费生活费）', cur:'USD', dir:'buy', note:'分批购汇'},
+    {k:'出境游客（购汇现金+刷卡）', cur:'JPY', dir:'buy', note:'一次性小额'},
+    {k:'入境接待（收外币结算）', cur:'EUR', dir:'sell', note:'外币→人民币'}
+  ];
+  $('out-sumpeople').innerHTML = dirs.map(d=>{
+    const a=adviceFor(d.cur, d.dir);
+    return `<div class="advice" style="margin-top:0;margin-bottom:10px"><b>${d.k}</b>（${d.note}）<br><span class="badge ${a.cls}">${a.label}</span>${a.text}</div>`;
+  }).join('');
+  const overall = mainPos>0.6? '综合看人民币处于偏弱区间（均值位置 '+Math.round(mainPos*100)+'%），利于结汇方；购汇方建议分批、逢低操作。'
+    : mainPos<0.4 ? '综合看人民币处于偏强区间（均值位置 '+Math.round(mainPos*100)+'%），利于购汇方；结汇方可分批或部分观望。'
+    : '主要币种处于中性区间（均值位置 '+Math.round(mainPos*100)+'%），双方均宜分批操作、控制敞口。';
+  $('ul-compliance').innerHTML=[
+    '<b>个人便利化额度：</b>每人每年购汇/结汇便利化额度等值 5 万美元，留学、就医等凭真实凭证可超额办理。',
+    '<b>现钞携带：</b>出境携带外币现钞 ≤ 等值 5,000 美元免申报；5,000–10,000 美元需银行《携带证》；超过 10,000 美元需外汇局许可。',
+    '<b>点差：</b>现汇买入价 &lt; 中间价 &lt; 现汇卖出价，本工具按 ±0.25% 估算，各行实际 0.1%–0.5% 不等，大额请询银行实价。',
+    '<b>敞口纪律：</b>企业单笔敞口超销售额 10% 建议建立套保制度，严禁"裸奔"赌单边行情；远期/期权需在银行叙做。',
+    '<b>综合判断：</b>'+overall
+  ].map(t=>'<li>'+t+'</li>').join('');
+}
+
+/* ================= 手动校准 ================= */
+function openManual(){
+  const g=$('mgrid-rates');
+  g.innerHTML=Object.keys(BASE_RATES).map(k=>
+    `<div><label>${k} ${CUR_NAME[k]}</label><input type="number" step="0.0001" id="mv-${k}" value="${MANUAL[k]!=null?MANUAL[k]:''}" placeholder="${(curRate(k)).toFixed(4)}"></div>`
+  ).join('');
+  $('modal-manual').classList.add('show');
+}
+function saveManual(){
+  MANUAL={};
+  for(const k of Object.keys(BASE_RATES)){
+    const v=parseFloat($('mv-'+k).value);
+    if(isFinite(v) && v>0) MANUAL[k]=v;
+  }
+  saveLS(LS_MANUAL, MANUAL);
+  applyRates(); setStatus(); renderAll();
+  $('modal-manual').classList.remove('show');
+}
+
+/* ================= 渲染全部 ================= */
+function renderAll(){
+  renderRateBoard();
+  renderCorrBuiltins();
+  renderCustom();
+  renderLocal();
+  renderStudy();
+  renderTravel();
+  renderInbound();
+  renderExport();
+  renderImport();
+  renderSummary();
+}
+
+/* ================= 初始化 ================= */
+function init(){
+  // tabs
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      $('panel-'+btn.dataset.tab).classList.add('active');
+    });
+  });
+  // modal close
+  document.querySelectorAll('[data-close]').forEach(b=>b.addEventListener('click',()=>$(b.dataset.close).classList.remove('show')));
+  document.querySelectorAll('.modal-mask').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('show'); }));
+  $('btn-help').addEventListener('click',()=>$('modal-help').classList.add('show'));
+  $('btn-manual').addEventListener('click',openManual);
+  $('btn-manual-save').addEventListener('click',saveManual);
+  $('btn-manual-clear').addEventListener('click',()=>{ MANUAL={}; saveLS(LS_MANUAL,{}); applyRates(); setStatus(); renderAll(); $('modal-manual').classList.remove('show'); });
+  $('btn-refresh').addEventListener('click',()=>refreshRates(true));
+
+  // selects
+  $('sel-city').innerHTML=CITIES.map(c=>`<option value="${c.name}">${c.name}（${c.country}）</option>`).join('');
+  $('sel-country').innerHTML=Object.keys(STUDY).map(k=>`<option value="${k}">${k}</option>`).join('');
+  $('sel-years').innerHTML=[1,2,3,4,5].map(y=>`<option value="${y}" ${y===4?'selected':''}>${y} 年</option>`).join('');
+  $('sel-dest').innerHTML=Object.keys(TRAVEL).map(k=>`<option value="${k}">${k}</option>`).join('');
+  $('sel-gcur').innerHTML='<option value="CNY">CNY 人民币（直接结算）</option>'+Object.keys(BASE_RATES).map(k=>`<option value="${k}" ${k==='USD'?'selected':''}>${k} ${CUR_NAME[k]}</option>`).join('');
+  $('sel-tier').innerHTML=Object.keys(HOST_TIER).map(k=>`<option value="${k}" ${k==='舒适型'?'selected':''}>${k}</option>`).join('');
+  const fxOpts='<option value="USD">USD 美元</option><option value="EUR">EUR 欧元</option><option value="JPY">JPY 日元</option><option value="GBP">GBP 英镑</option><option value="AUD">AUD 澳元</option><option value="CAD">CAD 加元</option><option value="SGD">SGD 新元</option><option value="HKD">HKD 港币</option><option value="KRW">KRW 韩元</option><option value="THB">THB 泰铢</option><option value="MYR">MYR 林吉特</option>';
+  $('sel-ecur').innerHTML=fxOpts; $('sel-icur').innerHTML=fxOpts;
+
+  // 事件绑定
+  const on=(id,ev,fn)=>$(id).addEventListener(ev||'input',fn);
+  on('sel-city','change',()=>{ const c=CITIES.find(x=>x.name===$('sel-city').value); if(c){$('in-t').value=c.traffic;$('in-f').value=c.food;$('in-r').value=c.rent;$('in-m').value=c.misc;} renderLocal(); });
+  ['in-t','in-f','in-r','in-m','in-income'].forEach(id=>on(id,'input',renderLocal));
+  on('sel-country','change',fillStudyDeps);
+  on('sel-scity','change',()=>{ const cur=STUDY[$('sel-country').value].cur; const city=CITIES.find(x=>x.name===$('sel-scity').value); if(city) $('in-slife').value=Math.round(cityTotal(city)/sellRate(cur,chk('chk-spread'))); renderStudy(); });
+  ['in-tuition','in-slife','in-onetime','sel-years'].forEach(id=>on(id,'input',renderStudy));
+  on('chk-spread','change',renderStudy);
+  on('sel-dest','change',fillTravelDeps);
+  ['in-days','in-ppl','in-buffer','in-lodge','in-food','in-transit','in-fun'].forEach(id=>on(id,'input',renderTravel));
+  on('chk-tspread','change',renderTravel);
+  on('sel-gcur','change',renderInbound);
+  on('sel-tier','change',fillHostDeps);
+  ['in-hl','in-hf','in-ht','in-he','in-hppl','in-hdays','in-hmargin'].forEach(id=>on(id,'input',renderInbound));
+  ['sel-ecur','in-eamt','in-edays','in-ecost','chk-espread'].forEach(id=>on(id,'input',renderExport));
+  ['sel-icur','in-iamt','in-itax','in-iother','in-isale','in-idays','chk-ispread'].forEach(id=>on(id,'input',renderImport));
+  on('ta-x','input',renderCustom); on('ta-y','input',renderCustom);
+  on('btn-corr-sample','click',()=>{ $('ta-x').value=CITIES.map(c=>c.traffic).join(', '); $('ta-y').value=CITIES.map(c=>c.food).join(', '); renderCustom(); });
+  on('btn-corr-save','click',()=>{ saveLS(LS_CORR,{x:$('ta-x').value,y:$('ta-y').value}); $('btn-corr-save').textContent='已保存 ✓'; setTimeout(()=>$('btn-corr-save').textContent='保存我的数据',1500); });
+  on('btn-corr-clear','click',()=>{ $('ta-x').value=''; $('ta-y').value=''; renderCustom(); });
+
+  // 恢复自定义相关性数据
+  const saved=loadLS(LS_CORR);
+  if(saved){ $('ta-x').value=saved.x||''; $('ta-y').value=saved.y||''; }
+  else { $('ta-x').value=CITIES.map(c=>c.traffic).join(', '); $('ta-y').value=CITIES.map(c=>c.food).join(', '); }
+
+  // 恢复手动校准 + 缓存
+  MANUAL=loadLS(LS_MANUAL)||{};
+  CACHE=loadLS(LS_CACHE)||null;
+  applyRates(); setStatus();
+
+  // 初始表单默认值
+  const c0=CITIES[0]; $('in-t').value=c0.traffic; $('in-f').value=c0.food; $('in-r').value=c0.rent; $('in-m').value=c0.misc;
+  fillStudyDeps(); fillTravelDeps(); fillHostDeps();
+  renderAll();
+
+  // 汇率抓取
+  refreshRates(false);
+}
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

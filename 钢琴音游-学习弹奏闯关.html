@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>旋律钢琴 · 学习 / 弹奏 / 闯关</title>
+<style>
+:root{
+  --primary:#4a90d9;--primary-deep:#3a76b8;--primary-light:#e8f2fb;
+  --bg:#f6fafd;--text:#2c3e50;--muted:#8aa3b8;
+  --line:rgba(74,144,217,.22);--glass:rgba(255,255,255,.72);
+  --good:#3ecf9a;--perfect:#ff9f43;--bad:#e76f6f;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  font-family:"PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  background:
+    radial-gradient(1200px 500px at 20% -10%, #eaf4ff 0%, transparent 60%),
+    radial-gradient(900px 420px at 90% 0%, #eaf6ff 0%, transparent 55%),var(--bg);
+  color:var(--text);min-height:100vh;user-select:none;
+}
+#app{max-width:1020px;margin:0 auto;padding:14px 16px 40px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo .icon{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#5aa3ea,#2b7fd4);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 4px 12px rgba(74,144,217,.35)}
+.logo .icon svg{width:24px;height:24px}
+.logo h1{font-size:20px;font-weight:700;letter-spacing:.5px}
+.logo p{font-size:11px;color:var(--muted);margin-top:1px}
+.stats{display:flex;gap:8px;font-size:12px}
+.stat{background:var(--glass);border:1px solid var(--line);border-radius:10px;padding:5px 12px;backdrop-filter:blur(8px)}
+.stat b{color:var(--primary-deep)}
+nav.tabs{display:flex;gap:6px;background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:5px;backdrop-filter:blur(10px);margin-bottom:14px}
+nav.tabs button{flex:1;border:0;background:transparent;cursor:pointer;padding:10px 8px;border-radius:10px;font-size:14px;font-weight:600;color:var(--muted);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px}
+nav.tabs button svg{width:17px;height:17px;flex:none}
+nav.tabs button:hover{background:rgba(74,144,217,.08)}
+nav.tabs button.on{background:var(--primary-deep);color:#fff;box-shadow:0 3px 10px rgba(58,120,184,.4)}
+.panel{background:var(--glass);border:1px solid var(--line);border-radius:16px;backdrop-filter:blur(10px);padding:16px;box-shadow:0 6px 24px rgba(74,144,217,.08)}
+.mode{display:none}
+.mode.on{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.hint{font-size:12px;color:var(--muted);line-height:1.7}
+.btn{border:1px solid var(--line);background:#fff;color:var(--text);border-radius:10px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;transition:all .18s}
+.btn:hover{border-color:var(--primary);color:var(--primary-deep)}
+.btn.primary{background:var(--primary-deep);border-color:var(--primary-deep);color:#fff}
+.btn.primary:hover{background:#3570ab;color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.sm{padding:5px 12px;font-size:12px;border-radius:8px}
+.icon-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:#fff;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:all .18s}
+.icon-btn:hover{border-color:var(--primary);color:var(--primary-deep)}
+.icon-btn svg{width:17px;height:17px}
+.icon-btn.recording{background:#ffe9e9;border-color:var(--bad);color:var(--bad);animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.55}}
+.kb{position:relative;height:196px;background:linear-gradient(#e9f1fa,#dbe7f4);border-radius:10px;padding:8px;box-shadow:inset 0 2px 6px rgba(58,120,184,.15);margin-top:12px}
+.kb .wkeys{position:absolute;inset:8px;display:flex;gap:3px}
+.kb .wkey{flex:1;background:#fff;border-radius:0 0 6px 6px;box-shadow:0 2px 5px rgba(0,0,0,.14),inset 0 -3px 0 rgba(74,144,217,.08);cursor:pointer;position:relative;transition:background .08s,transform .06s;border:1px solid #e3edf6}
+.kb .wkey .lab{position:absolute;bottom:9px;left:0;right:0;text-align:center;font-size:10px;color:#9db4c5;line-height:1.6}
+.kb .wkey .lab kbd{font-size:9px;min-width:15px;padding:0 3px}
+.kb .wkey.active{background:#cfe6fb;transform:translateY(2px);box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.kb .wkey.active .lab{color:var(--primary-deep)}
+.kb .bkeys{position:absolute;inset:8px;pointer-events:none}
+.kb .bkey{position:absolute;top:0;width:34px;height:118px;border-radius:0 0 6px 6px;background:linear-gradient(180deg,#3a4c60,#22303f);cursor:pointer;pointer-events:auto;box-shadow:0 3px 6px rgba(0,0,0,.35);transition:background .08s,transform .06s;z-index:2}
+.kb .bkey .lab{position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:9px;color:#a9c4dd;line-height:1.6}
+.kb .bkey .lab kbd{font-size:9px;min-width:14px;padding:0 2px;background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.3);color:#dcebfa}
+.kb .bkey.active{background:linear-gradient(180deg,#5b87b8,#3a76ad);transform:translateY(2px)}
+kbd{display:inline-block;min-width:18px;text-align:center;padding:1px 4px;border:1px solid #cddcea;border-bottom-width:2px;border-radius:6px;background:#fff;font-family:inherit;font-size:10px;color:var(--primary-deep);margin:0 1px;font-weight:700}
+.learn-steps{display:flex;gap:8px;margin-bottom:12px}
+.learn-steps .step{flex:1;border:1px solid var(--line);border-radius:12px;padding:9px 8px;text-align:center;font-size:12px;font-weight:600;color:var(--muted);background:#fff;cursor:pointer;transition:all .2s}
+.learn-steps .step .num{width:20px;height:20px;border-radius:50%;background:var(--primary-light);color:var(--primary-deep);display:inline-flex;align-items:center;justify-content:center;font-size:11px;margin-right:5px;font-weight:700}
+.learn-steps .step.on{border-color:var(--primary);color:var(--primary-deep);box-shadow:0 2px 8px rgba(74,144,217,.18)}
+.learn-steps .step.done{border-color:var(--good);color:var(--good)}
+.learn-steps .step.done .num{background:var(--good);color:#fff}
+.learn-area{min-height:120px;background:rgba(255,255,255,.6);border:1px dashed var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;text-align:center}
+.learn-note-big{font-size:22px;font-weight:800;color:var(--primary-deep);letter-spacing:1px}
+.learn-progress{width:100%;max-width:360px;height:8px;background:#e6f0f9;border-radius:6px;overflow:hidden}
+.learn-progress i{display:block;height:100%;background:linear-gradient(90deg,#5aa3ea,#3b7fd4);border-radius:6px;transition:width .3s}
+.tag-list{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:4px;max-width:560px}
+.tag{font-size:11px;padding:3px 9px;border-radius:20px;background:#fff;border:1px solid var(--line);color:var(--muted);transition:all .2s}
+.tag.done{border-color:var(--good);color:var(--good);background:#eefaf6}
+.play-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:4px}
+.play-note-now{flex:1;min-width:150px;text-align:center;font-size:15px;font-weight:700;color:var(--primary-deep);background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px}
+.tick-txt{font-size:12px;color:var(--muted);min-width:90px;text-align:right}
+.contest-head{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.contest-opts{display:flex;flex-direction:column;gap:8px;margin:0 0 12px;padding:10px 12px;background:rgba(255,255,255,.55);border:1px dashed var(--line);border-radius:12px}
+.opt-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.opt-label{font-size:12px;font-weight:700;color:var(--muted);min-width:34px}
+.pill-group{display:flex;gap:6px;flex-wrap:wrap}
+.pill{border:1px solid var(--line);background:#fff;color:var(--muted);border-radius:999px;padding:4px 12px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;font-family:inherit}
+.pill:hover{border-color:var(--primary);color:var(--primary-deep)}
+.pill.on{background:var(--primary-deep);border-color:var(--primary-deep);color:#fff}
+.hud-tag{font-size:11px;color:var(--muted);font-weight:400}
+.level-cards{display:flex;gap:8px;flex-wrap:wrap;flex:1}
+.lv-card{min-width:92px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:8px 10px;text-align:center;cursor:pointer;transition:all .2s}
+.lv-card:hover{border-color:var(--primary)}
+.lv-card.on{border-color:var(--primary);background:var(--primary-light)}
+.lv-card .lv-name{font-size:13px;font-weight:700}
+.lv-card .lv-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.lv-card.locked{opacity:.5;cursor:not-allowed}
+.lv-card.locked .lv-name{color:var(--muted)}
+.lv-card .stars{font-size:11px;color:#ffb703;letter-spacing:1px}
+.contest-stage{position:relative;height:300px;background:linear-gradient(180deg,rgba(234,244,255,.9),rgba(248,252,255,.95));border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex}
+.rail{flex:1;position:relative;border-right:1px dashed rgba(74,144,217,.18);min-width:0;height:100%}
+.rail:last-child{border-right:0}
+.rail .rail-lab{position:absolute;top:34px;left:0;right:0;text-align:center;font-size:12px;font-weight:700;color:#b9cfe1;z-index:1}
+.rail .rail-key{position:absolute;top:58px;left:0;right:0;text-align:center;font-size:10px;color:#c3d6e6;z-index:1}
+.fall-note{position:absolute;left:50%;transform:translateX(-50%);width:min(44px,60%);aspect-ratio:1;border-radius:10px;background:linear-gradient(135deg,#6db3f0,#3b7fd4);box-shadow:0 3px 10px rgba(74,144,217,.45),inset 0 0 0 2px rgba(255,255,255,.5);z-index:2;transition:background .15s,opacity .2s}
+.fall-note.hit{background:linear-gradient(135deg,#ffd9a0,#ff9f43)}
+.fall-note.missed{background:linear-gradient(135deg,#eab6b6,#d97d7d)}
+.fall-note.gone{opacity:0;transform:translateX(-50%) scale(.4)}
+.judgeline{position:absolute;left:0;right:0;bottom:0;height:5px;background:linear-gradient(90deg,transparent,var(--perfect),transparent);z-index:3;box-shadow:0 0 12px rgba(255,159,67,.55)}
+.contest-hud{position:absolute;top:0;left:0;right:0;height:34px;display:flex;align-items:center;justify-content:space-between;padding:0 12px;background:rgba(255,255,255,.7);backdrop-filter:blur(4px);border-bottom:1px solid var(--line);z-index:4;font-size:12px;font-weight:600}
+.hud-score{color:var(--primary-deep)}
+.hud-combo{color:var(--perfect)}
+.hud-life{color:var(--bad);letter-spacing:2px}
+.judge-pop{position:absolute;left:50%;top:26%;transform:translate(-50%,-50%);font-size:24px;font-weight:800;letter-spacing:1px;z-index:5;pointer-events:none;opacity:0;transition:all .25s ease}
+.judge-pop.show{opacity:1;transform:translate(-50%,-62%) scale(1.15)}
+.judge-pop.perfect{color:var(--perfect)}
+.judge-pop.good{color:var(--good)}
+.judge-pop.miss{color:var(--bad)}
+.countdown{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:54px;font-weight:800;color:var(--primary-deep);z-index:6;pointer-events:none;text-shadow:0 4px 12px rgba(74,144,217,.3)}
+.rail-kb{margin-top:10px;display:flex;gap:3px;height:78px}
+.rail-kb .rk{flex:1;background:#fff;border:1px solid var(--line);border-bottom-width:3px;border-radius:0 0 8px 8px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:6px;font-size:11px;font-weight:700;color:#9db4c6;transition:all .1s}
+.rail-kb .rk .rn{font-size:10px;color:#b9cfe1;font-weight:400}
+.rail-kb .rk.hit{background:#cfe6fb;color:var(--primary-deep);transform:translateY(2px)}
+.modal-mask{position:fixed;inset:0;background:rgba(30,50,70,.35);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:50;animation:fade .2s}
+.modal{background:var(--glass);border:1px solid rgba(255,255,255,.6);border-radius:18px;padding:24px 26px;max-width:380px;width:92%;text-align:center;box-shadow:0 18px 60px rgba(30,60,90,.3)}
+.modal h2{font-size:20px;margin-bottom:4px}
+.modal .sub{font-size:13px;color:var(--muted);margin-bottom:12px}
+.modal .big-num{font-size:38px;font-weight:800;color:var(--primary-deep)}
+.modal .rows{margin:14px 0;display:flex;flex-direction:column;gap:8px;font-size:13px}
+.modal .rows .r{display:flex;justify-content:space-between;border-bottom:1px dashed var(--line);padding-bottom:6px}
+.modal .rows .r b{color:var(--text)}
+.modal .btns{display:flex;gap:10px;justify-content:center;margin-top:8px}
+.keymap-tip{margin-top:12px;font-size:11px;color:var(--muted);line-height:2;background:rgba(255,255,255,.5);border:1px dashed var(--line);border-radius:10px;padding:8px 14px}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header class="top">
+    <div class="logo">
+      <div class="icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="13" rx="2"/><path d="M6 17v3M10 17v3M14 17v3M18 17v3"/></svg>
+      </div>
+      <div>
+        <h1>旋律钢琴</h1>
+        <p>学习 · 弹奏 · 闯关，三合一解压小游</p>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat">闯关进度 <b id="st-level">1/5</b></div>
+      <div class="stat">音游最佳 <b id="st-best">-</b></div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button id="tab-learn" class="on">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 9 12 4 2 9l10 5 10-5z"/><path d="M6 11.5V16c0 1.5 2.7 3 6 3s6-1.5 6-3v-4.5"/></svg>学习模式</button>
+    <button id="tab-play">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>弹钢琴</button>
+    <button id="tab-contest">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/><circle cx="12" cy="12" r="7"/></svg>闯关模式</button>
+  </nav>
+
+  <section class="mode on" id="mode-learn">
+    <div class="panel">
+      <div class="learn-steps">
+        <div class="step on" data-step="0"><span class="num">1</span>认识琴键</div>
+        <div class="step" data-step="1"><span class="num">2</span>指法跟练</div>
+        <div class="step" data-step="2"><span class="num">3</span>旋律跟弹</div>
+      </div>
+      <div class="learn-area" id="learn-area"></div>
+      <div id="learn-keyboard"></div>
+      <div class="keymap-tip" id="learn-tip"></div>
+    </div>
+  </section>
+
+  <section class="mode" id="mode-play">
+    <div class="panel">
+      <div class="play-bar">
+        <button class="icon-btn" id="btn-rec" title="录音">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="6"/></svg>
+        </button>
+        <button class="icon-btn" id="btn-playback" title="回放录音">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+        </button>
+        <button class="btn sm" id="btn-metro">节拍器 · 关</button>
+        <div class="play-note-now" id="play-now">点击琴键或按键盘弹奏</div>
+        <span class="tick-txt" id="tick-txt"></span>
+      </div>
+      <div id="play-keyboard"></div>
+      <div class="keymap-tip" id="play-tip"></div>
+    </div>
+  </section>
+
+  <section class="mode" id="mode-contest">
+    <div class="panel">
+      <div class="contest-head">
+        <div class="level-cards" id="level-cards"></div>
+        <button class="btn primary" id="btn-start">开始闯关</button>
+      </div>
+      <div class="contest-opts">
+        <div class="opt-row"><span class="opt-label">谱面</span><div class="pill-group" id="mode-pills"></div></div>
+        <div class="opt-row"><span class="opt-label">速度</span><div class="pill-group" id="speed-pills"></div></div>
+      </div>
+      <div class="contest-stage" id="stage"></div>
+      <div class="rail-kb" id="rail-kb"></div>
+      <div class="keymap-tip" id="contest-tip"></div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+'use strict';
+/* ================= 0. 工具 ================= */
+var $=function(s){return document.querySelector(s);};
+var $$=function(s){return Array.prototype.slice.call(document.querySelectorAll(s));};
+var store={
+  get:function(k,d){try{var v=JSON.parse(localStorage.getItem('pianoGame_'+k));return v===null?d:v;}catch(e){return d;}},
+  set:function(k,v){try{localStorage.setItem('pianoGame_'+k,JSON.stringify(v));}catch(e){}}
+};
+function shuffle(a){var b=a.slice();for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;}return b;}
+
+/* ================= 1. 音频引擎 ================= */
+var MIDI_NAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+var SOL_NAMES={0:'Do',2:'Re',4:'Mi',5:'Fa',7:'Sol',9:'La',11:'Si'};
+function midiFreq(m){return 440*Math.pow(2,(m-69)/12);}
+var AudioEng={
+  ctx:null,
+  ensure:function(){
+    if(!this.ctx){var AC=window.AudioContext||window.webkitAudioContext;if(!AC)return false;this.ctx=new AC();}
+    if(this.ctx.state==='suspended')this.ctx.resume();
+    return true;
+  },
+  play:function(midi,vel,dur){
+    if(!this.ensure())return;
+    if(vel===undefined)vel=.55;
+    if(dur===undefined)dur=1.1;
+    var t=this.ctx.currentTime+0.002,f=midiFreq(midi);
+    var master=this.ctx.createGain();
+    master.gain.setValueAtTime(0.0001,t);
+    master.gain.linearRampToValueAtTime(vel,t+0.012);
+    master.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    master.connect(this.ctx.destination);
+    function osc(type,freq,gv){
+      var o=this.ctx.createOscillator();o.type=type;o.frequency.value=freq;
+      var g=this.ctx.createGain();g.gain.value=gv;
+      o.connect(g);g.connect(master);o.start(t);o.stop(t+dur+0.06);
+    }
+    osc.call(this,'triangle',f,1);osc.call(this,'sine',f*2,.22);osc.call(this,'sine',f*3,.06);osc.call(this,'sine',f*.5,.1);
+  },
+  tick:function(high){
+    if(!this.ensure())return;
+    var t=this.ctx.currentTime;
+    var o=this.ctx.createOscillator(),g=this.ctx.createGain();
+    o.type='square';o.frequency.value=high?1600:900;
+    g.gain.setValueAtTime(.1,t);g.gain.exponentialRampToValueAtTime(.001,t+.07);
+    o.connect(g);g.connect(this.ctx.destination);
+    o.start(t);o.stop(t+.08);
+  }
+};
+
+/* ================= 2. 琴键数据 ================= */
+var KEYMAP={ /* e.code -> midi（C4~B5 两八度） */
+  KeyZ:60,KeyX:62,KeyC:64,KeyV:65,KeyB:67,KeyN:69,KeyM:71,
+  KeyQ:61,KeyW:63,KeyE:66,KeyR:68,KeyT:70,
+  KeyA:72,KeyS:74,KeyD:76,KeyF:77,KeyG:79,KeyH:81,KeyJ:83,
+  KeyY:73,KeyU:75,KeyI:78,KeyO:80,KeyP:82
+};
+var CODE_OF={};
+Object.keys(KEYMAP).forEach(function(c){var m=KEYMAP[c];if(!(m in CODE_OF))CODE_OF[m]=c;});
+function keyLabel(m){var c=CODE_OF[m];return c?c.replace('Key',''):'';}
+var CONTEST_KEYS=['KeyZ','KeyX','KeyC','KeyV','KeyB','KeyN','KeyM'];
+var CONTEST_MIDI=CONTEST_KEYS.map(function(c){return KEYMAP[c];});
+function buildKeys(from,to){
+  var arr=[];
+  for(var m=from;m<=to;m++){
+    var n=m%12;
+    arr.push({midi:m,name:MIDI_NAMES[n],oct:Math.floor(m/12)-1,
+      black:[1,3,6,8,10].indexOf(n)>=0,freq:midiFreq(m)});
+  }
+  return arr;
+}
+var ALL_KEYS=buildKeys(60,83);
+
+/* ================= 3. 键盘渲染 ================= */
+function renderKeyboard(container,keys){
+  container.innerHTML='';
+  var kb=document.createElement('div');kb.className='kb';
+  var wks=document.createElement('div');wks.className='wkeys';
+  var bks=document.createElement('div');bks.className='bkeys';
+  var whites=keys.filter(function(k){return !k.black;}),wTotal=whites.length;
+  keys.forEach(function(k){
+    var lab=keyLabel(k.midi)?'<kbd>'+keyLabel(k.midi)+'</kbd> ':'';
+    if(k.black){
+      var before=whites.filter(function(w){return w.midi<k.midi;}).length;
+      var d=document.createElement('div');d.className='bkey';d.setAttribute('data-mid',k.midi);
+      d.style.left='calc('+(before*100/wTotal).toFixed(2)+'% - 17px)';
+      d.innerHTML='<div class="lab">'+lab+k.name+k.oct+'</div>';
+      bks.appendChild(d);
+    }else{
+      var e=document.createElement('div');e.className='wkey';e.setAttribute('data-mid',k.midi);
+      e.innerHTML='<div class="lab">'+lab+k.name+k.oct+'</div>';
+      wks.appendChild(e);
+    }
+  });
+  kb.appendChild(wks);kb.appendChild(bks);
+  container.appendChild(kb);
+  kb.addEventListener('mousedown',function(ev){
+    var el=ev.target.closest('[data-mid]');
+    if(el)pressNote(parseInt(el.getAttribute('data-mid'),10));
+  });
+  return kb;
+}
+function flashKey(kb,mid){
+  var el=kb&&kb.querySelector('.wkey[data-mid="'+mid+'"],.bkey[data-mid="'+mid+'"]');
+  if(el){el.classList.add('active');setTimeout(function(){el.classList.remove('active');},170);}
+}
+
+/* ================= 4. 模式切换与按键分发 ================= */
+var curMode='learn';
+function switchMode(mode){
+  curMode=mode;
+  $$('.tabs button').forEach(function(b){b.classList.remove('on');});
+  $$('.mode').forEach(function(s){s.classList.remove('on');});
+  document.getElementById('tab-'+mode).classList.add('on');
+  document.getElementById('mode-'+mode).classList.add('on');
+  if(mode==='learn')renderLearn();
+  if(mode==='play')renderPlay();
+  if(mode==='contest')renderContest();
+}
+document.getElementById('tab-learn').onclick=function(){switchMode('learn');};
+document.getElementById('tab-play').onclick=function(){switchMode('play');};
+document.getElementById('tab-contest').onclick=function(){switchMode('contest');};
+
+function pressNote(midi){
+  AudioEng.play(midi);
+  if(curMode==='learn')onLearnKey(midi);
+  else if(curMode==='play')onPlayKey(midi);
+  else onContestKey(midi);
+}
+document.addEventListener('keydown',function(e){
+  if(e.repeat)return;
+  var midi=KEYMAP[e.code];
+  if(midi===undefined)return;
+  e.preventDefault();
+  pressNote(midi);
+});
+
+/* ================= 5. 学习模式 ================= */
+var learnKB=null,learnStep=0;
+var learnProg=store.get('learn',{done:[false,false,false],explored:[]});
+var LEARN_TIPS=[
+  '白键是 <b>Do Re Mi Fa Sol La Si</b>（1~7），黑键带 # 是半音。逐个点击琴键或按键盘，把 24 个键都点亮即完成第一步。',
+  '系统会高亮提示一个音，找到对应琴键按下。<b>连续弹对 6 次</b>即可完成本课。',
+  '《小星星》前两句共 14 个音，跟着高亮提示依次弹奏，全部弹对就完成学习！'
+];
+var LEARN_SONG=[60,60,67,67,69,69,67,65,65,64,64,62,62,60];
+var TRAIN_POOL=[60,62,64,65,67,69,71,72,74,76];
+var trainSeq=[],trainIdx=0,trainOk=0,songIdx=0;
+
+function setLearnArea(html){document.getElementById('learn-area').innerHTML=html;}
+function updateLearnSteps(){
+  $$('.learn-steps .step').forEach(function(s,i){
+    s.classList.toggle('done',!!learnProg.done[i]);
+    s.classList.toggle('on',i===learnStep);
+  });
+  document.getElementById('learn-tip').innerHTML=LEARN_TIPS[learnStep];
+}
+function renderLearn(){
+  if(!learnKB)learnKB=renderKeyboard(document.getElementById('learn-keyboard'),ALL_KEYS);
+  updateLearnSteps();
+  if(learnStep===0)renderExplore();
+  else if(learnStep===1)renderTrain();
+  else renderSong();
+}
+$$('.learn-steps .step').forEach(function(st){
+  st.onclick=function(){
+    var i=parseInt(st.getAttribute('data-step'),10);
+    if(i>learnStep&&!learnProg.done[i-1])return;
+    learnStep=i;
+    if(i===1){trainSeq=shuffle(TRAIN_POOL);trainIdx=0;trainOk=0;}
+    if(i===2)songIdx=0;
+    renderLearn();
+  };
+});
+function renderExplore(){
+  var done=learnProg.explored,total=ALL_KEYS.length;
+  var allDone=done.length>=total;
+  setLearnArea(
+    '<div class="learn-note-big">'+(allDone?'已认识全部琴键！':'点亮琴键 '+done.length+' / '+total)+'</div>'+
+    '<div class="learn-progress"><i style="width:'+(done.length/total*100).toFixed(1)+'%"></i></div>'+
+    '<div class="hint">'+(allDone?'第 1 课完成！可点击“指法跟练”继续':'点击琴键或按键盘，点亮所有按键')+'</div>'+
+    '<div class="tag-list">'+ALL_KEYS.map(function(k){return '<span class="tag'+(done.indexOf(k.midi)>=0?' done':'')+'">'+k.name+k.oct+'</span>';}).join('')+'</div>'
+  );
+  if(allDone&&!learnProg.done[0]){learnProg.done[0]=true;store.set('learn',learnProg);updateLearnSteps();}
+}
+function renderTrain(){
+  if(!trainSeq.length)trainSeq=shuffle(TRAIN_POOL);
+  var k=ALL_KEYS.filter(function(x){return x.midi===trainSeq[trainIdx];})[0];
+  setLearnArea(
+    '<div class="learn-note-big">请弹：'+k.name+k.oct+'（<kbd>'+keyLabel(k.midi)+'</kbd>）</div>'+
+    '<div class="learn-progress"><i style="width:'+(trainOk/6*100).toFixed(0)+'%"></i></div>'+
+    '<div class="hint">连续弹对 6 次完成本课 · 当前 '+trainOk+'/6</div>'
+  );
+  setTimeout(function(){flashKey(learnKB,k.midi);},150);
+}
+function onLearnTrainKey(m){
+  if(m===trainSeq[trainIdx]){
+    trainOk++;trainIdx++;
+    if(trainOk>=6){finishLearnStep(1);return;}
+    if(trainIdx>=trainSeq.length){trainSeq=shuffle(TRAIN_POOL);trainIdx=0;}
+    renderTrain();
+  }else{
+    var el=document.querySelector('#learn-area .learn-note-big');
+    if(el){el.style.color='var(--bad)';el.textContent='音不对，再听一次';setTimeout(function(){if(curMode==='learn'&&learnStep===1)renderTrain();},700);}
+  }
+}
+function renderSong(){
+  if(songIdx>=LEARN_SONG.length){finishLearnStep(2);return;}
+  var k=ALL_KEYS.filter(function(x){return x.midi===LEARN_SONG[songIdx];})[0];
+  setLearnArea(
+    '<div class="learn-note-big">第 '+(songIdx+1)+'/14 个音 · '+k.name+k.oct+'（<kbd>'+keyLabel(k.midi)+'</kbd>）</div>'+
+    '<div class="learn-progress"><i style="width:'+(songIdx/LEARN_SONG.length*100).toFixed(0)+'%"></i></div>'+
+    '<div class="hint">跟着提示弹《小星星》</div>'
+  );
+  setTimeout(function(){flashKey(learnKB,k.midi);},180);
+}
+function onSongKey(m){
+  if(m===LEARN_SONG[songIdx]){
+    songIdx++;
+    renderSong();
+  }else{
+    var el=document.querySelector('#learn-area .learn-note-big');
+    if(el){el.style.color='var(--bad)';el.textContent='音不对，继续尝试';}
+  }
+}
+function onLearnKey(midi){
+  flashKey(learnKB,midi);
+  if(learnStep===0){
+    if(learnProg.explored.indexOf(midi)<0){learnProg.explored.push(midi);store.set('learn',learnProg);}
+    renderExplore();
+  }else if(learnStep===1)onLearnTrainKey(midi);
+  else onSongKey(midi);
+}
+function finishLearnStep(i){
+  learnProg.done[i]=true;store.set('learn',learnProg);
+  updateLearnSteps();
+  setLearnArea(
+    '<div class="learn-note-big" style="color:var(--good)">第 '+(i+1)+' 课完成！</div>'+
+    '<div class="hint">'+(i<2?'即将进入下一课':'恭喜完成全部学习，去闯关模式实战吧！')+'</div>'
+  );
+  setTimeout(function(){
+    if(i<2){
+      learnStep=i+1;
+      if(learnStep===1){trainSeq=shuffle(TRAIN_POOL);trainIdx=0;trainOk=0;}
+      if(learnStep===2)songIdx=0;
+      renderLearn();
+    }
+  },1100);
+}
+
+/* ================= 6. 弹钢琴模式 ================= */
+var playKB=null,recording=false,recNotes=[],playbackOn=false,metroOn=false,metroTimer=null,metroBeat=0;
+function renderPlay(){
+  if(!playKB)playKB=renderKeyboard(document.getElementById('play-keyboard'),ALL_KEYS);
+  document.getElementById('play-tip').innerHTML=
+    '弹奏提示：<kbd>Z</kbd>~<kbd>M</kbd> 为低八度 C4~B4，<kbd>A</kbd>~<kbd>J</kbd> 为高八度 C5~B5，黑键在 <kbd>Q</kbd><kbd>W</kbd><kbd>E</kbd><kbd>R</kbd><kbd>T</kbd><kbd>Y</kbd><kbd>U</kbd><kbd>I</kbd><kbd>O</kbd><kbd>P</kbd>。点击琴键或按键即可演奏，支持录音回放。';
+}
+function onPlayKey(midi){
+  flashKey(playKB,midi);
+  var k=ALL_KEYS.filter(function(x){return x.midi===midi;})[0];
+  var sol=SOL_NAMES[midi%12]||'';
+  document.getElementById('play-now').textContent=k.name+k.oct+(sol?'（'+sol+'）':'');
+  if(recording)recNotes.push({m:midi,t:performance.now(),dur:.5});
+}
+document.getElementById('btn-rec').onclick=function(){
+  recording=!recording;
+  if(recording){recNotes=[];this.classList.add('recording');document.getElementById('play-now').textContent='● 录音中…请弹奏';}
+  else{this.classList.remove('recording');document.getElementById('play-now').textContent='已录制 '+recNotes.length+' 个音，可点播放回放';}
+};
+document.getElementById('btn-playback').onclick=function(){
+  if(playbackOn||!recNotes.length)return;
+  playbackOn=true;this.classList.add('recording');
+  var base=recNotes[0].t-120;
+  recNotes.forEach(function(n){
+    var delay=n.t-base;
+    setTimeout(function(){AudioEng.play(n.m,.55,n.dur||.5);flashKey(playKB,n.m);},delay);
+  });
+  setTimeout(function(){playbackOn=false;document.getElementById('btn-playback').classList.remove('recording');},(recNotes[recNotes.length-1].t-base)+700);
+};
+document.getElementById('btn-metro').onclick=function(){
+  metroOn=!metroOn;
+  this.textContent=metroOn?'节拍器 · 开':'节拍器 · 关';
+  if(metroOn){
+    metroBeat=0;
+    metroTimer=setInterval(function(){
+      AudioEng.tick(metroBeat%4===0);
+      document.getElementById('tick-txt').textContent='♩ '+((metroBeat%4)+1)+'/4';
+      metroBeat++;
+    },500);
+  }else{
+    clearInterval(metroTimer);
+    document.getElementById('tick-txt').textContent='';
+  }
+};
+
+/* ================= 7. 闯关模式 ================= */
+var SOLFEGE=['1','2','3','4','5','6','7'];
+var MEL_MIDI=[0,60,62,64,65,67,69,71];
+var twinkle=[1,1,5,5,6,6,5,4,4,3,3,2,2,1,5,5,4,4,3,3,2,5,5,4,4,3,3,2,1,1,5,5,6,6,5,4,4,3,3,2,2,1];
+var lamb=[3,2,1,2,3,3,3,2,2,2,3,5,5,3,2,1,2,3,3,3,3,2,2,3,2,1];
+var tiger=[1,2,3,1,1,2,3,1,3,4,5,3,4,5,5,6,5,4,3,1,5,6,5,4,3,1,1,5,1,1,5,1];
+var ode=[3,3,4,5,5,4,3,2,1,1,2,3,3,2,2,3,3,4,5,5,4,3,2,1,1,2,3,2,1,1];
+var jasmine=[3,3,5,6,5,6,5,3,3,5,6,5,6,5,5,5,3,5,6,6,5,3,5,6,5,5,3,2,1,1,1,3,5,6,6,5,3,5,3,2,1];
+var LEVELS=[
+  {name:'小星星',bpm:120,fall:3.0,mel:twinkle},
+  {name:'小羊羔',bpm:112,fall:2.7,mel:lamb.concat(lamb)},
+  {name:'两只老虎',bpm:110,fall:2.4,mel:tiger},
+  {name:'欢乐颂',bpm:115,fall:2.1,mel:ode.concat(ode)},
+  {name:'茉莉花',bpm:135,fall:1.8,mel:jasmine}
+];
+var PROGRESS_PRESETS=[
+  {id:'easy',name:'练习谱'},
+  {id:'normal',name:'标准谱'},
+  {id:'pro',name:'挑战谱'}
+];
+var SPEED_PRESETS=[
+  {name:'0.5× 入门',v:0.5},
+  {name:'0.8× 舒缓',v:0.8},
+  {name:'0.9× 轻快',v:0.9},
+  {name:'1.0× 标准',v:1.0},
+  {name:'1.15× 快速',v:1.15},
+  {name:'1.3× 极速',v:1.3}
+];
+var opts=store.get('opts',{prog:'normal',speed:3});
+var curProg=opts.prog,curSpeed=opts.speed;
+function saveOpts(){store.set('opts',{prog:curProg,speed:curSpeed});}
+function progName(id){for(var i=0;i<PROGRESS_PRESETS.length;i++)if(PROGRESS_PRESETS[i].id===id)return PROGRESS_PRESETS[i].name;return '';}
+var prog=store.get('progress',{unlocked:1,best:[],stars:[]});
+var curLevel=0,running=false;
+var GS={score:0,combo:0,maxCombo:0,life:5,perfect:0,good:0,miss:0,judged:0,total:0,notes:[],t0:0,fall:0,lineY:0,over:false,rAF:0};
+
+function renderContest(){
+  initStage();
+  var cards=document.getElementById('level-cards');
+  cards.innerHTML='';
+  LEVELS.forEach(function(lv,i){
+    var d=document.createElement('div');
+    var unlocked=i<prog.unlocked;
+    d.className='lv-card'+(i===curLevel?' on':'')+(unlocked?'':' locked');
+    var best=prog.best[i]||0;
+    var st=prog.stars[i]||0;
+    var stars=st>=3?'★★★':st===2?'★★':st===1?'★':'';
+    d.innerHTML='<div class="lv-name">'+(i+1)+'·'+lv.name+'</div>'+
+      '<div class="stars">'+stars+'</div>'+
+      '<div class="lv-sub">'+(unlocked?(best?best+' 分':'待挑战'):'🔒 未解锁')+'</div>';
+    if(unlocked)d.onclick=function(){curLevel=i;renderContest();};
+    cards.appendChild(d);
+  });
+  var mp=document.getElementById('mode-pills');
+  mp.innerHTML='';
+  PROGRESS_PRESETS.forEach(function(p){
+    var b=document.createElement('button');b.className='pill'+(p.id===curProg?' on':'');b.textContent=p.name;
+    b.onclick=function(){curProg=p.id;saveOpts();renderContest();};
+    mp.appendChild(b);
+  });
+  var sp=document.getElementById('speed-pills');
+  sp.innerHTML='';
+  SPEED_PRESETS.forEach(function(s,i){
+    var b=document.createElement('button');b.className='pill'+(i===curSpeed?' on':'');b.textContent=s.name;
+    b.onclick=function(){curSpeed=i;saveOpts();renderContest();};
+    sp.appendChild(b);
+  });
+  document.getElementById('st-level').textContent=Math.min(prog.unlocked,LEVELS.length)+'/'+LEVELS.length;
+  document.getElementById('st-best').textContent=prog.best.length?Math.max.apply(null,prog.best):'-';
+  var lv=LEVELS[curLevel];
+  var eff=Math.round(lv.bpm*SPEED_PRESETS[curSpeed].v);
+  document.getElementById('contest-tip').innerHTML=
+    '关卡 '+(curLevel+1)+'《'+lv.name+'》· 谱面【'+progName(curProg)+'】· 速度【'+SPEED_PRESETS[curSpeed].name+'】≈ '+eff+' BPM · 按键 <kbd>Z</kbd><kbd>X</kbd><kbd>C</kbd><kbd>V</kbd><kbd>B</kbd><kbd>N</kbd><kbd>M</kbd> 对应简谱 1~7 · 音符落到金色判定线时按键，Perfect/Good 得分，Miss 扣心，5 颗心扣完失败';
+}
+function initStage(){
+  var stage=document.getElementById('stage');
+  var html='<div class="judgeline"></div>'+
+    '<div class="judge-pop" id="judge-pop"></div>'+
+    '<div class="contest-hud" id="contest-hud">'+
+      '<span class="hud-score" id="hud-score">0 分</span>'+
+      '<span class="hud-tag" id="hud-tag"></span>'+
+      '<span class="hud-combo" id="hud-combo"></span>'+
+      '<span class="hud-life" id="hud-life">♥♥♥♥♥</span>'+
+    '</div>';
+  for(var i=0;i<7;i++){
+    html+='<div class="rail"><div class="rail-lab">'+SOLFEGE[i]+'</div><div class="rail-key"><kbd>'+keyLabel(CONTEST_MIDI[i])+'</kbd></div></div>';
+  }
+  stage.innerHTML=html;
+  var rk=document.getElementById('rail-kb');
+  var rkHtml='';
+  for(var j=0;j<7;j++){
+    rkHtml+='<div class="rk" data-i="'+j+'"><span>'+keyLabel(CONTEST_MIDI[j])+'</span><span class="rn">'+SOLFEGE[j]+'</span></div>';
+  }
+  rk.innerHTML=rkHtml;
+}
+function startGame(){
+  if(running)return;
+  AudioEng.ensure();
+  var btn=document.getElementById('btn-start');
+  btn.disabled=true;btn.textContent='游戏进行中…';
+  initStage();
+  var stage=document.getElementById('stage');
+  var lv=LEVELS[curLevel];
+  var spd=SPEED_PRESETS[curSpeed].v;
+  var noteDur=60/lv.bpm*1000/spd;
+  var mel=curProg==='easy'?lv.mel.slice(0,Math.max(8,Math.ceil(lv.mel.length*0.45))):lv.mel.slice();
+  var notes=mel.map(function(d,i){return {col:d-1,midi:MEL_MIDI[d],t:i*noteDur,el:null,judged:false};});
+  if(curProg==='pro'){
+    var extra=[];
+    for(var i=3;i<notes.length-1;i+=4){
+      var h=Math.min(mel[i]+2,7);
+      if(h===mel[i])continue;
+      extra.push({col:h-1,midi:MEL_MIDI[h],t:notes[i].t,el:null,judged:false});
+    }
+    notes=notes.concat(extra).sort(function(a,b){return a.t-b.t;});
+  }
+  GS.score=0;GS.combo=0;GS.maxCombo=0;GS.life=5;GS.perfect=0;GS.good=0;GS.miss=0;GS.judged=0;
+  GS.total=notes.length;GS.notes=notes;GS.over=false;
+  GS.fall=lv.fall*1000/spd;GS.lineY=stage.clientHeight-6;
+  var tag=document.getElementById('hud-tag');
+  if(tag)tag.textContent=progName(curProg)+' · '+SPEED_PRESETS[curSpeed].name;
+  var rails=stage.querySelectorAll('.rail');
+  notes.forEach(function(n){
+    var el=document.createElement('div');el.className='fall-note';
+    el.style.top='-50px';
+    rails[n.col].appendChild(el);n.el=el;
+  });
+  var cd=document.createElement('div');cd.className='countdown';cd.textContent='3';
+  stage.appendChild(cd);
+  var n=3;
+  var iv=setInterval(function(){
+    n--;
+    if(n<=0){
+      clearInterval(iv);
+      if(cd.parentNode)cd.parentNode.removeChild(cd);
+      GS.t0=performance.now()+50;
+      GS.rAF=requestAnimationFrame(loop);
+      running=true;
+    }else cd.textContent=n;
+  },800);
+}
+function loop(ts){
+  var now=ts-GS.t0;
+  GS.notes.forEach(function(nt){
+    if(nt.judged)return;
+    var dt=nt.t-now;
+    nt.el.style.top=(dt/GS.fall*GS.lineY)+'px';
+    if(dt<-80)missNote(nt);
+  });
+  if(GS.judged>=GS.total||GS.life<=0){endGame();return;}
+  GS.rAF=requestAnimationFrame(loop);
+}
+function onContestKey(midi){
+  var col=CONTEST_MIDI.indexOf(midi);
+  if(col<0)return;
+  var rk=document.querySelector('.rail-kb .rk[data-i="'+col+'"]');
+  if(rk){rk.classList.add('hit');setTimeout(function(){rk.classList.remove('hit');},130);}
+  if(!running||GS.over)return;
+  var now=performance.now()-GS.t0;
+  var best=null,bd=Infinity;
+  GS.notes.forEach(function(nt){
+    if(nt.judged||nt.col!==col)return;
+    var diff=nt.t-now;
+    if(diff>-90&&diff<170&&Math.abs(diff)<bd){best=nt;bd=Math.abs(diff);}
+  });
+  if(best)judgeNote(best,bd);
+}
+function judgeNote(nt,diff){
+  nt.judged=true;GS.judged++;
+  var kind=diff<=85?'perfect':'good';
+  if(kind==='perfect')GS.perfect++;else GS.good++;
+  GS.combo++;GS.maxCombo=Math.max(GS.maxCombo,GS.combo);
+  GS.score+=(kind==='perfect'?100:50)+Math.min(GS.combo-1,10)*5;
+  nt.el.classList.add('hit');
+  setTimeout(function(){nt.el.classList.add('gone');},70);
+  popJudgment(kind);
+  updateHud();
+  if(GS.judged>=GS.total)endGame();
+}
+function missNote(nt){
+  nt.judged=true;GS.judged++;GS.miss++;GS.combo=0;GS.life--;
+  nt.el.classList.add('missed');
+  setTimeout(function(){nt.el.classList.add('gone');},160);
+  popJudgment('miss');
+  updateHud();
+  if(GS.life<=0)endGame();
+}
+var popT=null;
+function popJudgment(kind){
+  var el=document.getElementById('judge-pop');
+  if(!el)return;
+  el.textContent=kind==='perfect'?'PERFECT':(kind==='good'?'GOOD':'MISS');
+  el.className='judge-pop '+kind+' show';
+  clearTimeout(popT);
+  popT=setTimeout(function(){el.classList.remove('show');},300);
+}
+function updateHud(){
+  document.getElementById('hud-score').textContent=GS.score+' 分';
+  document.getElementById('hud-combo').textContent=GS.combo>1?'x'+GS.combo+' 连击':'';
+  document.getElementById('hud-life').textContent='♥'.repeat(Math.max(GS.life,0))+'♡'.repeat(Math.max(5-GS.life,0));
+}
+function endGame(){
+  if(GS.over)return;
+  GS.over=true;running=false;
+  cancelAnimationFrame(GS.rAF);
+  var btn=document.getElementById('btn-start');
+  btn.disabled=false;btn.textContent='开始闯关';
+  var ok=GS.life>0&&GS.judged>=GS.total;
+  var perfectRate=GS.perfect/GS.total;
+  var stars=0;
+  if(ok){stars=(GS.miss===0&&perfectRate>=.85)?3:(GS.miss<=2&&perfectRate>=.55)?2:1;}
+  if(ok){
+    if(curLevel+1<LEVELS.length&&curLevel+1>=prog.unlocked)prog.unlocked=curLevel+2;
+    if(!prog.best[curLevel]||GS.score>prog.best[curLevel])prog.best[curLevel]=GS.score;
+    if((prog.stars[curLevel]||0)<stars)prog.stars[curLevel]=stars;
+    store.set('progress',prog);
+  }
+  renderContest();
+  var title=ok?(stars===3?'三星通关！':stars===2?'二星通关！':'一星通关！'):'挑战失败，再试一次';
+  var eff=Math.round(LEVELS[curLevel].bpm*SPEED_PRESETS[curSpeed].v);
+  var m=document.createElement('div');m.className='modal-mask';
+  m.innerHTML='<div class="modal">'+
+    '<h2>'+(ok?'🎉 '+title:'😢 '+title)+'</h2>'+
+    '<div class="sub">'+LEVELS[curLevel].name+' · '+progName(curProg)+' · '+SPEED_PRESETS[curSpeed].name+'（'+eff+' BPM）</div>'+
+    '<div class="big-num">'+GS.score+' <span style="font-size:14px;color:var(--muted)">分</span></div>'+
+    '<div class="rows">'+
+      '<div class="r"><span>Perfect / Good</span><b>'+GS.perfect+' / '+GS.good+'</b></div>'+
+      '<div class="r"><span>Miss 失误</span><b>'+GS.miss+'</b></div>'+
+      '<div class="r"><span>最大连击</span><b>'+GS.maxCombo+'</b></div>'+
+      '<div class="r"><span>评级</span><b>'+(stars?'★'.repeat(stars):'无')+'</b></div>'+
+    '</div>'+
+    '<div class="btns">'+
+      '<button class="btn" data-act="retry">再来一次</button>'+
+      ' <button class="btn primary" data-act="close">关闭</button>'+
+    '</div>'+
+  '</div>';
+  document.body.appendChild(m);
+  m.onclick=function(ev){
+    var act=ev.target.getAttribute('data-act');
+    if(act==='close'){document.body.removeChild(m);}
+    if(act==='retry'){document.body.removeChild(m);startGame();}
+  };
+}
+document.getElementById('btn-start').onclick=startGame;
+
+/* ================= 启动 ================= */
+switchMode('learn');
+</script>
+</body>
+</html>

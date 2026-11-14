@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生涯岔路口 · 生涯规划合规闯关（年龄×年级双重校验）</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#16324a;--navy2:#1f4a6e;--gold:#f4c430;--gold2:#ffe9a8;--green:#2e8b57;--green2:#3fa06a;
+ --red:#c0392b;--bg:#eef3f8;--ink:#22303c;--sub:#5b6b7b;--line:#d9e4ee}
+html,body{height:100%;overflow-x:hidden}
+body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.7}
+.screen{display:none;flex-direction:column;min-height:100vh}
+.serif{font-family:"KaiTi","STKaiti","Microsoft YaHei",serif}
+/* ---------- 首屏 ---------- */
+#screen-start{background:linear-gradient(180deg,#16324a 0%,#1f4a6e 34%,#eef3f8 34.1%)}
+.start-head{background:transparent;color:#fff;text-align:center;padding:44px 18px 96px;position:relative}
+.start-head .kicker{display:inline-block;font-size:12.5px;letter-spacing:4px;background:rgba(244,196,48,.16);border:1px solid rgba(244,196,48,.5);color:var(--gold2);border-radius:20px;padding:3px 16px;margin-bottom:14px}
+.start-head h1{font-size:42px;letter-spacing:8px;color:#fff;text-shadow:0 3px 14px rgba(0,0,0,.35)}
+.start-head h1 b{color:var(--gold)}
+.start-head .sub{margin-top:10px;font-size:14.5px;opacity:.92;letter-spacing:2px}
+.start-head .math{margin-top:12px;font-size:13px;color:var(--gold2);opacity:.95;letter-spacing:1px}
+.rules{max-width:1060px;margin:-70px auto 0;padding:0 18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;position:relative;z-index:2}
+.rule{background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px 15px;font-size:13px;box-shadow:0 6px 18px rgba(22,50,74,.10)}
+.rule b{color:var(--navy);display:block;margin-bottom:4px;font-size:14px}
+.profile-card{max-width:760px;margin:16px auto 30px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:22px 26px 24px;box-shadow:0 8px 24px rgba(22,50,74,.08)}
+.profile-card h2{font-size:16.5px;color:var(--navy);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.profile-card .hint{font-size:12.5px;color:var(--sub);margin-bottom:14px}
+.f-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px}
+.f-item label{display:block;font-size:12.5px;color:var(--sub);margin-bottom:4px}
+.f-item input[type=date],.f-item input[type=text],.f-item select{width:100%;padding:8px 10px;border:1px solid #c3d2e0;border-radius:8px;font-size:14px;background:#fbfdff;color:var(--ink)}
+.f-item input:focus,.f-item select:focus{outline:2px solid rgba(31,74,110,.25);border-color:var(--navy2)}
+.f-item .inline-check{display:flex;gap:16px;align-items:center;padding-top:6px}
+.f-item .inline-check label{display:flex;align-items:center;gap:6px;color:var(--ink);font-size:13.5px;margin:0;cursor:pointer}
+.f-item .inline-check input{width:16px;height:16px;accent-color:var(--navy2)}
+.path-row{display:flex;gap:12px;margin:14px 0 6px}
+.path-btn{flex:1;border:2px solid var(--line);background:#fbfdff;border-radius:12px;padding:12px 14px;cursor:pointer;text-align:left;transition:.15s;font-family:inherit}
+.path-btn .p-t{font-size:15.5px;font-weight:800;color:var(--navy)}
+.path-btn .p-d{font-size:12px;color:var(--sub);margin-top:3px;line-height:1.5}
+.path-btn.active{border-color:var(--navy2);background:linear-gradient(180deg,#f2f8ff,#eaf3fb);box-shadow:0 3px 12px rgba(31,74,110,.15)}
+.path-btn.active .p-t{color:var(--navy2)}
+.btn{border:none;border-radius:10px;padding:11px 22px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn-start{display:block;width:100%;margin-top:16px;background:linear-gradient(135deg,var(--navy2),var(--navy));color:#fff;font-size:17px;letter-spacing:6px;padding:14px}
+.btn-start:hover{filter:brightness(1.1)}
+.btn-ghost{background:#fff;color:var(--navy2);border:1px solid #c3d2e0;font-size:12.5px;padding:7px 12px}
+.btn-gold{background:linear-gradient(135deg,#f4c430,#e0a71c);color:#4a3200}
+.btn-next{background:linear-gradient(135deg,var(--navy2),var(--navy));color:#fff}
+.btn-retry{background:linear-gradient(135deg,#c0392b,#96281b);color:#fff}
+.btn-again{background:#4a5b6b;color:#fff}
+.btn-save{background:linear-gradient(135deg,var(--green),#256e46);color:#fff}
+.pulse{animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
+/* ---------- 游戏屏 ---------- */
+#screen-game{background:var(--bg)}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 16px;background:var(--navy);color:#fff;flex-wrap:wrap}
+.topbar .t-logo{font-size:15px;font-weight:800;letter-spacing:2px}
+.topbar .t-logo b{color:var(--gold)}
+.topbar .t-btns{display:flex;gap:8px}
+.topbar .btn-ghost{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.35);color:#fff}
+.archive-bar{background:linear-gradient(90deg,#1f4a6e,#2c608c);color:#fff;font-size:12.5px;padding:8px 16px;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center}
+.archive-bar .a-item b{color:var(--gold2)}
+.archive-bar .v-tag{border-radius:16px;padding:1px 12px;font-weight:800;font-size:12px}
+.v-tag.t-ok{background:#2e8b57}.v-tag.t-warn{background:#c07a1c}.v-tag.t-err{background:#c0392b}.v-tag.t-info{background:#5b7a95}
+.axis{position:relative;margin:14px 16px 4px;height:34px}
+.axis .a-bar{position:absolute;left:0;right:0;top:10px;height:8px;border-radius:6px;background:#d7e2ec;overflow:hidden}
+.axis .a-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--navy2),var(--green));border-radius:6px;transition:width .6s}
+.axis .a-ticks{position:absolute;left:0;right:0;top:0;height:100%}
+.axis .tick{position:absolute;transform:translateX(-50%);font-size:11px;color:var(--sub);white-space:nowrap;top:22px}
+.axis .tick i{position:absolute;left:50%;transform:translateX(-50%);top:-14px;width:8px;height:8px;border-radius:50%;background:#9db3c6}
+.t-cap{text-align:center;font-size:11.5px;color:var(--sub);margin:0 16px 6px}
+#mapwrap{overflow-x:auto;padding:6px 0 2px;cursor:grab;border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:#fbfdff}
+#mapwrap:active{cursor:grabbing}
+#mapwrap svg{display:block}
+.node .n-core{fill:#b9c9d8;stroke:#8fa6ba;stroke-width:2}
+.node.passed .n-core{fill:var(--green);stroke:#256e46}
+.node.current .n-core{fill:var(--gold);stroke:#c99a10}
+.node .n-idx{font-weight:900;fill:#fff}
+.node.locked{opacity:.55}
+.node .n-label{font-size:14px;font-weight:800;fill:var(--ink)}
+.node .n-sub{font-size:11px;fill:var(--sub)}
+.node .n-year{font-size:10.5px;fill:#7d93a8}
+.n-flag path{fill:#c0392b}
+.act-banner{position:sticky;top:8px;margin:8px 16px;background:rgba(22,50,74,.94);color:#fff;border-left:5px solid var(--gold);border-radius:10px;padding:10px 16px;font-size:14px;display:none;z-index:5;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.act-banner.show{display:block;animation:slidedown .4s}
+@keyframes slidedown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}
+.hudbar{display:flex;gap:10px;align-items:center;padding:12px 16px;flex-wrap:wrap}
+.stat{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 14px;font-size:13.5px;display:flex;align-items:center;gap:7px;box-shadow:0 2px 8px rgba(22,50,74,.05)}
+.stat .lab{color:var(--sub);font-size:12px}
+.hp i{font-style:normal;font-size:15px}
+.hp i.lost{filter:grayscale(1);opacity:.35}
+.pt-val{font-size:17px;font-weight:900;color:var(--navy2)}
+.grow{flex:1;min-width:180px}
+.bottombar{padding:6px 16px 20px;text-align:center}
+.btn-march{font-size:16.5px;letter-spacing:3px;padding:13px 46px}
+/* ---------- 弹窗 ---------- */
+.overlay{position:fixed;inset:0;background:rgba(13,30,44,.55);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:50;padding:16px}
+.overlay.show{display:flex}
+.q-card{background:#fff;border-radius:16px;max-width:640px;width:100%;max-height:92vh;overflow-y:auto;padding:20px 24px 22px;border-top:5px solid var(--gold);box-shadow:0 24px 60px rgba(0,0,0,.3)}
+.q-meta{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:12.5px;color:var(--sub);margin-bottom:6px}
+.q-no{background:var(--navy);color:#fff;border-radius:8px;padding:1px 12px;font-weight:800}
+.q-year{background:var(--gold);color:#4a3200;border-radius:8px;padding:1px 10px;font-weight:800}
+.q-title{font-size:20px;font-weight:900;color:var(--navy)}
+.q-act{font-size:12.5px;color:var(--sub);margin:2px 0 10px}
+.q-text{font-size:15.5px;font-weight:700;margin-bottom:14px}
+.opts{display:flex;flex-direction:column;gap:9px}
+.opt{display:flex;gap:10px;align-items:flex-start;text-align:left;border:1.5px solid #c3d2e0;background:#fbfdff;border-radius:10px;padding:10px 13px;font-size:14px;cursor:pointer;font-family:inherit;line-height:1.55;transition:.12s}
+.opt:hover{border-color:var(--navy2);background:#f2f8ff}
+.opt .tag{flex:0 0 auto;width:22px;height:22px;border-radius:50%;background:var(--navy2);color:#fff;font-size:12px;font-weight:800;display:inline-flex;align-items:center;justify-content:center;margin-top:1px}
+.opt.right{border-color:var(--green);background:#eaf6ef}
+.opt.right .tag{background:var(--green)}
+.opt.wrong{border-color:var(--red);background:#fbefed}
+.opt.wrong .tag{background:var(--red)}
+.opt:disabled{cursor:default}
+.q-feedback{display:none;border-radius:10px;padding:12px 14px;margin-top:14px;font-size:13.5px}
+.q-feedback.show{display:block}
+.q-feedback.ok{background:#eaf6ef;border:1px solid #bfe0cd}
+.q-feedback.no{background:#fbefed;border:1px solid #ecc8c2}
+.fb-line{font-weight:800;margin-bottom:6px}
+.q-feedback.ok .fb-line{color:#256e46}
+.q-feedback.no .fb-line{color:#96281b}
+.q-kp{color:#41576b;font-size:13px}
+.q-kp b{color:var(--navy)}
+.q-btns{display:flex;justify-content:flex-end;gap:10px;margin-top:14px}
+/* 彩蛋弹窗 */
+.egg-card{background:#fff;border-radius:16px;max-width:560px;width:100%;padding:26px 28px;border-top:6px solid var(--red);text-align:center;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+.egg-card .e-icon{font-size:44px}
+.egg-card h3{font-size:21px;color:var(--red);margin:8px 0 10px;letter-spacing:1px}
+.egg-card p{font-size:14px;color:#41576b;text-align:left;margin-bottom:8px}
+.egg-card .e-btns{display:flex;gap:12px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+/* rest */
+.rest-card{background:#fff;border-radius:16px;max-width:460px;width:100%;padding:26px 28px;text-align:center;border-top:6px solid var(--gold)}
+.rest-card h3{font-size:19px;color:var(--navy);margin-bottom:8px}
+.rest-card p{font-size:14px;color:#41576b;margin-bottom:6px}
+.rest-card .quote{font-family:"KaiTi",serif;font-size:16px;color:var(--navy2);margin:10px 0 4px}
+/* ---------- 通关 ---------- */
+#screen-victory{position:relative;background:radial-gradient(1200px 600px at 50% -10%,#2c608c,#132c42 70%);color:#fff;align-items:center;justify-content:center;min-height:100vh}
+#fw-canvas{position:absolute;inset:0;width:100%;height:100%}
+.v-card{position:relative;z-index:2;text-align:center;max-width:640px;width:92%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:30px 30px 26px;margin:40px 0}
+.v-kicker{font-size:12.5px;letter-spacing:4px;color:var(--gold2)}
+.v-title{font-size:34px;letter-spacing:6px;margin:8px 0 4px;color:#fff}
+.v-title b{color:var(--gold)}
+.v-profile{font-size:13px;color:#cfe0ee;margin-bottom:16px}
+.v-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+.v-stat{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:12px;padding:10px 6px}
+.v-stat .k{font-size:11.5px;color:#a9c2d6}
+.v-stat .v{font-size:15.5px;font-weight:900;margin-top:3px;color:var(--gold2)}
+.v-btns{display:flex;gap:12px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);background:rgba(22,50,74,.95);color:#fff;font-size:13.5px;border-radius:10px;padding:10px 20px;opacity:0;pointer-events:none;transition:.3s;z-index:80;max-width:92vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+footer{display:none}
+@media (max-width:500px){
+ .start-head h1{font-size:30px;letter-spacing:5px}
+ .start-head{padding:30px 12px 80px}
+ .f-grid{grid-template-columns:1fr}
+ .profile-card{margin:12px 10px 24px;padding:16px}
+ .rules{padding:0 10px}
+ .v-stats{grid-template-columns:repeat(2,1fr)}
+ .hudbar{padding:10px 10px}
+ .stat{padding:7px 10px;font-size:12.5px}
+ .archive-bar{font-size:11.5px;padding:7px 10px}
+ .axis{margin:12px 10px 4px}
+ .q-card{padding:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ 首屏 ============ -->
+<section id="screen-start" class="screen" style="display:flex">
+ <div class="start-head">
+  <span class="kicker">生涯规划 · 合规闯关</span>
+  <h1 class="serif">生涯<b>岔路口</b></h1>
+  <div class="sub">以进校时间为锚 —— 年龄×年级双重校验 · 国内 / 海外双路径</div>
+  <div class="math">应届 = 毕业那一届 · 待业 &gt;6 个月必须申报 · 有个税记录的就业必须申报 · 雅思成绩有效期 2 年</div>
+ </div>
+ <div class="rules">
+  <div class="rule"><b>🧭 双路径开局</b>国内线（四六级→竞赛→保研考研→考公选调）与海外线（雅思托福→中外合作→留学申请）规则集随路径切换。</div>
+  <div class="rule"><b>🪪 年龄×年级引擎</b>出生日期＋进校时间建档：大一未满 16 岁触发"确认输错出生日期了吗？"彩蛋；16—18 岁转人工审核；偏大风险低、偏小风险高。</div>
+  <div class="rule"><b>⏳ 时间线叙事</b>复读、休学、待业、短就业——每段"空档"都要有手续与记录佐证：待业超 6 个月必须申报，有个税记录的就业再短也要申报。</div>
+  <div class="rule"><b>📋 限时资格</b>应届身份、考试间隔、语言成绩 2 年有效期——生涯规划的本质，是给每个资格的时间窗留出冗余。</div>
+ </div>
+ <div class="profile-card">
+  <h2>🪪 生涯建档（引擎将即时完成年龄×年级双重校验）</h2>
+  <div class="hint">全部数据仅存本机浏览器（localStorage），不上传任何服务器。以下信息用于个性化判定与最终体检报告。</div>
+  <div class="f-grid">
+   <div class="f-item"><label for="by-input">出生日期（年龄校验的锚点）</label><input type="date" id="by-input" value="2005-06-15"></div>
+   <div class="f-item"><label for="ey-input">进入大学时间 · 入学年份（学籍锚点）</label>
+    <select id="ey-input">
+     <option value="2020">2020 级</option><option value="2021">2021 级</option><option value="2022">2022 级</option>
+     <option value="2023" selected>2023 级</option><option value="2024">2024 级</option><option value="2025">2025 级</option><option value="2026">2026 级</option>
+    </select></div>
+   <div class="f-item"><label>特殊学籍（如实勾选，系统自动注记）</label>
+    <div class="inline-check">
+     <label><input type="checkbox" id="ck-fudu">复读过</label>
+     <label><input type="checkbox" id="ck-xiuxue">休学过</label>
+    </div></div>
+   <div class="f-item"><label for="nm-input">姓名（选填，体检报告展示）</label><input type="text" id="nm-input" maxlength="12" placeholder="填写姓名（选填）"></div>
+  </div>
+  <div class="path-row">
+   <button class="path-btn active" id="path-cn" type="button">
+    <div class="p-t">🇨🇳 国内线</div>
+    <div class="p-d">四六级 → 国赛 / 美赛 / 挑战杯 → 保研 / 考研 → 考公 / 选调生<br>核心规则：应届届别 · 年龄线 · 服务年限</div>
+   </button>
+   <button class="path-btn" id="path-ov" type="button">
+    <div class="p-t">🌍 海外线</div>
+    <div class="p-d">雅思 / 托福 → 海外本科 / 中外合作研究生 → 留学申请<br>核心规则：语言成绩 2 年有效期 · 学历认证</div>
+   </button>
+  </div>
+  <button class="btn btn-start" id="btn-start">开启生涯体检</button>
+  <button class="btn btn-ghost" id="btn-continue" style="display:none;width:100%;margin-top:10px">继续上次体检 →</button>
+ </div>
+</section>
+
+<!-- ============ 游戏屏 ============ -->
+<section id="screen-game" class="screen">
+ <div class="topbar">
+  <span class="t-logo">生涯<b>岔路口</b> · 合规体检</span>
+  <span class="t-btns">
+   <button class="btn btn-ghost" id="btn-sound">🔇 音效关</button>
+   <button class="btn btn-ghost" id="btn-restart">重新建档</button>
+   <button class="btn btn-ghost" id="btn-home">返回首页</button>
+  </span>
+ </div>
+ <div class="archive-bar">
+  <span class="a-item">🪪 <b id="ab-name">同学</b></span>
+  <span class="a-item">📅 <b id="ab-birth">—</b> 出生</span>
+  <span class="a-item">🎓 <b id="ab-grade">—</b></span>
+  <span class="a-item">🎂 <b id="ab-age">—</b> 岁</span>
+  <span class="a-item">🧭 <b id="ab-path">国内线</b></span>
+  <span class="a-item" id="ab-note"></span>
+  <span class="a-item">判定 <span class="v-tag t-ok" id="ab-verdict">通过</span></span>
+ </div>
+ <div class="axis">
+  <div class="a-bar"><div class="a-fill" id="a-fill"></div></div>
+  <div class="a-ticks">
+   <span class="tick" style="left:0%"><i></i>大一</span>
+   <span class="tick" style="left:20%"><i></i>大二</span>
+   <span class="tick" style="left:40%"><i></i>大三</span>
+   <span class="tick" style="left:60%"><i></i>大四</span>
+   <span class="tick" style="left:80%"><i></i>毕业</span>
+   <span class="tick" style="left:100%"><i></i>归宿</span>
+  </div>
+ </div>
+ <div class="t-cap">生涯体检轴 —— 每过一关，资格与履历同步核验一段，抵达归宿</div>
+ <div id="mapwrap"></div>
+ <div class="act-banner" id="act-banner"></div>
+ <div class="hudbar">
+  <div class="stat hp"><span class="lab">体检灯</span></div>
+  <div class="stat"><span class="lab">合规点</span><span class="pt-val" id="pt-val">0</span><span class="lab">/ 14</span></div>
+  <div class="stat grow"><span class="lab" id="prog-lab">征程</span>&nbsp;<span class="val" id="prog-val">第 1 关 · 出生建档</span></div>
+ </div>
+ <div class="bottombar">
+  <button class="btn btn-gold btn-march pulse" id="btn-march">向第 1 关进军</button>
+ </div>
+</section>
+
+<!-- ============ 答题弹窗 ============ -->
+<div class="overlay" id="q-overlay">
+ <div class="q-card">
+  <div class="q-meta">
+   <span class="q-no" id="q-no">第 1 关</span>
+   <span class="q-year" id="q-year">大一 · 建档</span>
+  </div>
+  <div class="q-title" id="q-title">出生建档</div>
+  <div class="q-act" id="q-act">第一幕 · 象牙塔内（大一 — 大三）</div>
+  <div class="q-text" id="q-text">题目</div>
+  <div class="opts" id="opts"></div>
+  <div class="q-feedback" id="q-feedback">
+   <div class="fb-line" id="fb-line"></div>
+   <div class="q-kp" id="q-kp"></div>
+  </div>
+  <div class="q-btns">
+   <button class="btn btn-retry" id="btn-retry-q" style="display:none">换题再判</button>
+   <button class="btn btn-next" id="btn-q-next" style="display:none">继续行进 →</button>
+  </div>
+ </div>
+</div>
+
+<!-- ============ 彩蛋：年龄×年级强异常 ============ -->
+<div class="overlay" id="egg-overlay">
+ <div class="egg-card">
+  <div class="e-icon">⚠️🪪</div>
+  <h3>你确认输错出生日期了吗？</h3>
+  <p id="egg-detail">按学籍推算你应为大一，但出生日期折算年龄未满 16 岁——年龄与年级严重不符。</p>
+  <p>若确属少年班、特殊学制等个案，请走学校证明通道（人工审核）；若非，请返回核对后重填。生涯材料的第一个合规动作，就是把锚点数据核对正确。</p>
+  <div class="e-btns">
+   <button class="btn btn-ghost" id="btn-egg-back">返回核对出生日期</button>
+   <button class="btn btn-retry" id="btn-egg-ok">确认无误 · 按人工审核继续</button>
+  </div>
+ </div>
+</div>
+
+<!-- ============ 体检灯耗尽 ============ -->
+<div class="overlay" id="rest-overlay">
+ <div class="rest-card">
+  <h3>🛑 体检灯耗尽 —— 重整旗鼓</h3>
+  <p>连续误判会消耗体检灯。稍作休整，规则不会跑，岔路口一直都在。</p>
+  <div class="quote" id="rest-quote">凡事预则立，不预则废。</div>
+  <button class="btn btn-next" id="btn-rest">重整旗鼓，继续体检</button>
+ </div>
+</div>
+
+<!-- ============ 通关 ============ -->
+<section id="screen-victory" class="screen">
+ <canvas id="fw-canvas"></canvas>
+ <div class="v-card">
+  <div class="v-kicker">体 检 完 成 · 行 稳 致 远</div>
+  <div class="v-title serif">生涯合规 · <b>体检通过</b></div>
+  <div class="v-profile" id="v-profile"></div>
+  <div class="v-stats">
+   <div class="v-stat"><div class="k">合规点</div><div class="v" id="v-pt">14 / 14</div></div>
+   <div class="v-stat"><div class="k">荣誉称号</div><div class="v" id="v-rank">生涯引路人 · 合规之光</div></div>
+   <div class="v-stat"><div class="k">体检用时</div><div class="v" id="v-time">00:00</div></div>
+   <div class="v-stat"><div class="k">误判次数</div><div class="v" id="v-wrong">0</div></div>
+  </div>
+  <div class="v-btns">
+   <button class="btn btn-save" id="btn-save">保存生涯合规体检报告</button>
+   <button class="btn btn-again" id="btn-again">再走一次岔路口</button>
+   <button class="btn btn-ghost" id="btn-v-home" style="background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.35);color:#fff">返回首页</button>
+  </div>
+ </div>
+</section>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ==================== 数据：三幕十四关 · 48 题 ==================== */
+const LEVELS = [
+ {act:1,name:'出生建档',sub:'年龄锚点',year:'大一 · 建档',x:70,  y:310,qs:[
+  {q:'小林录入出生日期后，系统按学籍推算为"大一"，但按生日折算年龄只有 15 岁。系统最合理的动作是？',o:['弹出"你确认输错出生日期了吗？"并转人工复核','直接按 15 岁放行','判定不合规并拒绝建档','自动把年龄改成 18 岁'],a:0,st:'manual',k:'年龄×年级双重校验中，"大一且未满 16 岁"是强异常信号：更可能是出生日期误填而非真实情况。系统先请本人核对（彩蛋提示），确认无误后再按"人工审核"处理——少年班、特殊学制等个案走学校证明通道。'},
+  {q:'17 岁的大一新生报名大学英语四级，系统判定应为？',o:['警示并转人工审核：需学校允许报考','直接通过，年龄无影响','判定不合规，禁止报考','建议先报六级'],a:0,st:'manual',k:'四六级由学校统一组织报名，各校开放年级不同。17 岁处于 16—18 岁警戒区：满 16 未满 18，需确认学校允许，属"人工审核"态——年龄偏小需要解释，偏大风险反而较低。'},
+  {q:'若身份证出生日期与户口本不一致，生涯材料里的年龄应以哪个为准？',o:['以身份证与学籍档案为准，先更正差异再申报','以自己记得的为准','以家长口述为准','哪个对自己有利用哪个'],a:0,st:'ok',k:'一切生涯材料以官方证件链为准：身份证—学籍—档案必须一致。发现不一致应先走更正流程，否则后续考研报名学籍校验、政审环节都会卡壳。'}]},
+ {act:1,name:'进校时间',sub:'时间锚点',year:'大一 · 建档',x:176, y:170,qs:[
+  {q:'复读一年后考入大学，履历叙述应以什么时间为锚？',o:['以进入大学（学籍注册）时间为锚，复读经历一句话如实前置','只写大学毕业时间，复读保密','从高中入学开始逐年详写','删掉复读，把年龄改小一岁'],a:0,st:'ok',k:'"以进学校的时间为准"：学籍注册时间是年级、应届等一切判定的锚点。复读不是污点，如实一句话说明即可；刻意隐去反而造成年龄与届别对不上，引发更大质疑。'},
+  {q:'因休学一年，比同届同学大一岁，这项履历的风险是？',o:['风险低：休学有正式手续，材料如实写即可','风险高：必须删除休学记录','等于不合规，不能毕业','必须改成复读'],a:0,st:'ok',k:'年龄"偏大"通常风险较低：因病、入伍、创业等休学都有正式手续佐证。真正要防范的是"偏小"——没有跳级、少年班等手续的低龄入学，容易被质疑入学程序。'},
+  {q:'比同届小两岁、且拿不出跳级或少年班手续，最可能引发什么？',o:['"找关系 / 唯分数论"的程序质疑，需完整学籍手续自证','没有任何影响','自动获得保研资格','仅影响食堂饭卡'],a:0,st:'warn',k:'年龄"偏小"是履历审查的关注点：低龄入学若无法出示正式依据，易被质疑程序合规性。学籍档案是唯一自证材料——这正是年龄×年级双重校验要拦截的场景。'}]},
+ {act:1,name:'四级首考',sub:'年级×年龄',year:'大一 · 12月',x:282, y:310,qs:[
+  {q:'学校规定大二才开放四级报名，大一新生 10 月想报 12 月的考试，正确处理是？',o:['按学校规定推迟，先夯实英语（并非所有学校大一都能考）','绕过学校找社会代报名渠道','找机构抢校外考位','直接弃考大学英语课程'],a:0,st:'manual',k:'四六级以在校生身份由学校统一报名，"并非所有学校都允许大一报考"是典型的"人工审核"规则点：不是不能，而是要先看本校规定。无学籍支撑的社会代报名，成绩可能无效。'},
+  {q:'不少学校鼓励大一就考四级，主要理由是？',o:['趁高中英语底子还在尽早通过，给六级和保研留余地','大学四年考一次就够','四级与毕业证无关所以无所谓','四级成绩永久有效且校外可考'],a:0,st:'ok',k:'四级仅在校生可考，毕业即失去资格；多数院校保研、部分考公岗位还看六级。大一尽早考，是把"在校身份"这个限时资源用足——生涯规划第一课：识别限时资格。'},
+  {q:'四六级成绩单丢失，补办证明的官方渠道是？',o:['教育部教育考试院官网申请补办成绩证明','找学校隔壁打印店','自己修图做一张','无所谓，没人核验'],a:0,st:'ok',k:'四六级成绩可在官方渠道申请补办纸质成绩证明；保研复试与用人单位都会核验真伪——材料链必须走官方渠道，这与政审、背调的逻辑一致。'}]},
+ {act:1,name:'六级继考',sub:'门槛规则',year:'大二 · 6月',x:388, y:170,qs:[
+  {q:'报名大学英语六级的硬性门槛是？',o:['四级成绩达到 425 分及以上','只要大二','先过托福 80 分','任何年级都可直接报'],a:0,st:'ok',k:'六级报考资格＝四级成绩 ≥425 分。四六级成绩在校期间可反复报考刷分，但"在校"这个前提本身是限时资源——毕业即失去报考资格。'},
+  {q:'大三下才发现六级没过、又想保研，最稳妥的应对是？',o:['抢报 12 月最后一次六级，同时按考研路线双线准备','放弃保研直接躺平','找机构改成绩单','向学院隐瞒成绩'],a:0,st:'warn',k:'六级是多数院校保研的硬门槛之一。发现太晚即进入"风险"态：双线准备（保研＋考研）才不会两头落空——生涯规划的本质，是给关键规则留出冗余。'},
+  {q:'研究生阶段还能考四六级吗？',o:['可以：研究生属全日制在校生，以就读学校报名通知为准','绝对不能','只有本科生能考','必须回本科学校考'],a:0,st:'ok',k:'四六级面向全日制在校生，研究生同样具备资格（个别学校限制报名年级）。读研期间刷六级高分，对考公岗位选择、落户积分仍有实际价值。'}]},
+ {act:1,name:'竞赛窗口',sub:'赛道匹配',year:'大二 · 全年',x:494, y:310,qs:[
+  {q:'大二本科生想报名 HiMCM（美国高中生数学建模竞赛），判定是？',o:['不合规：HiMCM 限高中生，本科生应报 MCM/ICM','可以报，年龄够就行','找高中母校挂名报名','队里加一个高中生就行'],a:0,st:'no',k:'赛事有学段门槛：HiMCM/MidMCM 面向高中/初中生，大学生参赛构成失格事由。赛道匹配是合规第一步——正如考公要先看岗位表的报考条件。'},
+  {q:'关于挑战杯等国内大学生竞赛的参赛资格，说法正确的是？',o:['全日制在校生均可按学校通知组队报名，注意作品原创与学术规范','只有大三才能参加','必须挂教授名字才能参加','毕业两年内仍可用学生身份参赛'],a:0,st:'ok',k:'挑战杯等赛事面向全日制在校生，毕业即失格；评审对学术不端一票否决——竞赛履历与生涯材料一样，第一原则是"真实"。'},
+  {q:'美赛（MCM/ICM）报名时最该核对的合规细节是？',o:['注册缴费窗口（费用不退）、参赛时未满 25 岁、同校组队规则','只要英语好就行','可以毕业后再慢慢交论文','一人替全队报名交卷'],a:0,st:'ok',k:'美赛以队为单位、组队受同校等规则约束、注册费不退、参赛时未满 25 岁。错过窗口＝一年白等——竞赛的"时间窗"与考公的"应届身份"同属限时资格。'}]},
+ {act:1,name:'保研门槛',sub:'绩点与资历',year:'大三 · 推免',x:600, y:170,qs:[
+  {q:'保研（推免）资格审查最核心的硬指标是？',o:['前三年绩点排名与无挂科违纪记录，四六级多为门槛项','只要竞赛拿过奖','师生关系足够好','四六级过了就稳'],a:0,st:'ok',k:'推免资格＝学业成绩排名（通常看前三年）＋合规记录；四六级、竞赛是门槛或加分项。规则以本校推免细则为准——生涯规划的"招考公告"，就挂在教务处官网。'},
+  {q:'大一挂科一科（补考已过），对保研的影响属于？',o:['风险态：多数院校推免要求无不及格记录，需按本校细则确认','完全没影响','直接丧失学位','请客吃饭就能解决'],a:0,st:'warn',k:'不少院校推免细则写明"无不及格记录"，补考通过也可能影响排名。这类规则大一大二就要查清——拖到大三才发现，选项就只剩"风险"和"遗憾"。'},
+  {q:'转专业学生的推免排名按什么执行？',o:['按转入学院的推免细则执行，转出学年成绩认定办法提前书面咨询教务','按转出学院算','两边各算一次取高','没有规则全看运气'],a:0,st:'manual',k:'转专业、大类分流都会改变推免排名的计分口径。规则不明确＝"人工审核"态：第一时间书面咨询教务并留痕，是最可靠的自证材料。'}]},
+ {act:2,name:'考研报名',sub:'应届身份',year:'大四 · 10月',x:706, y:310,qs:[
+  {q:'应届本科生大四上学期 10 月报名、12 月初试，报考身份是？',o:['应届本科毕业生：以录取当年入学前可取得毕业证为准','往届生','同等学力','社会考生'],a:0,st:'ok',k:'考研语境的"应届"＝录取当年 9 月入学前能拿到毕业证的大四学生。应届身份影响报考点选择（一般在学校所在地）与部分专项计划资格。'},
+  {q:'考研报名时网上学籍校验未通过，最可能的原因是？',o:['姓名 / 学历证书号码填写有误或学籍尚未注册——先上学信网核对','电脑系统坏了','学校没交学费','运气不好，换个时间再试'],a:0,st:'manual',k:'报名系统对接学信网学籍库，校验不通过绝大多数是信息填写与学籍注册问题。材料链上的每个环节都要能相互印证——这是生涯材料的第一法则。'},
+  {q:'大三学生想"提前一年考研"早点上岸，判定是？',o:['不合规：报名须为入学当年可获毕业证的应届生（特批个案除外）','可以，成绩保留两年','找培训机构就能报','先考后补学籍'],a:0,st:'no',k:'考研报考条件要求国家承认学历的应届本科毕业生或已获学历者，大三报考无法通过学籍校验。"应届"是刚性的届别概念——早一届都不行。'}]},
+ {act:2,name:'毕业岔路',sub:'去向三选',year:'大四 · 6月',x:812, y:170,qs:[
+  {q:'毕业后签了工作、干了一周就离职，这份经历在履历 / 政审材料里怎么处理？',o:['必须写：只要有个税或社保记录，时间再短也是真实就业经历','不写，一周而已没人知道','写成"待业"，更体面','等政审时再解释'],a:0,st:'ok',k:'就业认定的证据是个税 / 社保记录，而不是主观感受。有记录就申报——履历审查看的是"与官方记录是否一致"，隐瞒真实经历比经历本身严重得多。'},
+  {q:'毕业后待业备考 8 个月，这段空档在材料里属于？',o:['必须申报：正常考试间隔约 12 个月，待业超 6 个月说明跨届，断层要如实说明','可以写成"在校社会实践"','可以不写，反正没人查','自动被录取院校覆盖'],a:0,st:'warn',k:'待业超 6 个月是履历审查的警戒线：能超过 6 个月，说明已错过上一届招录季（跨届），审查方需要了解你这段时间的去向。如实申报＋备考证据（报名记录、准考证）是最优解。'},
+  {q:'复读、休学、待业、短就业，四类"空档"履历叙述的共同原则是？',o:['真实手续 / 记录佐证＋时间连续可解释＋主动申报','全部隐藏，追求完美履历','写成一笔糊涂账','只挑对自己有利的写'],a:0,st:'ok',k:'空档不是问题，"无法解释的空档"才是。三件套：证据在手、时间线闭合、主动申报——主动说明是加分项，被动查出是减分项。'}]},
+ {act:2,name:'履历申报',sub:'空档与就业',year:'毕业后',x:918, y:310,qs:[
+  {q:'个税 APP 里查到一笔大学实习的申报记录，要写进履历吗？',o:['写：有申报记录就是就业经历，隐瞒＝履历不实','不写：实习不算工作','想办法删掉记录','写成奖学金'],a:0,st:'ok',k:'个税申报记录是就业经历的官方证据链。履历审查遵循"官方记录优先"：材料里没有、系统里有的经历，才是真正的雷。'},
+  {q:'自由职业 5 个月、有收入但没缴社保，材料里算什么？',o:['按就业经历如实写明（收入流水 / 平台合同 / 完税记录佐证）','按待业写','按在校写','删掉这段'],a:0,st:'ok',k:'灵活就业也是就业：收入流水、平台合同、完税记录都是佐证。分类不是关键，"与可出示的证据一致"才是关键。'},
+  {q:'待业备考最有说服力的自证材料是？',o:['研招网报名记录、准考证、成绩单等带时间戳的官方凭证','朋友圈打卡截图','口头承诺','家长写证明'],a:0,st:'ok',k:'备考是主观状态，报名与考试记录才是客观证据。生涯材料的一句话原则：每一句陈述，都能指到一张可出示的凭证。'}]},
+ {act:2,name:'应届判定',sub:'届别红线',year:'毕业当年',x:1024,y:170,qs:[
+  {q:'"应届毕业生"的准确含义是？',o:['当年毕业的那一届毕业生（如 2026 届＝2026 年毕业）','毕业后两年内都算','没缴社保就算','没找到工作就算'],a:0,st:'ok',k:'届别是刚性概念：2026 届＝2026 年毕业，早一届都不行。部分地区的"择业期"政策是另一套规则——看公告原文，不要混用。'},
+  {q:'选调生公告写"限 2026 届应届毕业生"，2025 届毕业未就业能报吗？',o:['不能：届别不符（不合规），除非公告明确含"择业期内"','能，反正没工作','能，找学校改届别','先报上再说'],a:0,st:'no',k:'招录公告的每一行都是硬条件。"择业期内未落实工作"是否包含、按什么口径，必须以公告原文为准——这是典型的"人工审核"点：拿不准就打公告电话并留痕。'},
+  {q:'大四上签了三方协议，毕业当年还算应届吗？',o:['算：当年毕业即为当年应届；入职与社保缴纳会改变后续年份的认定','不算，签了就丢','只算往届','看具体情况随口说'],a:0,st:'ok',k:'应届认定看毕业年份与就业状态的时间点：三方签订、社保起缴会影响"未落实工作"的口径。秋招签约前想清楚升学 / 考公路线，是应届身份管理的第一步。'}]},
+ {act:3,name:'归宿一站',sub:'考公 · 年龄线',year:'岔路 · 归宿',x:1130,y:310,cn:[],ov:[],
+  qs:[],pathQs:{
+  cn:[
+  {q:'国考报名的一般年龄上限是？',o:['一般 35 周岁以下，应届硕士、博士研究生放宽到 40 周岁','25 周岁','45 周岁','无限制'],a:0,st:'ok',k:'年龄线以招考公告为准（一般为 35 周岁，应届硕博放宽至 40）——又是"年龄×身份"双重校验：年龄是死的，身份（应届与否）是变量。'},
+  {q:'公务员最低服务年限内想再报考公务员？',o:['不合规：服务年限内不得报考，满最低服务年限后按公告','可以随时再考','写个检讨就行','让领导签个字'],a:0,st:'no',k:'在职公务员有最低服务年限（以招录公告与聘用文件为准）。体制内流动同样讲"合规窗口"，提前离职要付诚信代价。'},
+  {q:'报考有"两年基层工作经历"要求的岗位，以下能计入的是？',o:['毕业后在企业 / 社会组织全职工作并缴纳社保的年限','大学期间的暑假兼职','未注册的在校摆摊','游戏代练收入'],a:0,st:'ok',k:'基层工作经历按劳动合同、社保记录认定（毕业前的实习一般不计，以公告口径为准）。还是那条链：官方记录＝唯一证据。'}],
+  ov:[
+  {q:'雅思（IELTS）成绩的有效期是多久？这对申请意味着什么？',o:['2 年：申请时成绩必须在有效期内，需倒推规划考试时间','5 年','永久有效','10 年'],a:0,st:'ok',k:'雅思、托福有效期均为 2 年（自考试日起算）。申请季成绩过期＝白考一次。语言考试的"有效期"与考公的"应届身份"逻辑同源：都是限时资格。'},
+  {q:'语言成绩对年龄的要求是？',o:['年龄仅作参考，核心是成绩有效期与院校 / 签证要求','必须满 18 岁','必须未满 25 岁','35 岁以上不能考'],a:0,st:'ok',k:'与国内考试的年龄线不同，语言考试基本不看年龄——看成绩有效期。不同规则体系里"年龄的权重"不同，正是双路径规划的关键差异点。'},
+  {q:'计划 2027 年秋季入学，雅思考试最晚什么时候考较稳妥？',o:['2026 年内考出，留出二刷与送分时间，确保申请季仍在 2 年有效期内','2027 年 8 月开学前随便考','入学后再考','不重要，到时再说'],a:0,st:'ok',k:'申请季（前一年 9 月—次年 2 月）成绩必须有效，倒推即"入学前 1.5—2 年内考出"。倒排日程是海外线最常用的合规工具。'}]}},
+ {act:3,name:'录用认证',sub:'选调 · 服务期',year:'岔路 · 录用',x:1236,y:170,pathQs:{
+  cn:[
+  {q:'选调生报名的普遍硬条件是？',o:['应届优秀毕业生＋党员 / 学生干部 / 获奖等条件之一（按省份公告）','往届生优先','有工作经历优先','只需要成绩好'],a:0,st:'ok',k:'选调生＝党政机关储备干部招录，普遍卡"应届"与政治条件（党员、学生干部等），以各省公告为准。选调是"应届身份"最严格的应用场景之一。'},
+  {q:'定向选调与普通选调的核心区别？',o:['定向限定高校范围（面向名单内重点高校），普通选调面向范围更宽','定向不用考试','普通选调不用下基层','没有区别'],a:0,st:'ok',k:'定向选调面向名单内高校，普通选调范围更宽、竞争更开放。报名前核对自己的学校是否在名单内——资格不符就是"不合规"。'},
+  {q:'选调生录用后通常的服务安排是？',o:['有最低服务年限（常为 2—3 年起，含基层锻炼期），提前离职影响诚信记录','随时可以走','干满一个月就能走','没有服务期'],a:0,st:'warn',k:'选调生的基层锻炼与最低服务年限写入录用文件，提前离职记入诚信档案。签约前把"服务期"当回事，是体制内生涯规划的第一课。'}],
+  ov:[
+  {q:'中外合作办学项目颁发的国外学位，考公 / 落户前必须先做什么？',o:['在教育部留学服务中心做学历学位认证，并核验项目是否在批准名单内','直接使用，不用认证','找中介翻译一下','发朋友圈官宣'],a:0,st:'manual',k:'中外合作办学学位的效力以留服认证为准；报读前还要核验项目是否在教育部批复名单内——"入学前的合规审查"能避免时间与金钱双输。'},
+  {q:'留学申请材料的合规底线是？',o:['材料必须真实：代写、造假成绩一经查实即取消资格，且认证与背调会追溯','包装得越漂亮越好','成绩可以适度优化','推荐信随便签'],a:0,st:'no',k:'海外院校对材料造假的处罚（取消录取、撤销学位）同样严厉，且留服认证、背景调查具有追溯性。国内国外的共同底线：材料真实。'},
+  {q:'海外本科申请时间线规划的第一步是？',o:['按目标院校截止日倒排：语言考试→文书→网申→签证，每步留缓冲','先办签证再选校','等到高三再说','全靠中介，自己不管'],a:0,st:'ok',k:'海外线的核心工具是"倒排日程"：以截止日为锚，语言成绩（2 年有效期）、文书、推荐信各留缓冲。与国内"应届季"一样，都是截止日驱动的合规规划。'}]}},
+ {act:3,name:'诚信自查',sub:'材料与证据',year:'通用 · 自查',x:1342,y:310,qs:[
+  {q:'生涯材料自查中，最容易"爆雷"的一类信息是？',o:['时间断层（复读 / 休学 / 待业 / 短就业）——提前申报好过事后解释','身高体重','兴趣爱好','朋友圈内容'],a:0,st:'warn',k:'审查方最敏感的就是时间线断裂。每一段空档都提前写明、附上证据，是把"爆雷点"变成"可信项"的唯一办法。'},
+  {q:'政审 / 背调前，最应该提前自查的一项是？',o:['本人及直系亲属的违法违纪与诚信记录（含失信名单、个人征信）','微信头像','游戏段位','中学成绩'],a:0,st:'ok',k:'政审关注本人与家庭主要成员的守法与诚信记录。提前自查（裁判文书、失信名单、征信报告）才能把意外挡在公示期之前。'},
+  {q:'发现材料里有一处时间写错（如入职月份），正确做法是？',o:['立即更正并主动向审查方说明更正原因','装作没看见','再错一处掩护','撤回材料跑路'],a:0,st:'ok',k:'主动更正＝诚信记录；被动查出＝不诚信认定。生涯合规的底层逻辑：可信度比完美更重要。'}]},
+ {act:3,name:'生涯体检',sub:'终点 · 报告',year:'归宿 · 2026+',x:1448,y:240,final:true,qs:[
+  {q:'贯穿全部生涯材料的"叙述总锚点"是？',o:['以进学校（学籍注册）时间为锚，每段经历有手续 / 记录佐证、连续可解释','以出生时间写满每一岁','以最高学历为锚，其余略去','没有锚点，自由发挥'],a:0,st:'ok',k:'学籍注册时间是年级、应届、年龄校验的共同原点——从第 1 关到第 14 关，本游戏反复验证的就是这条锚点原则。'},
+  {q:'应届身份、考试间隔、语言有效期，这三个规则的共同本质是？',o:['都是"限时资格"：过期作废，规划的本质是给关键节点留冗余','都是玄学','都是机构编的话术','都只和年龄有关'],a:0,st:'ok',k:'生涯规划的真正对象不是"履历"，而是"资格的时间窗"。把每个资格的有效期标在同一条时间轴上，就是最朴素的生涯合规管理系统。'},
+  {q:'国内线与海外线规则差异最大的一项是？',o:['资格的时间口径：国内看应届届别与年龄线，海外看语言有效期与申请截止','都不用考试','都发奖学金','没有差异'],a:0,st:'ok',k:'双路径没有绝对优劣：应届身份是"一次性弹药"，语言成绩是"两年弹药"。先定目标（体制内 or 留学），再按对应规则倒排——岔路口的选择，本质是规则集的选择。'}]}
+];
+const ACTS = {
+ 1:{title:'第一幕 · 象牙塔内',span:'大一 — 大三',desc:'建档、考试与竞赛规则'},
+ 2:{title:'第二幕 · 毕业岔路',span:'大四 — 毕业年',desc:'应届、履历与申报'},
+ 3:{title:'第三幕 · 双线归宿',span:'国内线 / 海外线',desc:'考公选调 or 语言申请'}
+};
+const RANKS = [
+ {min:14,name:'生涯引路人 · 合规之光'},
+ {min:11,name:'岔路行家'},
+ {min:8, name:'规则学徒'},
+ {min:0, name:'生涯探索者'}
+];
+const QUOTES = {
+ 1:'凡事预则立，不预则废。',
+ 2:'宜未雨而绸缪，毋临渴而掘井。',
+ 3:'行远自迩，笃行不怠。'
+};
+const STATE_LABEL = {ok:'通过',warn:'风险',manual:'人工审核',no:'不合规'};
+
+/* ==================== 状态 ==================== */
+const SAVE_KEY='lk_save_v1', BEST_KEY='lk_best_v1', SND_KEY='lk_snd';
+let S=null, sndOn=localStorage.getItem(SND_KEY)==='1';
+const $=id=>document.getElementById(id);
+const fmtTime=ms=>{const s=Math.floor(ms/1000);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+function fullAge(birthStr,ref){
+ const b=new Date(birthStr+'T00:00:00'); if(isNaN(b))return NaN;
+ let a=ref.getFullYear()-b.getFullYear();
+ const m=ref.getMonth()-b.getMonth();
+ if(m<0||(m===0&&ref.getDate()<b.getDate()))a--;
+ return a;
+}
+function gradeLabel(g){return ['大一','大二','大三','大四'][g-1]||'毕业年'}
+function save(){if(S)localStorage.setItem(SAVE_KEY,JSON.stringify(S))}
+function loadSave(){try{return JSON.parse(localStorage.getItem(SAVE_KEY))}catch(e){return null}}
+
+/* ==================== 音效（WebAudio，零依赖） ==================== */
+let AC=null;
+function beep(freq,dur=0.12,type='sine',vol=0.16,delay=0){
+ if(!sndOn)return;
+ try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+ const t=AC.currentTime+delay,o=AC.createOscillator(),g=AC.createGain();
+ o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+ o.connect(g).connect(AC.destination);o.start(t);o.stop(t+dur);}catch(e){}
+}
+const sfx={
+ ok(){beep(660,.1,'triangle',.18);beep(880,.16,'triangle',.18,.09)},
+ no(){beep(196,.22,'sawtooth',.12)},
+ step(){beep(440,.06,'sine',.1)},
+ rest(){beep(330,.18,'sine',.12);beep(262,.22,'sine',.12,.16)},
+ win(){[523,659,784,1047,1319].forEach((f,i)=>beep(f,.22,'triangle',.16,i*.13))}
+};
+
+/* ==================== 档案引擎：年龄×年级双重校验 ==================== */
+function buildProfile(){
+ const birth=$('by-input').value, entry=+$('ey-input').value;
+ const name=$('nm-input').value.trim();
+ const path=$('path-cn').classList.contains('active')?'cn':'ov';
+ const now=new Date();
+ const age=fullAge(birth,now);
+ if(!birth||isNaN(age)){toast('请先填写有效的出生日期');return null}
+ let g=now.getFullYear()-entry+1;
+ let grade=g<=4?g:(g===5?5:6);
+ const fudu=$('ck-fudu').checked, xiuxue=$('ck-xiuxue').checked;
+ const notes=[];
+ if(fudu)notes.push('复读 1 年已注记：材料如实前置');
+ if(xiuxue)notes.push('休学 1 年已注记：有正式手续即可，风险低');
+ let verdict;
+ if(grade===1&&age<16)verdict={cls:'err',tag:'疑似误填',text:'大一且未满 16 岁——年龄与年级严重不符'};
+ else if(grade===1&&age<18)verdict={cls:'warn',tag:'人工审核',text:'未满 18 岁的大一新生：并非所有学校都允许报考四级，需学校允许'};
+ else if(age>25)verdict={cls:'info',tag:'风险 · 低',text:'入学偏大：休学等正当手续说明即可'};
+ else verdict={cls:'ok',tag:'通过',text:'年龄×年级匹配正常'};
+ return {name,birth,entry,grade,gradeLabel:gradeLabel(grade),age,path,fudu,xiuxue,notes,verdict};
+}
+
+/* ==================== 地图 SVG ==================== */
+const VB_W=1560,VB_H=480;
+function catmullPath(pts){
+ let d=`M ${pts[0].x} ${pts[0].y}`;
+ for(let i=0;i<pts.length-1;i++){
+  const p0=pts[Math.max(0,i-1)],p1=pts[i],p2=pts[i+1],p3=pts[Math.min(pts.length-1,i+2)];
+  d+=` C ${p1.x+(p2.x-p0.x)/6} ${p1.y+(p2.y-p0.y)/6}, ${p2.x-(p3.x-p1.x)/6} ${p2.y-(p3.y-p1.y)/6}, ${p2.x} ${p2.y}`;
+ }
+ return d;
+}
+function landmarkSVG(){
+ return `
+ <!-- 大学门 -->
+ <g opacity=".9">
+  <rect x="52" y="238" width="10" height="86" fill="#7a8ba0"/><rect x="118" y="238" width="10" height="86" fill="#7a8ba0"/>
+  <rect x="44" y="226" width="92" height="14" fill="#5f7186"/>
+  <text x="90" y="215" text-anchor="middle" font-size="13" fill="#5f7186" font-weight="700">大学 · 学籍注册</text>
+ </g>
+ <!-- 图书馆（四六级） -->
+ <g opacity=".85">
+  <rect x="330" y="96" width="66" height="46" fill="#8ba7c4"/>
+  <rect x="338" y="106" width="14" height="10" fill="#e8f0f8"/><rect x="358" y="106" width="14" height="10" fill="#e8f0f8"/><rect x="378" y="106" width="10" height="10" fill="#e8f0f8"/>
+  <rect x="338" y="122" width="14" height="10" fill="#e8f0f8"/><rect x="358" y="122" width="14" height="10" fill="#e8f0f8"/>
+  <text x="363" y="160" text-anchor="middle" font-size="12" fill="#5b7a95" font-weight="700">四六级 · 考试中心</text>
+ </g>
+ <!-- 奖杯（竞赛） -->
+ <g opacity=".85">
+  <path d="M506 218 h26 v10 a13 13 0 0 1 -26 0 z" fill="#e0b23e"/>
+  <rect x="516" y="240" width="6" height="10" fill="#b98f22"/><rect x="508" y="250" width="22" height="6" fill="#b98f22"/>
+  <text x="519" y="272" text-anchor="middle" font-size="12" fill="#a3841f" font-weight="700">竞赛窗口</text>
+ </g>
+ <!-- 推免榜（保研） -->
+ <g opacity=".85">
+  <rect x="618" y="92" width="44" height="58" fill="#eef3f8" stroke="#7a8ba0" stroke-width="2"/>
+  <line x1="626" y1="106" x2="654" y2="106" stroke="#7a8ba0" stroke-width="3"/>
+  <line x1="626" y1="118" x2="648" y2="118" stroke="#9db3c6" stroke-width="2.5"/>
+  <line x1="626" y1="130" x2="652" y2="130" stroke="#9db3c6" stroke-width="2.5"/>
+  <text x="640" y="166" text-anchor="middle" font-size="12" fill="#5b7a95" font-weight="700">推免公示栏</text>
+ </g>
+ <!-- 岔路指路牌（毕业岔路 · 本游戏地标） -->
+ <g opacity=".95">
+  <line x1="878" y1="150" x2="878" y2="86" stroke="#6b5b45" stroke-width="5"/>
+  <path d="M878 88 h52 l10 10 -10 10 h-52 z" fill="#f4c430" stroke="#c99a10" stroke-width="1.5"/>
+  <path d="M878 118 h-52 l-10 10 10 10 h52 z" fill="#8fb6d9" stroke="#5b86ad" stroke-width="1.5"/>
+  <text x="910" y="102" text-anchor="middle" font-size="11.5" fill="#4a3200" font-weight="800">考公 · 选调</text>
+  <text x="846" y="132" text-anchor="middle" font-size="11.5" fill="#1f4a6e" font-weight="800">留学 · 认证</text>
+  <text x="878" y="168" text-anchor="middle" font-size="13" fill="#6b5b45" font-weight="800">毕业岔路口</text>
+ </g>
+ <!-- 办公楼（考公） -->
+ <g opacity=".85">
+  <rect x="1068" y="120" width="46" height="70" fill="#6f8fb5"/>
+  <rect x="1076" y="130" width="8" height="8" fill="#dbe8f4"/><rect x="1090" y="130" width="8" height="8" fill="#dbe8f4"/><rect x="1104" y="130" width="8" height="8" fill="#dbe8f4"/>
+  <rect x="1076" y="146" width="8" height="8" fill="#dbe8f4"/><rect x="1090" y="146" width="8" height="8" fill="#dbe8f4"/>
+  <text x="1091" y="206" text-anchor="middle" font-size="12" fill="#41648a" font-weight="700">机关大楼</text>
+ </g>
+ <!-- 飞机（海外） -->
+ <g opacity=".85">
+  <path d="M1188 148 l46 -12 -10 14 12 8 -16 2 -6 14 -8 -16 -18 -4 z" fill="#5b86ad"/>
+  <text x="1210" y="176" text-anchor="middle" font-size="12" fill="#41648a" font-weight="700">留学航线</text>
+ </g>
+ <!-- 放大镜（自查） -->
+ <g opacity=".85">
+  <circle cx="1366" cy="112" r="16" fill="none" stroke="#5b86ad" stroke-width="5"/>
+  <line x1="1378" y1="124" x2="1394" y2="140" stroke="#5b86ad" stroke-width="6" stroke-linecap="round"/>
+  <text x="1372" y="160" text-anchor="middle" font-size="12" fill="#41648a" font-weight="700">诚信自查</text>
+ </g>
+ <!-- 终点：生涯体检中心 -->
+ <g opacity=".95">
+  <rect x="1398" y="196" width="100" height="12" fill="#2e8b57"/>
+  <rect x="1400" y="208" width="96" height="7" fill="#256e46"/>
+  <rect x="1402" y="215" width="10" height="36" fill="#1f5c3a"/><rect x="1426" y="215" width="10" height="36" fill="#1f5c3a"/><rect x="1482" y="215" width="10" height="36" fill="#1f5c3a"/>
+  <rect x="1450" y="222" width="24" height="29" fill="#123d27"/>
+  <text x="1448" y="132" text-anchor="middle" font-size="30" font-weight="900" fill="#2e8b57" font-family="KaiTi,serif">生涯体检中心</text>
+  <text x="1448" y="160" text-anchor="middle" font-size="17" font-weight="800" fill="#256e46">合规同行</text>
+  <path d="M1444 186 l3 6 7 1 -5 5 1 7 -6 -3 -6 3 1 -7 -5 -5 7 -1 z" fill="#f4c430"/>
+ </g>
+ <!-- 幕分区标签 -->
+ <text x="380" y="46" text-anchor="middle" font-size="15" fill="#41648a" opacity=".65" letter-spacing="4">第一幕 · 象牙塔内（大一 — 大三）</text>
+ <text x="930" y="46" text-anchor="middle" font-size="15" fill="#8a6d3b" opacity=".7" letter-spacing="4">第二幕 · 毕业岔路（大四 — 毕业年）</text>
+ <text x="1290" y="46" text-anchor="middle" font-size="15" fill="#2e7d5b" opacity=".75" letter-spacing="4">第三幕 · 双线归宿（国内 / 海外）</text>`;
+}
+function buildMap(){
+ const pts=LEVELS.map(l=>({x:l.x,y:l.y}));
+ const d=catmullPath(pts);
+ let nodes='';
+ LEVELS.forEach((l,i)=>{
+  const labY=l.y===310?l.y+52:l.y-56;
+  const subY=labY+17;
+  const yrY=labY-16;
+  const r=l.final?21:17;
+  nodes+=`
+  <g class="node" data-i="${i}" id="node-${i}">
+   <circle class="n-ring" cx="${l.x}" cy="${l.y}" r="${r+4}"/>
+   <circle class="n-core" cx="${l.x}" cy="${l.y}" r="${r}"/>
+   <text x="${l.x}" y="${l.y+5}" text-anchor="middle" font-size="13" font-weight="900" fill="#fff" class="n-idx">${i+1}</text>
+   <text class="n-label" x="${l.x}" y="${labY}" text-anchor="middle">${l.name}</text>
+   <text class="n-sub" id="nsub-${i}" x="${l.x}" y="${subY}" text-anchor="middle">${l.sub}</text>
+   <text class="n-year" x="${l.x}" y="${yrY}" text-anchor="middle">${l.year}</text>
+  </g>`;
+ });
+ $('mapwrap').innerHTML=`
+ <svg id="map" viewBox="0 0 ${VB_W} ${VB_H}" width="${VB_W}" height="${VB_H}" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+   <linearGradient id="bgAll" x1="0" y1="0" x2="1" y2="0">
+    <stop offset="0" stop-color="#f0f5fa"/><stop offset=".48" stop-color="#f0f5fa"/>
+    <stop offset=".485" stop-color="#f4f8fb"/><stop offset=".655" stop-color="#f4f8fb"/>
+    <stop offset=".66" stop-color="#eef4ef"/><stop offset="1" stop-color="#eef4ef"/>
+   </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="${VB_W}" height="${VB_H}" fill="url(#bgAll)"/>
+  ${landmarkSVG()}
+  <path id="route-full" d="${d}" fill="none" stroke="#b9c9d8" stroke-width="5" stroke-dasharray="10 9"/>
+  <path id="route-done" d="${d}" fill="none" stroke="#2e8b57" stroke-width="5" stroke-linecap="round"/>
+  ${nodes}
+  <g id="walker">
+   <ellipse cx="0" cy="14" rx="10" ry="3" fill="rgba(22,50,74,.18)"/>
+   <circle cx="0" cy="-18" r="6.5" fill="#e8c9a8" stroke="#b98f68" stroke-width="1"/>
+   <path id="w-cap" d="M-7 -20 q7 -8 14 0 z" fill="#16324a"/>
+   <rect id="w-body" x="-6.5" y="-12" width="13" height="17" rx="4" fill="#4a6fa5"/>
+   <rect x="-5" y="5" width="4.5" height="9" fill="#3a4a5a"/><rect x="1" y="5" width="4.5" height="9" fill="#3a4a5a"/>
+  </g>
+ </svg>`;
+ const route=$('route-done'),L=route.getTotalLength();
+ route.dataset.len=L;route.setAttribute('stroke-dasharray',`0 ${L}`);
+ // 拖动滚动
+ const wrap=$('mapwrap');let down=false,sx=0,sl=0;
+ wrap.addEventListener('pointerdown',e=>{down=true;sx=e.clientX;sl=wrap.scrollLeft;wrap.classList.add('dragging')});
+ window.addEventListener('pointermove',e=>{if(!down)return;wrap.scrollLeft=sl-(e.clientX-sx)});
+ window.addEventListener('pointerup',()=>{down=false;wrap.classList.remove('dragging')});
+}
+function setWalkerAct(act){
+ const body=$('w-body'),cap=$('w-cap');
+ if(!body)return;
+ if(act===1){body.setAttribute('fill','#4a6fa5');cap.setAttribute('fill','#16324a')}
+ else if(act===2){body.setAttribute('fill','#3fa06a');cap.setAttribute('fill','#256e46')}
+ else{body.setAttribute('fill','#d9a020');cap.setAttribute('fill','#b98f22')}
+}
+function moveWalker(i,instant){
+ const w=$('walker');if(!w)return;
+ const l=LEVELS[i];
+ w.style.transition=instant?'none':'transform .9s ease-in-out';
+ w.style.transform=`translate(${l.x}px,${l.y+2}px)`;
+ setWalkerAct(l.act);
+ const done=Math.max(0,S?S.level:0);
+ const route=$('route-done'),L=+route.dataset.len;
+ route.setAttribute('stroke-dasharray',`${L*(done/LEVELS.length)} ${L}`);
+}
+function centerNode(i){
+ const wrap=$('mapwrap'),l=LEVELS[i];
+ const vw=wrap.clientWidth||900;
+ const target=Math.max(0,l.x-vw/2+80);
+ wrap.scrollTo({left:target,behavior:'smooth'});
+}
+
+/* ==================== 界面刷新 ==================== */
+function refreshHUD(){
+ const hp=$('hp-box')||document.querySelector('.hp');
+ hp.querySelectorAll('i').forEach(e=>e.remove());
+ for(let i=0;i<3;i++){
+  const t=document.createElement('i');t.textContent='💚';
+  if(i>=S.hp)t.className='lost';hp.appendChild(t);
+ }
+ $('pt-val').textContent=S.points;
+ const l=LEVELS[S.level];
+ if(S.finished){$('prog-val').textContent='体检完成 · 合规同行';$('btn-march').style.display='none'}
+ else{
+  $('prog-val').textContent=`第 ${S.level+1} 关 · ${l.name}（${l.year}）`;
+  $('btn-march').style.display='';
+  $('btn-march').textContent=`向第 ${S.level+1} 关进军`;
+ }
+ const p=Math.min(1,(S.finished?LEVELS.length:S.level)/LEVELS.length);
+ $('a-fill').style.width=(p*100)+'%';
+ document.querySelectorAll('.node').forEach(n=>{
+  const i=+n.dataset.i;
+  n.classList.toggle('passed',i<S.level||S.finished);
+  n.classList.toggle('current',i===S.level&&!S.finished);
+  n.classList.toggle('locked',i>S.level&&!S.finished);
+ });
+ save();
+}
+let bannerTimer=null;
+function showActBanner(act){
+ const a=ACTS[act],b=$('act-banner');
+ b.textContent=`${a.title}（${a.span}）—— ${a.desc}`;
+ b.classList.add('show');clearTimeout(bannerTimer);
+ bannerTimer=setTimeout(()=>b.classList.remove('show'),3600);
+}
+let toastTimer=null;
+function toast(msg,ms=2800){
+ const t=$('toast');t.innerHTML=msg;t.classList.add('show');
+ clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),ms);
+}
+
+/* ==================== 答题流程 ==================== */
+let curQ=null;
+function poolOf(lvIdx){
+ const lv=LEVELS[lvIdx];
+ return lv.pathQs?(lv.pathQs[S.path]||lv.pathQs.cn):lv.qs;
+}
+function pickQuestion(){
+ const lv=LEVELS[S.level],pool=poolOf(S.level);
+ const asked=S.asked[S.level]||[];
+ let avail=pool.map((q,i)=>i).filter(i=>!asked.includes(i));
+ if(!avail.length){S.asked[S.level]=[];avail=pool.map((q,i)=>i)}
+ const qi=avail[Math.floor(Math.random()*avail.length)];
+ (S.asked[S.level]=S.asked[S.level]||[]).push(qi);
+ save();return pool[qi];
+}
+function openQuestion(){
+ if(!S||S.finished||S.level>=LEVELS.length)return;
+ const lv=LEVELS[S.level];
+ curQ=pickQuestion();
+ $('q-no').textContent=`第 ${S.level+1} 关`;
+ $('q-year').textContent=lv.year;
+ $('q-title').textContent=lv.name;
+ $('q-act').textContent=`${ACTS[lv.act].title}（${ACTS[lv.act].span}）`;
+ $('q-text').textContent=curQ.q;
+ $('q-feedback').className='q-feedback';
+ $('btn-q-next').style.display='none';
+ $('btn-retry-q').style.display='none';
+ const box=$('opts');box.innerHTML='';
+ const order=curQ.o.map((t,i)=>({t,i})).sort(()=>Math.random()-.5);
+ order.forEach((op,idx)=>{
+  const b=document.createElement('button');
+  b.className='opt';
+  b.innerHTML=`<span class="tag">${'ABCD'[idx]}</span><span>${op.t}</span>`;
+  b.addEventListener('click',()=>answer(b,op.i));
+  box.appendChild(b);
+ });
+ $('q-overlay').classList.add('show');
+}
+function answer(btn,chosen){
+ if(btn.disabled)return;
+ const box=$('opts'),btns=[...box.querySelectorAll('.opt')];
+ btns.forEach(b=>b.disabled=true);
+ const right=chosen===curQ.a;
+ const fb=$('q-feedback');
+ if(right){
+  btn.classList.add('right');
+  S.points=Math.min(14,S.points+1);
+  sfx.ok();
+  fb.className='q-feedback ok show';
+  $('fb-line').textContent=`✦ 判定正确【${STATE_LABEL[curQ.st]||'通过'}】—— 合规点 +1，节点亮起！`;
+  $('q-kp').innerHTML=`<b>规则依据：</b>${curQ.k}`;
+  $('btn-q-next').style.display='';
+  $('btn-q-next').textContent=S.level===LEVELS.length-1?'抵达终点 · 生成体检报告 🎉':'继续行进 →';
+ }else{
+  btn.classList.add('wrong');
+  btns.forEach(b=>{const t=b.querySelector('span:last-child').textContent;if(t===curQ.o[curQ.a])b.classList.add('right')});
+  S.wrongs++;S.hp--;S.points=Math.max(0,S.points-1);
+  sfx.no();
+  fb.className='q-feedback no show';
+  $('fb-line').textContent=`✧ 判定错误 —— 正确判定已标绿。合规点 −1、体检灯 −1（剩 ${S.hp} 盏）。换一题再判！`;
+  $('q-kp').innerHTML=`<b>规则依据：</b>${curQ.k}`;
+  $('btn-retry-q').style.display='';
+  if(S.hp<=0){setTimeout(()=>{$('q-overlay').classList.remove('show');$('rest-overlay').classList.add('show');sfx.rest()},900)}
+ }
+ refreshHUD();
+}
+$('btn-retry-q').addEventListener('click',()=>{$('q-overlay').classList.remove('show');setTimeout(openQuestion,240)});
+$('btn-rest').addEventListener('click',()=>{
+ S.hp=3;$('rest-overlay').classList.remove('show');refreshHUD();
+ toast('体检灯已恢复 —— '+QUOTES[LEVELS[S.level].act]);
+ setTimeout(openQuestion,260);
+});
+$('btn-q-next').addEventListener('click',()=>{
+ $('q-overlay').classList.remove('show');
+ sfx.step();
+ S.level++;
+ if(S.level>=LEVELS.length){finishGame();return}
+ const lv=LEVELS[S.level];
+ refreshHUD();moveWalker(S.level);centerNode(S.level);
+ if(S.level===0||S.level===6||S.level===10)setTimeout(()=>showActBanner(lv.act),500);
+ toast(`行进至：${lv.name}（${lv.year}）· ${lv.sub}`);
+});
+
+/* ==================== 通关 ==================== */
+function rankOf(pt){return RANKS.find(r=>pt>=r.min).name}
+function finishGame(){
+ S.finished=true;S.elapsed=Date.now()-S.startTs;
+ refreshHUD();moveWalker(LEVELS.length-1,true);
+ $('a-fill').style.width='100%';
+ document.querySelectorAll('.node').forEach(n=>n.classList.add('passed'));
+ $('screen-game').style.display='none';
+ $('screen-victory').style.display='flex';
+ const pl=S.name?S.name+' 同学':'同学';
+ $('v-profile').textContent=`${pl} · ${S.birth.slice(0,7).replace('-',' 年 ')} 月出生 · ${S.entry} 级（${S.gradeLabel}）· ${S.age} 岁 · ${S.path==='cn'?'国内线':'海外线'}`;
+ $('v-pt').textContent=`${S.points} / 14`;
+ $('v-rank').textContent=rankOf(S.points);
+ $('v-time').textContent=fmtTime(S.elapsed);
+ $('v-wrong').textContent=S.wrongs;
+ const best=JSON.parse(localStorage.getItem(BEST_KEY)||'null');
+ if(!best||S.points>best.points||(S.points===best.points&&S.elapsed<best.time)){
+  localStorage.setItem(BEST_KEY,JSON.stringify({points:S.points,time:S.elapsed,rank:rankOf(S.points),date:new Date().toLocaleDateString('zh-CN')}));
+ }
+ localStorage.removeItem(SAVE_KEY);
+ startFireworks();sfx.win();
+}
+/* 烟花 */
+let fwRun=false;
+function startFireworks(){
+ const cv=$('fw-canvas'),ctx=cv.getContext('2d');
+ const fit=()=>{cv.width=innerWidth;cv.height=innerHeight};fit();window.addEventListener('resize',fit);
+ const COLORS=['#f4c430','#3fa06a','#e8f4ff','#ffd54f','#7fd4a8','#ffe9a8'];
+ let parts=[];
+ function burst(x,y){
+  const n=52+Math.floor(Math.random()*30),c=COLORS[Math.floor(Math.random()*COLORS.length)];
+  for(let i=0;i<n;i++){
+   const a=Math.random()*Math.PI*2,v=1.6+Math.random()*4.2;
+   parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-1.2,life:60+Math.random()*40,age:0,c,r:1.6+Math.random()*2.2});
+  }
+ }
+ fwRun=true;
+ (function loop(){
+  if(!fwRun)return;
+  ctx.clearRect(0,0,cv.width,cv.height);
+  if(Math.random()<.16)burst(cv.width*(.1+Math.random()*.8),cv.height*(.08+Math.random()*.45));
+  parts=parts.filter(p=>p.age<p.life);
+  parts.forEach(p=>{
+   p.age++;p.x+=p.vx;p.y+=p.vy;p.vy+=.045;p.vx*=.985;
+   ctx.globalAlpha=Math.max(0,1-p.age/p.life);
+   ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fill();
+  });
+  ctx.globalAlpha=1;
+  requestAnimationFrame(loop);
+ })();
+}
+function stopFireworks(){fwRun=false}
+
+/* ==================== 体检报告卡 ==================== */
+function saveCard(){
+ const cv=document.createElement('canvas');cv.width=1000;cv.height=640;
+ const ctx=cv.getContext('2d');
+ const g=ctx.createLinearGradient(0,0,0,640);
+ g.addColorStop(0,'#132c42');g.addColorStop(.55,'#1f4a6e');g.addColorStop(1,'#132c42');
+ ctx.fillStyle=g;ctx.fillRect(0,0,1000,640);
+ ctx.fillStyle='rgba(244,196,48,.25)';
+ for(let i=0;i<70;i++){const x=Math.random()*1000,y=Math.random()*640,r=Math.random()*1.6+.4;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.fill()}
+ ctx.strokeStyle='#f4c430';ctx.lineWidth=4;ctx.strokeRect(18,18,964,604);
+ ctx.strokeStyle='rgba(244,196,48,.45)';ctx.lineWidth=1.5;ctx.strokeRect(30,30,940,580);
+ ctx.textAlign='center';
+ ctx.fillStyle='#f4c430';ctx.font='900 52px "KaiTi","Microsoft YaHei",serif';
+ ctx.fillText('生涯岔路口 · 生涯合规体检报告',500,104);
+ ctx.fillStyle='#cfe0ee';ctx.font='19px "Microsoft YaHei"';
+ ctx.fillText('以进校时间为锚 · 年龄×年级双重校验 · 双路径规则随行',500,142);
+ ctx.font='900 84px "Microsoft YaHei"';ctx.fillStyle='#f4c430';
+ ctx.fillText(S.gradeLabel,320,300);
+ ctx.fillText(S.age+' 岁',680,300);
+ ctx.font='900 46px "Microsoft YaHei"';ctx.fillStyle='#ffe9a8';
+ ctx.fillText('×',500,272);
+ ctx.font='21px "Microsoft YaHei"';ctx.fillStyle='#cfe0ee';
+ ctx.fillText('学籍 · '+S.entry+' 级',320,338);
+ ctx.fillText('出生 · '+S.birth.replace('-',' 年 ').replace('-',' 月 ')+' 日',680,338);
+ ctx.font='800 29px "Microsoft YaHei"';ctx.fillStyle='#ffe9a8';
+ ctx.fillText('— '+(S.path==='cn'?'国 内 线':'海 外 线')+' · 双路径规则随行 —',500,392);
+ ctx.fillStyle='#fff';
+ ctx.font='bold 25px "Microsoft YaHei"';
+ ctx.fillText((S.name||'同学')+' · 生涯体检',500,446);
+ ctx.fillStyle='#a9d8bd';ctx.font='21px "Microsoft YaHei"';
+ ctx.fillText(`合规点 ${S.points}/14 · ${rankOf(S.points)} · 用时 ${fmtTime(S.elapsed)} · 误判 ${S.wrongs} 次`,500,486);
+ ctx.fillStyle='rgba(207,224,238,.92)';ctx.font='25px "KaiTi","Microsoft YaHei",serif';
+ ctx.fillText('“行远自迩，笃行不怠。”',500,552);
+ ctx.fillStyle='rgba(207,224,238,.6)';ctx.font='15px "Microsoft YaHei"';
+ ctx.fillText(new Date().toLocaleDateString('zh-CN')+' · 生涯岔路口合规闯关纪念',500,596);
+ const a=document.createElement('a');
+ a.download=`生涯合规体检报告-${(S.name||'同学').replace(/[\\/:*?"<>|]/g,'')}.png`;
+ a.href=cv.toDataURL('image/png');a.click();
+ toast('体检报告已保存 —— 可留存或打印');
+}
+
+/* ==================== 屏幕切换 ==================== */
+function showStart(){
+ $('screen-game').style.display='none';
+ $('screen-victory').style.display='none';
+ $('screen-start').style.display='flex';
+}
+function showGame(){
+ $('screen-start').style.display='none';
+ $('screen-victory').style.display='none';
+ $('screen-game').style.display='flex';
+ // 档案栏
+ $('ab-name').textContent=S.name||'同学';
+ $('ab-birth').textContent=S.birth;
+ $('ab-grade').textContent=`${S.entry} 级（${S.gradeLabel}）`;
+ $('ab-age').textContent=S.age;
+ $('ab-path').textContent=S.path==='cn'?'国内线':'海外线';
+ $('ab-note').textContent=S.notes.join('；');
+ const v=$('ab-verdict');
+ v.textContent=S.verdict.tag;
+ v.className='v-tag '+(S.verdict.cls==='ok'?'t-ok':S.verdict.cls==='warn'?'t-warn':S.verdict.cls==='info'?'t-info':'t-err');
+ // 路径专属节点副标签
+ if(S.path==='ov'){$('nsub-10').textContent='语言 · 有效期';$('nsub-11').textContent='认证 · 名单核验'}
+ else{$('nsub-10').textContent='考公 · 年龄线';$('nsub-11').textContent='选调 · 服务期'}
+ refreshHUD();moveWalker(S.level,true);centerNode(S.level);
+ showActBanner(LEVELS[S.level].act);
+ toast(`档案判定【${S.verdict.tag}】—— ${S.verdict.text}`);
+}
+function startGame(){
+ const P=buildProfile();
+ if(!P)return;
+ if(P.verdict.cls==='err'){
+  $('egg-detail').textContent=`按学籍推算你应为 ${P.gradeLabel}，但出生日期折算年龄仅 ${P.age} 岁（未满 16 岁）——年龄与年级严重不符。`;
+  $('egg-overlay').classList.add('show');
+  window.__pendingProfile=P;
+  return;
+ }
+ S=Object.assign({level:0,points:0,wrongs:0,hp:3,startTs:Date.now(),finished:false,asked:{}},P);
+ save();
+ if(P.verdict.cls==='warn')toast(`档案判定【人工审核】—— ${P.verdict.text}`,3600);
+ showGame();
+}
+$('btn-egg-back').addEventListener('click',()=>{$('egg-overlay').classList.remove('show');showStart()});
+$('btn-egg-ok').addEventListener('click',()=>{
+ $('egg-overlay').classList.remove('show');
+ const P=window.__pendingProfile;
+ P.verdict={cls:'err',tag:'人工审核',text:'低龄入学待核：请准备少年班 / 特殊学制证明'};
+ S=Object.assign({level:0,points:0,wrongs:0,hp:3,startTs:Date.now(),finished:false,asked:{}},P);
+ save();showGame();
+});
+$('btn-start').addEventListener('click',startGame);
+$('btn-continue').addEventListener('click',()=>{
+ const sv=loadSave();
+ if(sv){S=Object.assign({},sv);S.asked=S.asked||{};showGame();toast('已恢复上次体检 —— 继续行进！')}
+});
+$('btn-march').addEventListener('click',openQuestion);
+$('btn-sound').addEventListener('click',()=>{
+ sndOn=!sndOn;localStorage.setItem(SND_KEY,sndOn?'1':'0');
+ $('btn-sound').textContent=sndOn?'🔊 音效开':'🔇 音效关';
+ if(sndOn)sfx.step();
+});
+$('btn-restart').addEventListener('click',()=>{
+ if(!confirm('重新建档将清空当前体检进度，确定吗？'))return;
+ const P=buildProfile();
+ if(!P)return;
+ S=Object.assign({level:0,points:0,wrongs:0,hp:3,startTs:Date.now(),finished:false,asked:{}},P);
+ save();refreshHUD();moveWalker(0,true);centerNode(0);
+ toast('新的体检开始了 —— 出生建档！');
+});
+$('btn-home').addEventListener('click',showStart);
+$('btn-save').addEventListener('click',saveCard);
+$('btn-again').addEventListener('click',()=>{
+ stopFireworks();
+ const P=buildProfile();
+ if(!P)return;
+ if(P.verdict.cls==='err'){$('egg-detail').textContent=`按学籍推算你应为 ${P.gradeLabel}，但出生日期折算年龄仅 ${P.age} 岁（未满 16 岁）。`;$('egg-overlay').classList.add('show');window.__pendingProfile=P;return}
+ S=Object.assign({level:0,points:0,wrongs:0,hp:3,startTs:Date.now(),finished:false,asked:{}},P);
+ save();$('screen-victory').style.display='none';showGame();
+});
+$('btn-v-home').addEventListener('click',()=>{stopFireworks();showStart()});
+$('path-cn').addEventListener('click',()=>{$('path-cn').classList.add('active');$('path-ov').classList.remove('active')});
+$('path-ov').addEventListener('click',()=>{$('path-ov').classList.add('active');$('path-cn').classList.remove('active')});
+
+/* ==================== 初始化 ==================== */
+buildMap();
+(function init(){
+ if(sndOn)$('btn-sound').textContent='🔊 音效开';
+ const sv=loadSave();
+ if(sv&&!sv.finished){
+  $('btn-continue').style.display='';
+  $('btn-continue').textContent=`继续上次体检（第 ${Math.min(sv.level+1,14)} 关）→`;
+  $('by-input').value=sv.birth;$('ey-input').value=sv.entry;
+  if(sv.name)$('nm-input').value=sv.name;
+  $('ck-fudu').checked=!!sv.fudu;$('ck-xiuxue').checked=!!sv.xiuxue;
+  if(sv.path==='ov'){$('path-ov').classList.add('active');$('path-cn').classList.remove('active')}
+ }
+})();
+/* 端到端辅助 */
+window.__game={
+ get state(){return S},
+ get levels(){return LEVELS},
+ start(){startGame()},
+ openQ:openQuestion,
+ answerCorrect(){
+  const btns=[...document.querySelectorAll('#opts .opt')];
+  const rightBtn=btns.find(b=>b.querySelector('span:last-child').textContent===curQ.o[curQ.a]);
+  if(rightBtn)rightBtn.click();
+ },
+ next(){$('btn-q-next').click()},
+ autoWin(){while(S&&!S.finished){openQuestion();this.answerCorrect();this.next()}}
+};
+</script>
+</body>
+</html>

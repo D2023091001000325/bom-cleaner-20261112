@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生涯规划罗盘 · 从小学到大学的全学段规划台</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--navy:#16324a;--navy2:#1f4a6e;--blue:#4a90e2;--cyan:#0891b2;--gold:#f4c430;--green:#2e8b57;
+ --bg:#eef3f8;--ink:#22303c;--sub:#5b6b7b;--line:#d9e4ee;--card:#ffffff}
+html,body{height:100%}
+body{font-family:"Segoe UI","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--ink);line-height:1.75}
+header{background:linear-gradient(135deg,#16324a,#1f4a6e 60%,#2c608c);color:#fff;padding:30px 20px 70px;position:relative}
+.h-wrap{max-width:1180px;margin:0 auto;position:relative;z-index:2}
+.h-tag{display:inline-block;font-size:12px;letter-spacing:3px;background:rgba(244,196,48,.18);border:1px solid rgba(244,196,48,.5);color:#ffe9a8;border-radius:20px;padding:2px 14px;margin-bottom:10px}
+header h1{font-size:30px;letter-spacing:4px}
+header h1 b{color:var(--gold)}
+.h-sub{margin-top:8px;font-size:14px;opacity:.92}
+.h-disclaimer{margin-top:12px;font-size:12.5px;background:rgba(255,255,255,.1);border-left:4px solid var(--gold);border-radius:8px;padding:8px 14px;max-width:760px}
+.h-disclaimer b{color:#ffe9a8}
+/* 建档区 */
+.profile{max-width:1180px;margin:-46px auto 0;padding:0 20px;position:relative;z-index:3;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.p-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:0 8px 24px rgba(22,50,74,.1)}
+.p-card.full{grid-column:1/-1}
+.p-card h2{font-size:16px;color:var(--navy);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.p-card .hint{font-size:12.5px;color:var(--sub);margin-bottom:12px}
+.f-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.f-item label{display:block;font-size:12.5px;color:var(--sub);margin-bottom:4px}
+.f-item input,.f-item select{width:100%;padding:8px 10px;border:1px solid #c3d2e0;border-radius:8px;font-size:14px;background:#fbfdff;color:var(--ink)}
+.f-item input:focus,.f-item select:focus{outline:2px solid rgba(31,74,110,.25);border-color:var(--navy2)}
+.seg-row{display:flex;gap:10px;margin-top:4px}
+.seg{flex:1;border:2px solid var(--line);background:#fbfdff;border-radius:12px;padding:10px 12px;cursor:pointer;text-align:center;transition:.15s;font-family:inherit}
+.seg b{display:block;font-size:15px;color:var(--navy)}
+.seg span{font-size:12px;color:var(--sub)}
+.seg.active{border-color:var(--navy2);background:linear-gradient(180deg,#f2f8ff,#eaf3fb)}
+.seg.active b{color:var(--navy2)}
+.btn{border:none;border-radius:10px;padding:11px 26px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit}
+.btn-main{background:linear-gradient(135deg,var(--navy2),var(--navy));color:#fff;width:100%;margin-top:14px;font-size:16px;letter-spacing:4px;padding:13px}
+.btn-main:hover{filter:brightness(1.1)}
+/* 判定横幅 */
+.verdict{max-width:1180px;margin:16px auto 0;padding:0 20px;display:none}
+.verdict.show{display:block}
+.v-box{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 20px;box-shadow:0 8px 24px rgba(22,50,74,.1);display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.v-tag{border-radius:12px;padding:8px 18px;font-size:15px;font-weight:800;color:#fff;flex-shrink:0}
+.v-tag.t-ok{background:var(--green)}.v-tag.t-warn{background:#c07a1c}.v-tag.t-info{background:#5b7a95}.v-tag.t-err{background:#c0392b}
+.v-text{font-size:14px;color:#41576b;line-height:1.6;flex:1;min-width:240px}
+.v-text b{color:var(--navy)}
+/* 学段分档区 */
+main{max-width:1180px;margin:20px auto 40px;padding:0 20px}
+.stage-sec{background:var(--card);border:1px solid var(--line);border-radius:16px;margin-bottom:18px;overflow:hidden}
+.stage-head{padding:16px 22px;display:flex;align-items:center;gap:12px;cursor:pointer;border-left:6px solid var(--blue)}
+.stage-head .s-emoji{font-size:26px}
+.stage-head .s-t{font-size:18px;font-weight:800;color:var(--navy)}
+.stage-head .s-d{font-size:12.5px;color:var(--sub);margin-top:2px}
+.stage-head .s-arrow{margin-left:auto;font-size:13px;color:var(--sub);transition:.25s}
+.stage-sec.open .stage-head .s-arrow{transform:rotate(180deg)}
+.stage-body{display:none;padding:0 22px 20px}
+.stage-sec.open .stage-body{display:block}
+/* 初中以下：金色启蒙主题 */
+.stage-sec.sec-pre .stage-head{border-left-color:var(--gold);background:linear-gradient(90deg,#fdf8e8,#ffffff)}
+.stage-sec.sec-junior .stage-head{border-left-color:var(--cyan);background:linear-gradient(90deg,#eaf6f8,#ffffff)}
+.stage-sec.sec-senior .stage-head{border-left-color:var(--blue);background:linear-gradient(90deg,#eef4fb,#ffffff)}
+.stage-sec.sec-univ .stage-head{border-left-color:var(--navy2);background:linear-gradient(90deg,#eaf1f7,#ffffff)}
+/* 路径切换条（初一以上可用） */
+.pathbar{display:none;background:linear-gradient(90deg,#1f4a6e,#2c608c);border-radius:12px;padding:10px 16px;color:#fff;align-items:center;gap:14px;margin-bottom:14px}
+.pathbar.show{display:flex}
+.pathbar .pb-lab{font-size:13.5px;font-weight:700}
+.pb-tabs{display:flex;gap:8px}
+.pb-tab{border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.08);color:#fff;border-radius:9px;padding:6px 16px;font-size:13.5px;cursor:pointer;font-family:inherit}
+.pb-tab.on{background:#fff;color:var(--navy2);border-color:#fff;font-weight:700}
+.pb-note{margin-left:auto;font-size:12px;opacity:.85}
+/* 规划卡片 */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px}
+.pl-card{background:#fbfdff;border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.pl-card h3{font-size:15.5px;color:var(--navy);margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.pl-card h3 .pl-ic{width:30px;height:30px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.pl-card ul{list-style:none}
+.pl-card li{font-size:13.5px;color:#41576b;padding:5px 0 5px 20px;position:relative;line-height:1.6}
+.pl-card li::before{content:"▸";position:absolute;left:2px;color:var(--blue);font-weight:900}
+.pl-card li b{color:var(--navy)}
+.pl-card .rule-tip{margin-top:8px;background:#f2f7fb;border-left:3px solid var(--cyan);border-radius:6px;padding:7px 10px;font-size:12.5px;color:#37596e;line-height:1.55}
+.pl-card .rule-tip b{color:var(--cyan)}
+/* 承认度输入（美赛等） */
+.recog-box{background:#fffbe9;border:1px solid #e8d48a;border-radius:12px;padding:14px 16px;margin-top:14px}
+.recog-box h4{font-size:14.5px;color:#8a6d1a;margin-bottom:8px}
+.recog-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.recog-row select{padding:7px 10px;border:1px solid #cbb56a;border-radius:8px;font-size:13.5px;background:#fff}
+.recog-row .recog-out{font-size:13px;color:#6b5a20;line-height:1.6;flex:1;min-width:220px}
+.recog-out b{color:#8a6d1a}
+/* 时间轴 */
+.timeline{margin-top:16px;background:#fbfdff;border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.tl-title{font-size:15px;font-weight:800;color:var(--navy);margin-bottom:14px}
+.tl-track{position:relative;padding-left:26px}
+.tl-track::before{content:"";position:absolute;left:8px;top:6px;bottom:6px;width:3px;background:linear-gradient(180deg,var(--gold),var(--cyan),var(--blue),var(--navy2));border-radius:99px}
+.tl-item{position:relative;margin-bottom:13px}
+.tl-item::before{content:"";position:absolute;left:-25px;top:5px;width:11px;height:11px;border-radius:50%;background:#fff;border:3px solid var(--blue)}
+.tl-item.pre::before{border-color:var(--gold)}.tl-item.jr::before{border-color:var(--cyan)}.tl-item.un::before{border-color:var(--navy2)}
+.tl-item b{font-size:14px;color:var(--navy)}
+.tl-item span{display:block;font-size:13px;color:#41576b;line-height:1.6}
+/* ===== 党团发展首班车时刻表 ===== */
+.party-sec{background:var(--card);border:1px solid var(--line);border-radius:16px;margin-bottom:18px;overflow:hidden}
+.party-head{padding:16px 22px;display:flex;align-items:center;gap:12px;cursor:pointer;border-left:6px solid #c0392b;background:linear-gradient(90deg,#fdeeee,#ffffff)}
+.party-head .s-t{font-size:18px;font-weight:800;color:var(--navy)}
+.party-head .s-d{font-size:12.5px;color:var(--sub);margin-top:2px}
+.party-head .s-arrow{margin-left:auto;font-size:13px;color:var(--sub);transition:.25s}
+.party-sec.open .party-head .s-arrow{transform:rotate(180deg)}
+.party-body{display:none;padding:0 22px 20px}
+.party-sec.open .party-body{display:block}
+.party-intro{background:#f2f7fb;border-left:4px solid var(--navy2);border-radius:10px;padding:10px 14px;font-size:13px;color:#37596e;line-height:1.7;margin-bottom:14px}
+.party-intro b{color:var(--navy)}
+.pt-track{background:#fbfdff;border:1px solid var(--line);border-radius:12px;margin-bottom:14px;overflow:hidden}
+.pt-head{display:flex;align-items:center;gap:10px;padding:11px 16px;font-weight:800;font-size:15px;flex-wrap:wrap}
+.pt-head.young{background:linear-gradient(90deg,#e8c14a,#f4d968);color:#5c4300}
+.pt-head.league{background:linear-gradient(90deg,#0a7d94,#22b8cf);color:#fff}
+.pt-head.party{background:linear-gradient(90deg,#922b21,#c0392b);color:#fff}
+.pt-head .pt-total{margin-left:auto;font-size:12px;font-weight:600;opacity:.92;letter-spacing:.5px}
+.pt-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table.pt{width:100%;border-collapse:collapse;min-width:660px;font-size:13px}
+table.pt th{background:#f2f6fa;color:#37596e;font-weight:700;padding:8px 12px;text-align:left;border-bottom:2px solid var(--line);white-space:nowrap}
+table.pt td{padding:9px 12px;border-bottom:1px solid #e8eff5;vertical-align:top;line-height:1.6;color:#41576b}
+table.pt tr:last-child td{border-bottom:none}
+table.pt td.st{white-space:nowrap;font-weight:700;color:var(--navy)}
+table.pt td.age{white-space:nowrap;font-weight:800;color:#a93226}
+table.pt td.rule{min-width:260px}
+table.pt td.basis{white-space:nowrap;font-size:12px;color:#718096;min-width:120px}
+table.pt tr.now{background:#fff7e0}
+table.pt tr.now td.st{color:#b0730c}
+.now-badge{display:inline-block;margin-left:6px;background:var(--gold);color:#5c4300;font-size:10.5px;border-radius:8px;padding:0 7px;font-weight:800;vertical-align:1px}
+.pt-note{padding:9px 16px;background:#fdf6e8;border-top:1px solid #eadfb8;font-size:12.5px;color:#7a5c10;line-height:1.6}
+.pt-note b{color:#8a6d1a}
+/* 适用范围规范卡 */
+.scope-box{background:#fff5f3;border:1px solid #ecc8c0;border-left:5px solid #c0392b;border-radius:12px;padding:14px 18px;margin-top:14px}
+.scope-box h4{font-size:15px;color:#a93226;margin-bottom:8px}
+.scope-box ul{list-style:none}
+.scope-box li{font-size:13px;color:#5d4037;padding:4px 0 4px 22px;position:relative;line-height:1.65}
+.scope-box li::before{content:"✓";position:absolute;left:2px;color:#c0392b;font-weight:900}
+.scope-box li b{color:#a93226}
+/* 声明条 */
+.declare{background:linear-gradient(135deg,#16324a,#1f4a6e);color:#fff;border-radius:14px;padding:18px 22px;font-size:13px;line-height:1.8;margin-top:6px}
+.declare b{color:var(--gold)}
+footer{background:var(--navy);color:rgba(255,255,255,.75);text-align:center;padding:22px 16px;font-size:12.5px;letter-spacing:1px}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(18px);background:rgba(22,50,74,.95);color:#fff;font-size:13.5px;border-radius:10px;padding:10px 20px;opacity:0;pointer-events:none;transition:.3s;z-index:60;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media (max-width:760px){
+ .profile{grid-template-columns:1fr}
+ header h1{font-size:24px}
+ .h-disclaimer{font-size:11.5px}
+ .stage-head .s-t{font-size:16px}
+ .pb-note{display:none}
+ /* 党团时刻表：窄屏改卡片式，免横向滑动 */
+ .pt-scroll{overflow-x:visible}
+ table.pt{min-width:0;display:block}
+ table.pt thead{display:none}
+ table.pt tbody{display:block}
+ table.pt tr{display:block;border:1px solid #e8eff5;border-radius:10px;margin:10px 0;padding:9px 12px;background:#fff}
+ table.pt tr.now{background:#fff7e0;border-color:#ead9a8}
+ table.pt td{display:block;border:none;padding:2px 0}
+ table.pt td.st{font-size:14.5px;padding-bottom:4px}
+ table.pt td.rule::before{content:"制度门槛：";font-weight:700;color:#5b7a95}
+ table.pt td.age::before{content:"最早年龄：";font-weight:700;color:#5b7a95}
+ table.pt td.age span{display:inline}
+ table.pt td.basis::before{content:"依据：";font-weight:700;color:#5b7a95}
+ table.pt td.basis{font-size:11.5px;color:#8ea0b0}
+}
+</style>
+</head>
+<body>
+
+<header>
+ <div class="h-wrap">
+  <span class="h-tag">生 涯 规 划 · 全 学 段</span>
+  <h1>生涯规划<b>罗盘</b></h1>
+   <div class="h-sub">从入学年龄到毕业归宿 —— 合规年龄线 · 党团发展首班车时刻表 · 双路径规划 · 规则依据随行</div>
+   <div class="h-disclaimer"><b>声明：</b>本工具适用于<b>大专及以上学历</b>规划场景的规则参考；小学与初中阶段内容为升学启蒙参考。党团发展时刻表依据现行<b>党章（2022）、团章（2023）、队章（2020）</b>与<b>《中国共产党发展党员工作细则》（2026 年 5 月修订施行）</b>整理。所有年龄线、届别与有效期规则请以当年官方招考公告为准，本站不替代官方口径。</div>
+ </div>
+</header>
+
+<!-- ============ 建档 ============ -->
+<div class="profile">
+ <div class="p-card full">
+  <h2>🪪 生涯建档（即时完成年龄合规判定）</h2>
+  <div class="hint">数据仅存本机浏览器，不上传。出生日期 + 当前学段用于换算年龄合规线与倒推时间轴。</div>
+  <div class="f-grid">
+   <div class="f-item"><label for="by">出生日期</label><input type="date" id="by" value="2008-09-01"></div>
+   <div class="f-item"><label for="stage">当前学段</label>
+    <select id="stage">
+     <option value="pre">初一以下（小学 / 学前）</option>
+     <option value="junior" selected>初一及以上 · 初中</option>
+     <option value="senior">高中 / 中职</option>
+     <option value="univ">大学 / 大专及以上</option>
+     <option value="grad">毕业 / 备考期</option>
+    </select></div>
+   <div class="f-item"><label for="grade-in">入学年份（现学段入学年）</label><input type="number" id="grade-in" value="2024" min="2015" max="2035"></div>
+  </div>
+  <div class="seg-row">
+   <button class="seg active" id="seg-cn" type="button"><b>🇨🇳 国内线</b><span>强基计划 · 五大竞赛 · 保研考研 · 考公职</span></button>
+   <button class="seg" id="seg-ov" type="button"><b>🌍 海外线</b><span>雅思托福 · 海外本科 / 中外合作 · 留学申请</span></button>
+  </div>
+  <button class="btn btn-main" id="btn-go">生成我的生涯规划视图</button>
+ </div>
+</div>
+
+<!-- 判定横幅 -->
+<div class="verdict" id="verdict">
+ <div class="v-box">
+  <div class="v-tag" id="v-tag">通过</div>
+  <div class="v-text" id="v-text"></div>
+ </div>
+</div>
+
+<!-- ============ 主体 ============ -->
+<main>
+
+ <!-- ===== 党团发展首班车时刻表 ===== -->
+ <section class="party-sec open" id="sec-party">
+  <div class="party-head" onclick="toggleSec('sec-party')">
+   <span class="s-emoji">🚉</span>
+   <div><div class="s-t">党团发展 · 首班车时刻表</div><div class="s-d">少先队 → 共青团 → 共产党 —— 不只列申请年龄：每个流程站点的"考核通过"最小年龄逐站累加</div></div>
+   <span class="s-arrow">▼ 收起</span>
+  </div>
+  <div class="party-body">
+   <div class="party-intro">按<b>现行《中国共产党章程》（2022 年修改）</b>、<b>《中国共产党发展党员工作细则》（2026 年 4 月修订、5 月发布施行）</b>、<b>《中国共产主义青年团章程》（2023 年修改）</b>、<b>《中国少年先锋队章程》（2020 年修改）</b>整理。入党申请线（18 周岁）恰与高考 / 大学入学年龄重合，故入党流程<b>默认从大学阶段起步</b>，下列时刻表供逐站对照；各站实际进度以所在党组织安排为准。</div>
+   <div id="party-tracks"></div>
+   <div class="grid2" id="g-party"></div>
+   <div class="scope-box">
+    <h4>📏 适用范围规范（本表及全站规划的边界）</h4>
+    <ul>
+     <li><b>主要适用：</b>学生群体（全日制大专 / 本科 / 硕士 / 博士在读）；不以读研为必要条件，但<b>最高学历须为大专及以上</b></li>
+     <li><b>在职规则：</b><b>研究生阶段可在职</b>（非全日制研究生向工作、学习所在单位党组织提出申请）；<b>全日制本科及以下不得在职</b>使用本表规划</li>
+     <li><b>非全日制边界：</b><b>仅支持研究生层次</b>；非全日制本科、非全日制大专及以下学历（<b>含微专业</b>）不支持</li>
+     <li><b>毕业仅剩备考期（含在职备考）：</b>须持<b>全日制统招大专及以上毕业证书</b>方可按本表参考；非全日制、非统招本科及以下不支持</li>
+     <li><b>免责：</b>党团发展以所在党组织与上级党委实际审批为准；年龄线为制度下限而非承诺进度</li>
+    </ul>
+   </div>
+  </div>
+ </section>
+
+ <!-- ===== 初一以下 ===== -->
+ <section class="stage-sec sec-pre" id="sec-pre">
+  <div class="stage-head" onclick="toggleSec('sec-pre')">
+   <span class="s-emoji">🌱</span>
+   <div><div class="s-t">初一以下 · 启蒙规划带</div><div class="s-d">从出生户籍登记到小学入学 —— 合规年龄线 · 少先队 · 班干与领导力</div></div>
+   <span class="s-arrow">▼ 展开</span>
+  </div>
+  <div class="stage-body">
+   <div class="grid2">
+    <div class="pl-card">
+     <h3><span class="pl-ic" style="background:#fdf3d0;">📋</span>合规起点：出生与户籍</h3>
+     <ul>
+      <li><b>出生登记：</b>出生后一个月内办理出生医学证明与户籍登记——一切生涯档案的"第 0 号材料"</li>
+      <li><b>姓名规范：</b>入学前如需改名，尽早办理并同步更新所有证件，避免学籍与户籍不一致</li>
+      <li><b>从小学起建"成长档案袋"：</b>奖状、证书、体检记录按学年归档，日后升学材料信手拈来</li>
+     </ul>
+     <div class="rule-tip"><b>规则依据：</b>小学入学年龄线（一般为当年 8 月 31 日前满 6 周岁，各地略有差异）以当年教育局通告为准——差一天都可能影响入学届别，届别又影响此后全部考试年份。</div>
+    </div>
+    <div class="pl-card">
+     <h3><span class="pl-ic" style="background:#fdf3d0;">🧣</span>少先队与集体启蒙</h3>
+     <ul>
+      <li><b>入队规划：</b>一般二年级前后首批入队，家长可提前引导理解队史与标志含义</li>
+      <li><b>红领巾与荣誉：</b>争章、评优记录保留原件——中学入团材料常需小学阶段表现佐证</li>
+      <li><b>仪式感：</b>入队仪式、六一活动拍照留存，综合素质档案的早期素材</li>
+     </ul>
+     <div class="rule-tip"><b>提示：</b>少先队经历本身不构成升学加分，但"争章 + 班干 + 综合素质记录"共同构成中学入团与评优的信用起点。</div>
+    </div>
+    <div class="pl-card">
+     <h3><span class="pl-ic" style="background:#fdf3d0;">🧭</span>班干与领导力启蒙</h3>
+     <ul>
+      <li><b>轮值班干：</b>低年级以轮流任职体验为主，家长不必追求"当大干部"</li>
+      <li><b>领导力积累：</b>小组长、图书管理员、领操员等"小岗位"都是可叙述的领导力素材</li>
+      <li><b>记录方式：</b>学年末让孩子自述一句"这一年我负责了什么"，家长笔录归档——真实、具体、可追溯</li>
+     </ul>
+     <div class="rule-tip"><b>规划要点：</b>领导力叙事从小学就要"留痕"，中学竞选、大学社团与综评都会回溯这条线。</div>
+    </div>
+    <div class="pl-card">
+     <h3><span class="pl-ic" style="background:#fdf3d0;">📚</span>习惯与兴趣占位</h3>
+     <ul>
+      <li><b>阅读与计算习惯：</b>小学阶段的核心竞争力是习惯，不是提前学完初中课本</li>
+      <li><b>兴趣班取舍：</b>保留 1—2 项能坚持的兴趣（体育 / 艺术 / 科技），初中后自然转化为特长档案</li>
+      <li><b>防"抢跑陷阱"：</b>过度超前学习易在初中出现倦怠——规划的首要目标是可持续</li>
+     </ul>
+     <div class="rule-tip"><b>家长备忘：</b>这一阶段的"规划成果"是档案袋 + 习惯 + 兴趣三条线，而非分数。</div>
+    </div>
+   </div>
+   <div class="timeline">
+    <div class="tl-title">🕐 启蒙带时间轴（以出生年份倒推）</div>
+    <div class="tl-track" id="tl-pre"></div>
+   </div>
+  </div>
+ </section>
+
+ <!-- ===== 初一及以上（含路径条） ===== -->
+ <div class="pathbar" id="pathbar">
+  <span class="pb-lab">🧭 规划路径</span>
+  <div class="pb-tabs">
+   <button class="pb-tab on" id="tab-cn">国内线</button>
+   <button class="pb-tab" id="tab-ov">海外线</button>
+  </div>
+  <span class="pb-note">初中以上可选：两条路径规则集独立，可切换对照</span>
+ </div>
+
+ <!-- 初中 -->
+ <section class="stage-sec sec-junior" id="sec-junior">
+  <div class="stage-head" onclick="toggleSec('sec-junior')">
+   <span class="s-emoji">🧭</span>
+   <div><div class="s-t">初一及以上 · 初中三年</div><div class="s-d">入团 · 学科启蒙 · 国内线竞赛与强基预备的最早起点</div></div>
+   <span class="s-arrow">▼ 展开</span>
+  </div>
+  <div class="stage-body">
+   <div class="grid2" id="g-junior">
+    <!-- JS 注入：按路径渲染 -->
+   </div>
+   <div class="timeline">
+    <div class="tl-title">🕐 初中时间轴</div>
+    <div class="tl-track" id="tl-junior"></div>
+   </div>
+  </div>
+ </section>
+
+ <!-- 高中 -->
+ <section class="stage-sec sec-senior" id="sec-senior">
+  <div class="stage-head" onclick="toggleSec('sec-senior')">
+   <span class="s-emoji">⛰️</span>
+   <div><div class="s-t">高中 · 双线分岔口</div><div class="s-d">国内线：强基计划 + 五大学科竞赛纵深　海外线：语言与申请倒排</div></div>
+   <span class="s-arrow">▼ 展开</span>
+  </div>
+  <div class="stage-body">
+   <div class="grid2" id="g-senior"></div>
+   <!-- 美赛承认度（双线共用示例：大学项，高中先提示） -->
+   <div class="recog-box">
+    <h4>🎓 附：大学竞赛承认度自查（供高二学生与家长提前预研）</h4>
+    <div class="recog-row">
+     <select id="recog-sel">
+      <option value="mcm">美赛 MCM/ICM</option>
+      <option value="cupt">挑战杯 / 创青春</option>
+      <option value="kch">国赛（全国大学生数学建模）</option>
+     </select>
+     <select id="recog-school">
+      <option value="yes">本校承认（保研加分/综测认定）</option>
+      <option value="no">本校不承认</option>
+      <option value="unk">不确定 / 需查教务细则</option>
+     </select>
+     <div class="recog-out" id="recog-out"></div>
+    </div>
+   </div>
+   <div class="timeline">
+    <div class="tl-title">🕐 高中时间轴</div>
+    <div class="tl-track" id="tl-senior"></div>
+   </div>
+  </div>
+ </section>
+
+ <!-- 大学 -->
+ <section class="stage-sec sec-univ" id="sec-univ">
+  <div class="stage-head" onclick="toggleSec('sec-univ')">
+   <span class="s-emoji">🎓</span>
+   <div><div class="s-t">大学 · 大专及以上（含毕业去向）</div><div class="s-d">四六级 · 竞赛与科创 · 保研考研考博 · 考公选调 · 就业与一人公司</div></div>
+   <span class="s-arrow">▼ 展开</span>
+  </div>
+  <div class="stage-body">
+   <div class="grid2" id="g-univ"></div>
+   <div class="declare">
+    <b>声明：</b>本区适用于<b>大专及以上学历</b>的规划场景。保研、考研、考公、选调、申博、就业、一人公司等去向规则以各校推免细则与当年招考公告为准；<b>竞赛承认度因校而异</b>（如美赛部分学校承认、部分不承认），使用上方"承认度自查"按本校口径确认，不承认时竞赛价值回归个人能力证明本身。
+   </div>
+   <div class="timeline">
+    <div class="tl-title">🕐 大学时间轴</div>
+    <div class="tl-track" id="tl-univ"></div>
+   </div>
+  </div>
+ </section>
+
+</main>
+
+<footer>生涯规划罗盘 · 单文件本地工具 · 规则仅供参考，以官方公告为准</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ==================== 数据 ==================== */
+const JUNIOR_CN = [
+ {ic:'🎗️',bg:'#e0f2f6',h:'入团规划',lis:[
+  '<b>初一起 eligible：</b>年满 14 周岁可申请入团，团龄从支部大会通过之日算起',
+  '<b>材料链：</b>申请书 + 团课记录 + 志愿书，逐项留存原件',
+  '<b>回溯价值：</b>大学入党、选调生政治审查都会看团员档案的完整与连续'],
+  tip:'<b>规则依据：</b>入团年龄线 14 周岁；团员档案与学籍档案同寿命，缺件补办极难——从初一开始留痕。'},
+ {ic:'📐',bg:'#e0f2f6',h:'学科启蒙与竞赛预备',lis:[
+  '<b>五大竞赛预备：</b>数学（数联/CMO 系）、物理（CPhO 系）、化学、生物、信息学（CSP-J/S → NOIP）',
+  '<b>信息学最早：</b>CSP-J/S 初二即可参加，是五大竞赛中可最早拿成绩的赛道',
+  '<b>强基预备：</b>校内保持年级前列——强基计划初审看平时成绩 + 竞赛奖项双线'],
+  tip:'<b>国内线要点：</b>强基计划与学科竞赛的准备从初一级以后就要开始布局；初三停手专心中考是常见节奏。'},
+ {ic:'📖',bg:'#e0f2f6',h:'中考与档案定型',lis:[
+  '<b>学籍与户籍一致：</b>中考报名前核对，避免"两籍分离"影响录取',
+  '<b>综合素质评价：</b>初三上锁定材料——班干经历、志愿服务、艺术素养逐项录入',
+  '<b>职普分流：</b>中职路径同样有升学通道（职教高考），规划不因分流而中断'],
+  tip:'<b>规则依据：</b>综合素质评价档案随学籍转移，是高中强基/综评的回溯材料源。'}
+];
+const JUNIOR_OV = [
+ {ic:'🔤',bg:'#e0f2f6',h:'英语底子与语言预备',lis:[
+  '<b>词汇与阅读：</b>初中打牢 3500 词级底子，高中直接衔接雅思/托福备考',
+  '<b>听说先行：</b>海外线语言能力的关键差在口语与听力，越早磨耳朵成本越低',
+  '<b>可选项：</b>剑桥 KET/PET 等分级考试作为阶段检验（非必需）'],
+  tip:'<b>海外线要点：</b>雅思托福无年龄门槛、成绩 2 年有效期——初中只需打底子，不急着考试。'},
+ {ic:'💰',bg:'#e0f2f6',h:'国际路线的成本盘算',lis:[
+  '<b>三条通道：</b>公立学校国际部 / 国际学校 / 海外直接读高中',
+  '<b>时间成本：</b>初三或高一转入国际轨道较常见，越晚转衔接成本越高',
+  '<b>家庭决策点：</b>确定走海外线后，高考课程投入可适度让渡给语言与标化'],
+  tip:'<b>提示：</b>转轨决策建议在初三前完成——双轨并行的家庭，孩子负担通常最重。'},
+ {ic:'🗂️',bg:'#e0f2f6',h:'材料启蒙（海外版）',lis:[
+  '<b>成长记录：</b>国际路线同样要档案：活动、奖项、阅读清单、社区服务',
+  '<b>兴趣纵深：</b>海外申请看"长期投入的 2—3 项"而非"浅尝辄止的 10 项"',
+  '<b>家长备忘：</b>每学期一次复盘记录，高中写文书时有据可依'],
+  tip:'<b>规则依据：</b>海外本科文书与活动列表强调持续性与真实影响，记录要从初中开始。'}
+];
+const SENIOR_CN = [
+ {ic:'🏔️',bg:'#eaf2fb',h:'强基计划主线',lis:[
+  '<b>39 所试点高校：</b>聚焦基础学科（数理化生文史哲等），高考成绩占 85%+',
+  '<b>入围双轨：</b>高考成绩优异入围 / 破格入围（竞赛银牌及以上）',
+  '<b>培养特点：</b>本硕博衔接培养、导师制小班化——适合立志基础学科深造者'],
+  tip:'<b>时间线：</b>高三 4 月报名、高考后校测；高一高二的核心任务是校内排名 + 竞赛纵深。'},
+ {ic:'🏅',bg:'#eaf2fb',h:'五大学科竞赛纵深',lis:[
+  '<b>路径：</b>省级初赛 → 复赛（省级奖）→ 国决（国家奖）→ 国家集训队（保送资格）',
+  '<b>强基破格：</b>五大学科银牌及以上可破格入围强基校测',
+  '<b>性价比判断：</b>省一以上才对强基有实质帮助；止步省二省三则回归高考主线'],
+  tip:'<b>规则依据：</b>保送资格 = 国家集训队成员；破格入围 = 国决银牌及以上，以当年简章为准。'},
+ {ic:'🧪',bg:'#eaf2fb',h:'综合评价与多元通道',lis:[
+  '<b>综合评价招生：</b>高考 + 校测 + 学业水平三合一（部分省份试点）',
+  '<b>少年班 / 少年班特例：</b>中科大少年班、西安交大少年班等低龄通道，需学校推荐与特殊审核',
+  '<b>专项计划：</b>国家专项 / 地方专项 / 高校专项按户籍与学籍资格申报'],
+  tip:'<b>提示：</b>少年班类通道年龄线严格（如 16 周岁以下），报名前核对当年招生简章的年龄上限。'}
+];
+const SENIOR_OV = [
+ {ic:'🌐',bg:'#eaf2fb',h:'语言标化攻坚',lis:[
+  '<b>雅思目标：</b>6.5—7.0（顶尖校 7.0+）；托福 95—105（顶尖校 105+）',
+  '<b>有效期纪律：</b>成绩 2 年有效，高二下—高三上考出最优（覆盖申请季）',
+  '<b>二刷预算：</b>首考留出二刷空间，语言出分是整个申请线的第一块多米诺'],
+  tip:'<b>规则依据：</b>雅思/托福自考试日起 2 年有效——倒推申请季，最晚高三上学期 10 月前出分。'},
+ {ic:'📄',bg:'#eaf2fb',h:'申请材料体系',lis:[
+  '<b>核心四件：</b>在校成绩 GPA（初三—高三）、语言成绩、文书（PS/SOP）、推荐信',
+  '<b>标化考试：</b>SAT/ACT 按目标校要求准备（部分院校 test-optional）',
+  '<b>活动列表：</b>10 项活动 + 荣誉奖项，贵在纵深与领导力叙事'],
+  tip:'<b>提示：</b>Common App 等系统的活动列表是"精装修"，初三以来的原始记录才是"毛坯"。'},
+ {ic:'🏛️',bg:'#eaf2fb',h:'本科通道三选',lis:[
+  '<b>海外本科直申：</b>高三上开始递交，滚动录取，签证与行前另计',
+  '<b>中外合作办学：</b>先核验项目在教育部批准名单内，毕业做留服认证',
+  '<b>高考 + 申请双轨：</b>高考成绩已被部分海外院校认可，可作双保险'],
+  tip:'<b>规则依据：</b>中外合作项目以教育部中外合作办学监管工作信息平台名单为准；学位认证以留服中心为准。'}
+];
+const UNIV_CN = [
+ {ic:'📚',bg:'#eaf1f7',h:'四六级与语言工具',lis:[
+  '<b>报考资格：</b>全日制在校生，四级 425 分以上方可报六级；毕业即失格',
+  '<b>规划节奏：</b>大一尽早考四级（并非所有学校开放，按本校通知）',
+  '<b>研究生可考：</b>读研期间仍可刷分——考公部分岗位与落户积分看六级'],
+  tip:'<b>规则依据：</b>四六级仅限在校生报名；成绩以官方补办渠道为唯一补证途径。'},
+ {ic:'🏆',bg:'#eaf1f7',h:'竞赛与科创矩阵',lis:[
+  '<b>保研相关竞赛：</b>挑战杯、创青春、国赛（数学建模）、美赛（部分学校承认）、科创类赛事',
+  '<b>承认度差异：</b>美赛等国际赛事各校认定不同——用"承认度自查"按本校口径确认',
+  '<b>学术纵深：</b>SCI / EI / 会议论文（edas 等投稿系统）按导师指导推进，署名规范是红线'],
+  tip:'<b>规则依据：</b>竞赛加分以本校保研细则列名目录为准；不承认的竞赛价值回归个人能力证明。'},
+ {ic:'🎓',bg:'#eaf1f7',h:'保研 / 考研 / 申博',lis:[
+  '<b>保研（推免）：</b>前三年绩点 + 无挂科违纪；四六级与竞赛为门槛或加分项',
+  '<b>考研：</b>应届身份 = 录取当年入学前可取得毕业证；大四 10 月报名、12 月初试',
+  '<b>申博：</b>申请考核制为主流，硕士期间成果（论文/竞赛）与导师匹配是核心'],
+  tip:'<b>规则依据：</b>推免细则各校不同；考研应届身份影响报考点选择与专项计划资格。'},
+ {ic:'🏛️',bg:'#eaf1f7',h:'考公 / 选调 / 基层项目',lis:[
+  '<b>国考省考：</b>一般 18—35 周岁；<b>应届硕士、博士（非在职）放宽至 40 周岁</b>；服务年限内不得再考',
+  '<b>选调生年龄线（各省不同）：</b>本科常见 ≤25 周岁、硕士 ≤28—30 周岁、博士 ≤30—35 周岁——以当年度各省公告为准',
+  '<b>党员联动：</b>多数定向选调要求<b>中共党员（含预备党员）</b>——大一申请、大三转正、大四报考是标准节奏（见党团时刻表共产党轨）',
+  '<b>应届与基层项目：</b>限应届 + 党员/学生干部/获奖条件之一；西部计划、三支一扶等服务期满享定向招录'],
+  tip:'<b>规则依据：</b>应届届别是刚性概念（毕业那一届）；选调年龄上限与党员要求以当年度各省选调公告为准——先查公告再倒排入党节奏。'},
+ {ic:'💼',bg:'#eaf1f7',h:'就业 / 一人公司',lis:[
+  '<b>秋招春招：</b>应届身份的最佳兑现窗口；三方协议签订影响后续应届口径',
+  '<b>履历纪律：</b>有个税/社保记录的就业再短也要写；待业超 6 个月须申报说明',
+  '<b>一人公司：</b>个体户/一人有限公司均可；税务申报记录同样成为履历证据链'],
+  tip:'<b>规则依据：</b>履历审查看"与官方记录是否一致"——隐瞒真实经历比经历本身严重得多。'}
+];
+const UNIV_OV = [
+ {ic:'🌐',bg:'#eaf1f7',h:'语言与标化（大学版）',lis:[
+  '<b>雅思 2 年有效期：</b>申请季成绩必须在有效期内，倒推规划考试时间',
+  '<b>托福拼分：</b>MyBest Scores 政策按目标院校要求确认',
+  '<b>多邻国等替代：</b>部分院校接受，按官方认可清单为准'],
+  tip:'<b>规则依据：</b>语言成绩有效期以考试日起算；申请季前 1.5—2 年考出最稳。'},
+ {ic:'🤝',bg:'#eaf1f7',h:'中外合作与双学位',lis:[
+  '<b>项目核验：</b>报读前查教育部中外合作办学批准名单',
+  '<b>学位认证：</b>毕业先做留服认证——考公/落户的前置动作',
+  '<b>交换与 2+2：</b>按项目协议走，转学分记录完整留存'],
+  tip:'<b>规则依据：</b>中外合作学位效力以留服认证为准；认证前不要默认等同国内学位。'},
+ {ic:'🎓',bg:'#eaf1f7',h:'海外研究生申请',lis:[
+  '<b>三件套：</b>GPA（本科三年）、语言、文书；推荐信 2—3 封',
+  '<b>时间线：</b>大三下锁定选校 → 大四上递交 → 次年春季出结果',
+  '<b>申请系统：</b>各校 portal 或统一平台，截止日类型（滚动/硬截止）务必分清'],
+  tip:'<b>规划要点：</b>海外线的核心工具是倒排日程——以截止日为锚，每步留缓冲。'},
+ {ic:'📄',bg:'#eaf1f7',h:'认证与回国发展',lis:[
+  '<b>学历学位认证：</b>留服中心在线办理，材料齐备约 10—20 个工作日',
+  '<b>回国通道：</b>认证后可参加国考、落户申请（按城市政策）',
+  '<b>应届认定：</b>留学回国人员按各地"留学人员"专项政策口径执行'],
+  tip:'<b>规则依据：</b>留学人员落户与考公的"应届"口径与国内应届不同，按各地专项政策执行。'}
+];
+const RECOG = {
+ mcm:{name:'美赛 MCM/ICM'},
+ cupt:{name:'挑战杯 / 创青春'},
+ kch:{name:'全国大学生数学建模竞赛（国赛）'}
+};
+
+/* ==================== 党团发展首班车时刻表 ==================== */
+/* 每行：站点 st / 制度门槛 rule / 最早年龄 age / 累计 dur / 依据 basis / 代入高亮用的最小周岁数 mA */
+const PARTY_TRACKS = [
+ { key:'young', cls:'young', name:'🧣 少先队轨', total:'6 周岁入队 → 14 周岁离队',
+  note:'<b>衔接提示：</b>14 周岁既是超龄离队线，也恰好是共青团轨的发车年龄——离队与入团无缝衔接。',
+  rows:[
+   { st:'① 申请入队', rule:'年满 6 周岁、愿意参加少先队并遵守队章，向所在学校少先队组织提出申请，经批准成为队员', age:'≥6 周岁', dur:'入学当年', basis:'队章（2020 修改）', mA:6 },
+   { st:'② 分批入队', rule:'现行分批入队：一年级第二学期起首批（约 30%），二年级前完成全童入队', age:'6—7 周岁', dur:'1 年内', basis:'分批入队政策（2019）', mA:6.5 },
+   { st:'③ 超龄离队', rule:'年满 14 周岁的队员应当离队（离队仪式常见于初二前后），档案随综合素质记录留痕', age:'14 周岁', dur:'离队即衔接入团', basis:'队章超龄离队条款', mA:14 }
+  ]},
+ { key:'league', cls:'league', name:'🎗️ 共青团轨', total:'14 周岁入团 → 28 周岁离团（推优入党窗口）',
+  note:'<b>衔接提示：</b>28 周岁以下青年入党一般应经团组织"推优"——团员身份是入党推荐的重要通道；党员发展细则亦以"群团组织推优"产生积极分子人选。',
+  rows:[
+   { st:'① 申请入团', rule:'14 周岁以上、28 周岁以下中国青年，承认团章、愿意参加团的一个组织并积极工作、执行决议、按期交纳团费', age:'≥14 周岁', dur:'初一起可启动', basis:'团章（2023 修改）第一条', mA:14 },
+   { st:'② 支部大会通过', rule:'团课学习 + 入团志愿书齐备，经支部大会讨论通过成为团员（团龄自通过之日算起）', age:'≥14 周岁', dur:'申请后数月', basis:'团章', mA:14.5 },
+   { st:'③ 推优入党窗口', rule:'28 周岁以下青年入党一般应经团组织推优——是确定入党积极分子的两大来源之一', age:'14—28 周岁', dur:'贯穿团员期', basis:'推优机制 · 细则第八条', mA:15 },
+   { st:'④ 超龄离团', rule:'年满 28 周岁、未担任团内职务应办理离团手续；已入党的保留团籍至 28 周岁', age:'28 周岁', dur:'离团不影响党员发展', basis:'团章第二条', mA:28 }
+  ]},
+ { key:'party', cls:'party', name:'🚩 共产党轨（重点）', total:'18 周岁申请 → 最快约 21 周岁转正（制度下限累加）',
+  note:'<b>累加结论：</b>从 18 周岁递交申请到正式党员，制度下限约 2 年半（培养考察 1 年 + 预备期 1 年为硬性时长，其余为审批周期）；实践中一般 3 年左右——即"大一申请、大三转正"的普遍节奏。2026 年 5 月新修订细则将发展对象确定由"上级党委备案"改为"<b>上级党委同意 + 公示不少于 5 个工作日</b>"，把关更严。',
+  rows:[
+   { st:'① 递交入党申请书', rule:'年满 18 周岁，向工作、学习所在单位党组织提出（流动人员可向流动党员党组织提出）', age:'最早 18 岁 0 个月', dur:'+0（申请门槛）', basis:'党章第一条 · 细则第五、六条', mA:18 },
+   { st:'② 党组织派人谈话', rule:'党组织收到申请书后 1 个月内派人谈话：学习工作经历、对党的认识、入党动机、家庭情况等', age:'18 岁 +1 个月', dur:'+1 个月（硬性）', basis:'细则第七条', mA:18.1 },
+   { st:'③ 确定为入党积极分子', rule:'党员推荐 / 群团推优产生人选 → 党支部委员会会议研究决定 → 报上级党委备案；此后每半年考察一次', age:'≈18 岁半起', dur:'+数月（细则未定最短时长，高校常于申请半年后确定）', basis:'细则第八、十一条', mA:18.5 },
+   { st:'④ 培养考察满 1 年 → 发展对象', rule:'培养教育考察 1 年以上 + 听取党小组 / 培养联系人 / 党员群众意见 → 支委会会议研究 + 报上级党委同意 → 公示不少于 5 个工作日', age:'最早 ≈19 岁 6 个月', dur:'+12 个月（硬性）+5 个工作日公示', basis:'细则第十三条（2026 修订）', mA:19.5 },
+   { st:'⑤ 政治审查 + 集中培训', rule:'政审（联审、函调 / 外调）+ 短期集中培训不少于 3 天或 24 学时；未经培训除特殊情况外不能发展', age:'19 岁 6 个月+', dur:'+1—2 个月', basis:'细则第十六、十七条', mA:19.6 },
+   { st:'⑥ 接收为预备党员', rule:'支委会审查 → 基层党委预审 → 预审合格后 1 个月内支部党员大会无记名投票 → 报党委 3 个月内审批（特殊情况不超过 6 个月）', age:'最早 ≈19 岁 9 个月', dur:'+1—3 个月（审批周期）', basis:'细则第十八、十九、二十五条', mA:19.75 },
+   { st:'⑦ 预备期一年', rule:'预备期自支部大会通过之日算起；批复后 1 个月内面向党旗宣誓；可延长预备期一次（不少于半年、不超过一年）', age:'至 ≈20 岁 9 个月', dur:'+12 个月（硬性）', basis:'细则第二十九、三十一条', mA:20.75 },
+   { st:'⑧ 转正为正式党员', rule:'预备期满本人提出书面转正申请 → 征求意见 → 支委会审查 → 支部大会表决 → 党委 3 个月内审批；<b>党龄自预备期满转为正式党员之日算起</b>', age:'最早 ≈21 岁', dur:'+1—3 个月', basis:'细则第三十二、三十三条', mA:21 }
+  ]}
+];
+const PARTY_PATHS = [
+ { ic:'🎓', bg:'#eaf1f7', h:'本科（四年制）', lis:[
+  '<b>大一（18 岁）递交入党申请书</b> → 大三前后（20—21 岁）转正，毕业前完成全程',
+  '<b>选调联动：</b>多数定向选调要求中共党员（含预备党员）——大三转正 + 大四报考，节奏刚好衔接',
+  '<b>毕业季红线：</b>发展对象未来 3 个月内将离开学校的，一般不办理接收预备党员手续——接收须在大三结束前完成',
+  '<b>在职限制：</b>全日制本科就读期间不得以在职身份适用本表'],
+  tip:'<b>规则依据：</b>细则第十八条"未来三个月内将离开工作、学习单位的，一般不办理接收预备党员的手续"。' },
+ { ic:'📘', bg:'#eaf1f7', h:'大专（三年制）', lis:[
+  '<b>大一（18 岁）即递交申请</b> → 最快约 20 岁半转正，正踩毕业线；大二才申请则毕业时多止步积极分子 / 预备党员',
+  '<b>身份续接：</b>未完成的发展程序随组织关系转入本科（专升本）或工作单位党组织接续进行',
+  '<b>在职限制：</b>全日制大专就读期间同样不得以在职身份适用本表'],
+  tip:'<b>规划要点：</b>三年学制里"培养考察 1 年 + 预备期 1 年"几乎占满全程——大一申请是唯一从容解。' },
+ { ic:'📗', bg:'#eaf1f7', h:'专升本（3+2）', lis:[
+  '<b>专科阶段递交申请：</b>积极分子身份随组织关系转入本科高校',
+  '<b>培养期连续计算：</b>入党积极分子单位变动，原党组织转交材料、现党组织接续培养——<b>培养教育时间可以连续计算</b>',
+  '<b>本科两年内完成：</b>转入时已是发展对象 / 预备党员者，本科阶段即可走完转正'],
+  tip:'<b>规则依据：</b>细则第十二条"现单位或者居住地党组织应当对有关材料进行认真审查，并接续做好培养教育工作。培养教育时间可以连续计算"。' },
+ { ic:'🎓', bg:'#eaf1f7', h:'硕博研究生（含在职）', lis:[
+  '<b>研究生阶段申请同样适用：</b>硕士约 22—25 岁、博士约 25—29 岁，向学习 / 工作单位党组织提出',
+  '<b>研究生可在职：</b>非全日制研究生（在职就读）可按细则第五、六条向工作单位党组织申请——本科及以下无此通道',
+  '<b>推优衔接：</b>28 周岁以下研究生入党一般仍经团组织推优',
+  '<b>非全日制边界：</b>仅研究生层次支持非全日制；非全日制本科及以下（含微专业）不支持'],
+  tip:'<b>规则依据：</b>细则第五条（年满 18 岁申请主体覆盖各阶层）、第六条（按工作 / 学习单位提出申请）。' }
+];
+
+function renderPartyTracks(age) {
+ const cur = (typeof age === 'number' && !isNaN(age)) ? age : null;
+ $('party-tracks').innerHTML = PARTY_TRACKS.map(tr => {
+  let nowIdx = -1;
+  if (cur !== null) {
+   tr.rows.forEach((r, i) => { if (cur >= r.mA) nowIdx = i; });
+  }
+  const rows = tr.rows.map((r, i) =>
+   `<tr class="${i === nowIdx ? 'now' : ''}">
+     <td class="st">${r.st}${i === nowIdx ? '<span class="now-badge">📍 当前站</span>' : ''}</td>
+     <td class="rule">${r.rule}</td>
+     <td class="age">${r.age}<br><span style="font-weight:400;color:#8a6d1a;font-size:12px;">${r.dur}</span></td>
+     <td class="basis">${r.basis}</td>
+    </tr>`).join('');
+  return `<div class="pt-track">
+   <div class="pt-head ${tr.cls}">${tr.name}<span class="pt-total">${tr.total}</span></div>
+   <div class="pt-scroll"><table class="pt">
+    <thead><tr><th>站点（流程节点）</th><th>申请 / 考核通过的制度门槛</th><th>最早年龄 · 累计</th><th>依据条文</th></tr></thead>
+    <tbody>${rows}</tbody>
+   </table></div>
+   <div class="pt-note">${tr.note}</div>
+  </div>`;
+ }).join('');
+ $('g-party').innerHTML = PARTY_PATHS.map(cardHtml).join('');
+}
+
+/* ==================== 交互 ==================== */
+const $ = id => document.getElementById(id);
+let path = 'cn';
+let toastTimer = null;
+function toast(msg, ms = 3000) {
+ const t = $('toast'); t.innerHTML = msg; t.classList.add('show');
+ clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), ms);
+}
+function toggleSec(id) { $(id).classList.toggle('open'); }
+function segActivate(which) {
+ path = which;
+ $('seg-cn').classList.toggle('active', which === 'cn');
+ $('seg-ov').classList.toggle('active', which === 'ov');
+ $('tab-cn').classList.toggle('on', which === 'cn');
+ $('tab-ov').classList.toggle('on', which === 'ov');
+ renderPath();
+}
+$('seg-cn').onclick = () => segActivate('cn');
+$('seg-ov').onclick = () => segActivate('ov');
+$('tab-cn').onclick = () => { segActivate('cn'); toast('已切换：国内线规则集'); };
+$('tab-ov').onclick = () => { segActivate('ov'); toast('已切换：海外线规则集'); };
+
+function cardHtml(c) {
+ return `<div class="pl-card">
+  <h3><span class="pl-ic" style="background:${c.bg};">${c.ic}</span>${c.h}</h3>
+  <ul>${c.lis.map(l => `<li>${l}</li>`).join('')}</ul>
+  <div class="rule-tip">${c.tip}</div>
+ </div>`;
+}
+function renderPath() {
+ $('g-junior').innerHTML = (path === 'cn' ? JUNIOR_CN : JUNIOR_OV).map(cardHtml).join('');
+ $('g-senior').innerHTML = (path === 'cn' ? SENIOR_CN : SENIOR_OV).map(cardHtml).join('');
+ $('g-univ').innerHTML = (path === 'cn' ? UNIV_CN : UNIV_OV).map(cardHtml).join('');
+ renderRecog();
+}
+function renderRecog() {
+ const k = $('recog-sel').value, s = $('recog-school').value;
+ const name = RECOG[k].name;
+ let out;
+ if (s === 'yes') out = `<b>${name}在本校承认：</b>按本校保研加分/综测认定口径执行，注意留存获奖证书与官网名单截图作为认定凭证。`;
+ else if (s === 'no') out = `<b>${name}本校不承认：</b>其价值回归个人能力证明本身（面试叙述、简历背书）——继续投入与否按时间成本权衡。`;
+ else out = `<b>不确定：</b>查本校教务处《研究生推免实施细则》附件的竞赛目录，或直接书面咨询教务留痕——按"人工审核"处理最稳妥。`;
+ $('recog-out').innerHTML = out;
+}
+$('recog-sel').onchange = renderRecog;
+$('recog-school').onchange = renderRecog;
+
+/* 时间轴渲染 */
+function tl(items, target) {
+ $(target).innerHTML = items.map((it, i) =>
+  `<div class="tl-item ${it.cls || ''}"><b>${it.t}</b><span>${it.d}</span></div>`).join('');
+}
+
+/* 建档判定 */
+function fullAge(birthStr) {
+ const b = new Date(birthStr + 'T00:00:00'); if (isNaN(b)) return NaN;
+ const now = new Date();
+ let a = now.getFullYear() - b.getFullYear();
+ const m = now.getMonth() - b.getMonth();
+ if (m < 0 || (m === 0 && now.getDate() < b.getDate())) a--;
+ return a;
+}
+function go() {
+ const birth = $('by').value, stage = $('stage').value;
+ const age = fullAge(birth);
+ if (!birth || isNaN(age)) { toast('请先填写有效的出生日期'); return; }
+ const stageName = { pre: '初一以下', junior: '初中', senior: '高中', univ: '大学', grad: '毕业/备考期' }[stage];
+ // 年龄合规粗判
+ let verdict, cls, text;
+ if (stage === 'pre') {
+  verdict = age <= 13 ? '启蒙期' : '提示'; cls = age <= 13 ? 't-info' : 't-warn';
+  text = `<b>${age} 岁 · ${stageName}：</b>启蒙规划带以习惯与档案为主线；${age > 13 ? '年龄偏大仍在初一以下学段，建议核对学籍信息。' : '按小学入学年龄线（6 周岁）正推即可。'}`;
+ } else if (stage === 'junior') {
+  const ok = age >= 12 && age <= 16;
+  verdict = ok ? '通过' : '人工审核'; cls = ok ? 't-ok' : 't-warn';
+  text = `<b>${age} 岁 · ${stageName}：</b>${ok ? '年龄×年级匹配正常。14 周岁可启动入团规划；国内线竞赛预备（CSP-J/S 等）与海外线语言打底并行可选。' : '年龄与初中常见区间（12—16 岁）不符，请核对出生日期或学籍（跳级/复读情形按学校手续为准）。'}`;
+ } else if (stage === 'senior') {
+  const ok = age >= 15 && age <= 20;
+  verdict = ok ? '通过' : '人工审核'; cls = ok ? 't-ok' : 't-warn';
+  text = `<b>${age} 岁 · ${stageName}：</b>${ok ? '高中双线分岔口——国内线（强基+竞赛）或海外线（语言+申请）已需明确主线。' : '年龄与高中常见区间（15—20 岁）不符，少年班等特殊通道请按当年简章年龄线核对。'}`;
+ } else if (stage === 'univ') {
+  const ok = age >= 17 && age <= 25;
+  verdict = ok ? '通过' : '提示'; cls = ok ? 't-ok' : 't-info';
+  text = `<b>${age} 岁 · ${stageName}：</b>${ok ? '四六级、竞赛、保研考研考公的时间窗全部打开——大三前完成主线选择。' : '超 25 岁读本科多见于复读/休学/专升本情形，有正式手续即可如实前置；考公 35 岁线与硕博放宽线见大学区。'}`;
+ } else {
+  verdict = '参考'; cls = 't-info';
+  text = `<b>${age} 岁 · 毕业备考期：</b>考公一般 35 周岁线（应届硕博放宽至 40）；待业超 6 个月须申报；语言成绩 2 年有效期——限时限龄规则见对应分区。`;
+ }
+  $('v-tag').textContent = verdict;
+  $('v-tag').className = 'v-tag ' + cls;
+  $('v-text').innerHTML = text + `　<span style="color:#718096;">（年龄判定为粗校验，特殊学制以学籍档案为准）</span>`;
+  $('verdict').classList.add('show');
+  // 党团首班车时刻表：按当前年龄定位“当前站”
+  renderPartyTracks(age);
+ // 时间轴按出生年渲染启蒙带
+ const by = new Date(birth).getFullYear();
+ tl([
+  { t: `${by} 年 · 出生登记`, d: '出生医学证明 + 户口登记（一个月内）——档案链第 0 号', cls: 'pre' },
+  { t: `${by + 3} 年前后 · 幼儿园`, d: '习惯与社会化启蒙；档案袋开始收集体检与成长记录', cls: 'pre' },
+  { t: `${by + 6} 年 · 小学入学`, d: '当年 8 月 31 日前满 6 周岁（以当地教育局口径为准）→ 确定入学届别', cls: 'pre' },
+  { t: `${by + 7} 年前后 · 入队`, d: '二年级前后首批入队；争章与荣誉原件归档', cls: 'pre' },
+  { t: `${by + 12} 年前后 · 小升初`, d: '学籍与户籍一致性核对；综合素质评价材料定型', cls: 'pre' },
+ ], 'tl-pre');
+ // 初中时间轴
+ tl([
+  { t: '初一 · 入团启动', d: '年满 14 周岁可申请入团；CSP-J/S 信息学竞赛可开始', cls: 'jr' },
+  { t: '初二 · 分岔预备', d: '国内线：竞赛试水与校内排名；海外线：语言底子与家庭通道决策', cls: 'jr' },
+  { t: '初三 · 定型年', d: '竞赛暂歇专心中考；综合素质评价锁定；国际轨道转轨最后窗口', cls: 'jr' },
+ ], 'tl-junior');
+ tl([
+  { t: '高一 · 主线确定', d: '国内线：竞赛科目纵深（省初赛起步）；海外线：语言首考规划（2 年有效期倒推）', cls: '' },
+  { t: '高二 · 成果窗口', d: '国内线：省赛冲奖（省一以上对强基有实质帮助）；海外线：语言出分 + SAT/ACT 可选', cls: '' },
+  { t: '高三 · 兑现期', d: '国内线：强基报名（4 月）+ 高考 + 校测；海外线：早申递交（11 月）→ 常规轮（1 月）→ 录取', cls: '' },
+ ], 'tl-senior');
+  tl([
+   { t: '大一—大二 · 打地基', d: '<b>年满 18 周岁即递交入党申请书</b>（党团时刻表共产党轨第①站）；四六级尽早考；绩点排名从大一算起（保研生命线）；竞赛试水（挑战杯/国赛/美赛按承认度）', cls: 'un' },
+   { t: '大三 · 主线抉择', d: '入党：培养考察满 1 年→发展对象→预备党员（大一申请者此年前后接收）；保研（夏令营 6—7 月）⇄ 考研（择校定专业）⇄ 海外申研（选校 + 语言出分）三选一或双保险', cls: 'un' },
+   { t: '大四 · 兑现与去向', d: '入党：预备期满→转正（大一申请者大三末—大四完成，避开“离校前 3 个月不办接收”红线）；秋招 9 月启动；考研 12 月初试；申研递交；选调生按省公告（应届届别 + 党员身份双红线）', cls: 'un' },
+   { t: '毕业 · 身份切换', d: '应届身份当年有效；就业有个税记录即须申报；待业 >6 个月如实说明；一人公司开启税务合规', cls: 'un' },
+  ], 'tl-univ');
+ // 展开对应学段
+ ['sec-pre', 'sec-junior', 'sec-senior', 'sec-univ'].forEach(s => $(s).classList.remove('open'));
+ const target = { pre: 'sec-pre', junior: 'sec-junior', senior: 'sec-senior', univ: 'sec-univ', grad: 'sec-univ' }[stage];
+ $(target).classList.add('open');
+ if (stage !== 'pre') $('pathbar').classList.add('show'); else $('pathbar').classList.remove('show');
+ // 切到对应学段视图
+ window.scrollTo({ top: $('verdict').offsetTop - 90, behavior: 'smooth' });
+ toast(`生涯视图已生成：${age} 岁 · ${stageName} · ${path === 'cn' ? '国内线' : '海外线'}规则集`);
+}
+$('btn-go').onclick = go;
+
+/* init */
+renderPath();
+renderPartyTracks();
+tl([
+ { t: '初一 · 入团启动', d: '年满 14 周岁可申请入团；CSP-J/S 信息学竞赛可开始', cls: 'jr' },
+ { t: '初二 · 分岔预备', d: '国内线：竞赛试水与校内排名；海外线：语言底子与家庭通道决策', cls: 'jr' },
+ { t: '初三 · 定型年', d: '竞赛暂歇专心中考；综合素质评价锁定；国际轨道转轨最后窗口', cls: 'jr' },
+], 'tl-junior');
+tl([
+ { t: '高一 · 主线确定', d: '国内线：竞赛科目纵深；海外线：语言首考规划', cls: '' },
+ { t: '高二 · 成果窗口', d: '国内线：省赛冲奖；海外线：语言出分 + 标化可选', cls: '' },
+ { t: '高三 · 兑现期', d: '国内线：强基 + 高考 + 校测；海外线：早申 → 常规轮 → 录取', cls: '' },
+], 'tl-senior');
+tl([
+ { t: '大一—大二 · 打地基', d: '年满 18 周岁即递交入党申请书；四六级尽早；绩点排名是保研生命线；竞赛按承认度取舍', cls: 'un' },
+ { t: '大三 · 主线抉择', d: '入党：考察满 1 年→发展对象→预备党员；保研夏令营 ⇄ 考研择校 ⇄ 海外申研，三选一或双保险', cls: 'un' },
+ { t: '大四 · 兑现与去向', d: '预备期满转正；秋招 / 考研初试 / 申研递交 / 选调生报名（应届 + 党员双红线）', cls: 'un' },
+ { t: '毕业 · 身份切换', d: '应届当年有效；个税记录须申报；待业 >6 个月如实说明', cls: 'un' },
+], 'tl-univ');
+tl([
+ { t: '出生年 · 出生登记', d: '出生医学证明 + 户口登记——档案链第 0 号', cls: 'pre' },
+ { t: '+6 岁 · 小学入学', d: '8 月 31 日前满 6 周岁（当地口径）→ 确定入学届别', cls: 'pre' },
+ { t: '+7 岁 · 入队', d: '二年级前后首批入队；争章荣誉归档', cls: 'pre' },
+ { t: '+12 岁 · 小升初', d: '学籍户籍核对；综合素质评价定型', cls: 'pre' },
+], 'tl-pre');
+</script>
+</body>
+</html>

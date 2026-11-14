@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>国际数学竞赛合规校验平台 · 商业计划书与产品设计</title>
+<style>
+/* ========== Reset & Base ========== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { min-height: 100%; }
+body {
+  position: relative;
+  font-family: -apple-system, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Segoe UI", "Noto Sans SC", sans-serif;
+  color: #1e2c3c;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  background: linear-gradient(160deg, #faf9f5 0%, #ffffff 45%, #e4dcc3 100%);
+  min-height: 100vh;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 45% 35% at 12% 8%, rgba(255,255,255,0.55) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 88% 90%, rgba(255,255,255,0.45) 0%, transparent 55%);
+}
+body > * { position: relative; z-index: 1; }
+
+/* ========== 封面 Hero ========== */
+.title {
+  position: relative;
+  overflow: hidden;
+  padding: 56px 40px;
+  text-align: center;
+  background: linear-gradient(135deg, #22374f 0%, #b79a4a 50%, #4a6b9c 100%);
+  color: #ffffff;
+  border-radius: 16px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}
+.title::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 55% at 18% 82%, rgba(255,255,255,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 55% 40% at 82% 18%, rgba(255,255,255,0.08) 0%, transparent 55%);
+  pointer-events: none;
+}
+.title > * { position: relative; z-index: 1; }
+.title h1 { font-size: 30px; font-weight: 800; margin: 0 0 14px 0; letter-spacing: 1px; color: #ffffff; }
+.title .accent-line { width: 48px; height: 3px; background: rgba(255,255,255,0.85); margin: 0 auto 18px; border-radius: 2px; }
+.title p { font-size: 15px; color: rgba(255,255,255,0.88); margin: 0; line-height: 1.7; }
+.title .meta { margin-top: 18px; font-size: 12px; color: rgba(255,255,255,0.65); letter-spacing: 2px; }
+
+/* ========== 章节标题 ========== */
+h1.heading {
+  font-size: 28px; color: #1c2f4a; margin: 36px 0 16px 0; font-weight: 700;
+  border-left: 4px solid #b79a4a; padding-left: 16px;
+}
+h2.heading {
+  font-size: 22px; color: #1c2f4a; margin: 28px 0 12px; padding-bottom: 8px;
+  border-bottom: 2px solid #c9d2ea; font-weight: 600;
+}
+h3.heading { font-size: 18px; color: #1c2f4a; margin: 20px 0 10px; font-weight: 600; }
+
+/* ========== 正文 / 列表 ========== */
+.paragraph { font-size: 15px; color: #1e2c3c; line-height: 1.8; margin: 0 0 16px 0; text-indent: 2em; }
+.list { margin: 0 0 16px 0; padding-left: 24px; font-size: 15px; color: #1e2c3c; line-height: 1.8; }
+.list li { margin-bottom: 8px; }
+.list li::marker { color: #b79a4a; }
+.list li strong { color: #1c2f4a; }
+
+/* ========== 正文区容器 ========== */
+.doc-section {
+  background: #ffffff; border-radius: 14px; padding: 24px 28px; margin: 0 0 16px 0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+.doc-section.alt { background: #eae7dc; box-shadow: none; }
+
+/* ========== callout ========== */
+.callout {
+  margin: 0 0 16px 0; padding: 16px 24px; background: #f2e6c2;
+  border-left: 4px solid #b79a4a; border-radius: 8px;
+}
+.callout[data-variant="warning"] { background: #FFF3E0; border-left-color: #d97706; }
+.callout[data-variant="tip"] { background: #E8F5E9; border-left-color: #16a34a; }
+.callout[data-variant="quote"] { background: #faf5e6; border-left-color: #9c8438; }
+.callout p { font-size: 15px; color: #1e2c3c; margin: 0; line-height: 1.8; }
+
+/* ========== 表格 ========== */
+.table-wrap {
+  background: #ffffff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  overflow: hidden; margin: 0 0 16px 0;
+}
+.table-caption {
+  padding: 12px 16px; background: linear-gradient(135deg, #c9d2ea, #f2e6c2);
+  color: #1c2f4a; font-size: 14px; font-weight: 600; text-align: center;
+  border-bottom: 1px solid #d9dccb;
+}
+table.table { width: 100%; border-collapse: collapse; font-size: 13.5px; table-layout: fixed; }
+table.table thead th {
+  padding: 10px 12px; text-align: left; background: #c9d2ea; color: #1c2f4a;
+  font-weight: 700; border-bottom: 2px solid #d9dccb; word-break: break-word;
+}
+table.table tbody td { padding: 10px 12px; border-bottom: 1px solid #d9dccb; color: #1e2c3c; word-break: break-word; line-height: 1.7; }
+table.table tbody tr:last-child td { border-bottom: none; }
+table.table tbody tr:hover { background: #faf5e6; }
+table.table td.dim { font-weight: 700; color: #1c2f4a; background: #faf9f5; }
+.tag { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.tag.ok { background: #E8F5E9; color: #2E7D32; }
+.tag.warn { background: #FFF3E0; color: #E65100; }
+.tag.bad { background: #FCE4EC; color: #C62828; }
+.tag.info { background: #E3F2FD; color: #1565C0; }
+
+/* ========== 数据来源引用标记 ========== */
+.cite {
+  font-size: 11px; color: #9c8438; font-weight: 600; vertical-align: super;
+  margin-left: 2px; text-decoration: none; cursor: pointer;
+}
+.cite:hover { color: #1c2f4a; text-decoration: underline; }
+
+/* ========== 来源列表 ========== */
+.source-list { margin: 0 0 16px 0; }
+.source-list ol { padding-left: 20px; font-size: 13px; color: #6b7a90; line-height: 2.0; }
+.source-list ol li { margin-bottom: 6px; }
+.source-list ol li strong { color: #1c2f4a; }
+.source-list .src-id { display: inline-block; width: 24px; font-weight: 700; color: #b79a4a; }
+.source-list .source-link { color: #9c8438; text-decoration: none; border-bottom: 1px solid rgba(183,154,74,0.35); }
+.source-list .source-link:hover { color: #14233a; border-bottom-color: #14233a; }
+
+/* ========== stat ========== */
+.stat-grid { display: flex; gap: 16px; margin: 0 0 16px 0; }
+.stat {
+  flex: 1; text-align: center; padding: 20px; background: #ffffff;
+  border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-top: 3px solid #b79a4a;
+}
+.stat .num { font-size: 26px; color: #b79a4a; font-weight: 800; line-height: 1.1; }
+.stat .label { font-size: 12px; color: #6b7a90; margin-top: 6px; }
+
+/* ========== timeline ========== */
+.timeline { list-style: none; padding: 0; margin: 0 0 16px 0; }
+.timeline li {
+  position: relative; padding-left: 28px; padding-bottom: 18px;
+  border-left: 2px solid #f2e6c2; margin-left: 6px;
+}
+.timeline li:last-child { border-left-color: transparent; padding-bottom: 0; }
+.timeline li::before {
+  content: ''; position: absolute; left: -7px; top: 5px; width: 12px; height: 12px;
+  border-radius: 50%; background: #b79a4a; border: 2px solid #f6f5f0; box-shadow: 0 0 0 2px #f2e6c2;
+}
+.timeline strong { font-size: 14px; color: #9c8438; }
+.timeline p { font-size: 15px; color: #1e2c3c; margin: 4px 0 0 0; line-height: 1.8; }
+
+/* ========== code ========== */
+.code {
+  background: #1e293b; color: #e2e8f0; padding: 16px 24px; border-radius: 8px;
+  font-size: 13px; line-height: 1.6; overflow-x: auto; margin: 0 0 16px 0;
+  font-family: 'Cascadia Code', 'Fira Code', 'SF Mono', 'Source Code Pro', Consolas, monospace;
+}
+.code .k { color: #93c5fd; }
+
+/* ========== card ========== */
+.card-grid { display: flex; gap: 16px; margin: 0 0 16px 0; }
+.card {
+  flex: 1; background: #ffffff; padding: 22px; border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06); border-top: 3px solid #b79a4a;
+}
+.card h3 { font-size: 17px; color: #1c2f4a; margin: 0 0 8px 0; font-weight: 700; }
+.card p { font-size: 13.5px; color: #6b7a90; margin: 0; line-height: 1.75; }
+.card p b { color: #1e2c3c; }
+
+/* ========== 图表组件（通用类） ========== */
+.chart-row { display: flex; gap: 10px; align-items: flex-end; height: 72px; margin: 0 0 10px 0; }
+.chart-row .bar { flex: 1; border-radius: 3px 3px 0 0; min-height: 4px; background: linear-gradient(180deg, #b79a4a, #f2e6c2); }
+.chart-labels { display: flex; gap: 10px; margin-top: 2px; }
+.chart-labels span { flex: 1; text-align: center; font-size: 11px; color: #6b7a90; }
+.stat-inline { display: flex; gap: 24px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #d9dccb; }
+.stat-inline .item .v { font-size: 20px; font-weight: 800; color: #1c2f4a; }
+.stat-inline .item .l { font-size: 11px; color: #6b7a90; margin-top: 2px; }
+
+/* ========== divider ========== */
+.divider { margin: 32px 0; text-align: center; user-select: none; }
+.divider .line { display: inline-block; width: 36px; height: 1px; vertical-align: middle; background: linear-gradient(to right, transparent, #f2e6c2); }
+.divider .line:last-child { background: linear-gradient(to left, transparent, #f2e6c2); }
+.divider .diamond { display: inline-block; width: 8px; height: 8px; margin: 0 12px; vertical-align: middle; transform: rotate(45deg); background: #b79a4a; border-radius: 1px; box-shadow: 0 0 0 2px #f6f5f0; }
+
+/* ========== 尾页 ========== */
+.end_page {
+  margin-top: 24px; padding: 56px 24px; text-align: center;
+  background: linear-gradient(135deg, #c9d2ea 0%, #f2e6c2 100%); border-radius: 16px;
+}
+.end_page h1 { font-size: 28px; color: #1c2f4a; margin: 0 0 16px 0; font-weight: 800; }
+.end_page p { font-size: 15px; color: #6b7a90; margin: 0; line-height: 1.8; }
+
+/* ========== 响应式 ========== */
+@media screen and (max-width: 600px) {
+  body { padding: 16px !important; }
+  h1 { font-size: 22px !important; }
+  h2 { font-size: 18px !important; }
+  h3 { font-size: 16px !important; }
+  .stat-grid, .card-grid { flex-direction: column; }
+}
+
+/* ========== 打印优化 ========== */
+@media print {
+  body { padding: 0 !important; margin: 0 !important; background: #f6f5f0; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  body::before { display: none; }
+  .title, .end_page { border-radius: 0; box-shadow: none; }
+  .doc-section, .card, .stat, .table-wrap { box-shadow: none; border: 1px solid #d9dccb; }
+  section { break-inside: auto !important; }
+}
+</style>
+</head>
+<body class="mode-doc" data-palette="navy-gold">
+
+<!-- ================= 封面 ================= -->
+<section class="title">
+  <h1>国际数学竞赛合规校验平台</h1>
+  <div class="accent-line"></div>
+  <p>商业计划书与产品设计 · MathCheck</p>
+  <p>面向国际学校 / 国际部，提供 HiMCM / MidMCM / MCM / ICM 参赛资格的自动化合规校验工具</p>
+  <p class="meta">V1.0 · 2026 年 10 月 21 日 · 规则数据快照：2026–27 赛季</p>
+</section>
+
+<!-- ================= 一、项目概述 ================= -->
+<h1 class="heading">一、项目概述</h1>
+
+<h2 class="heading">1.1 一句话定位</h2>
+<aside class="callout" data-variant="quote">
+  <p>面向国际学校 / 国际部，提供 HiMCM / MidMCM / MCM / ICM 参赛资格的<b>自动化合规校验工具</b>——输入学生信息，一键输出资格判定 + 合规报告 + 赛季提醒。</p>
+</aside>
+
+<h2 class="heading">1.2 核心痛点</h2>
+<div class="doc-section">
+  <p class="paragraph">每年大量队伍因<b>年龄误判（14.5 岁线）</b>、<b>跨校组队</b>、<b>advisor（指导老师）不合规</b>等原因被取消资格，损失整个赛季的努力和升学材料。对一支 HiMCM 队伍而言，隐性投入远不止报名费：</p>
+  <ul class="list">
+    <li><strong>资金成本：</strong>赛前培训 3,000–8,000 元 / 队 + 注册费 100 美元 / 队（官方明确不予退还）<a class="cite" href="#source-1">[1]</a>；</li>
+    <li><strong>时间成本：</strong>3–6 个月备赛周期，占用学生标化、校内 GPA 与申请文书的时间窗口；</li>
+    <li><strong>机会成本：</strong>HiMCM 结果次年 2 月底公布<a class="cite" href="#source-1">[1]</a>，与美本申请材料季强耦合，一次失格意味着当年申请故事线断档；</li>
+    <li><strong>大学生端同样存在：</strong>MCM/ICM（美赛）获奖是国内高校推免 / 保研综测加分的重要认定项<a class="cite" href="#source-3">[3]</a>，若因资格瑕疵被追溯取消成绩，保研认定同步失效。</li>
+  </ul>
+  <p class="paragraph">更关键的是，规则本身正在快速变化：2026 赛季 HiMCM/MidMCM 更新了组队主体政策（同一学校 / 机构 / 官方批准的项目）、明确排除短期竞赛培训机构作为组队主体、禁止同一学生"两头报名"，并新增 AI 使用报告与在线投稿要求<a class="cite" href="#source-2">[2]</a>——市场上的中文二手解读普遍滞后甚至自相矛盾，家长与老师缺乏可靠的"规则原文 → 可执行判定"的翻译层。</p>
+</div>
+
+<h2 class="heading">1.3 解决方案</h2>
+<div class="doc-section">
+  <p class="paragraph">轻量级 SaaS 工具：录入学生与队伍信息（出生日期、年级、学校 / 机构、advisor 身份），系统基于结构化规则库自动完成资格校验，输出<b>三态判定（通过 / 风险 / 不合规）+ 逐条官方依据的合规报告 + 赛季关键节点提醒</b>。全部校验逻辑对齐 COMAP 官方规则原文并做版本化管理，每个赛季更新规则包。</p>
+</div>
+
+<h2 class="heading">1.4 目标市场与盈利模式</h2>
+<div class="table-wrap">
+  <div class="table-caption">表 1-1 · 盈利模式总览</div>
+  <table class="table" data-caption="盈利模式总览">
+    <colgroup><col style="width:20%"><col style="width:18%"><col style="width:38%"><col style="width:24%"></colgroup>
+    <thead><tr><th>产品</th><th>定价</th><th>包含内容</th><th>目标客群</th></tr></thead>
+    <tbody>
+      <tr><td class="dim">单队校验</td><td>99 元 / 队 · 次</td><td>资格校验 + 合规报告（PDF，含官方依据溯源）+ 本赛季提醒</td><td>首次参赛家庭</td></tr>
+      <tr><td class="dim">年度会员</td><td>299 元 / 年</td><td>全赛季多赛事不限次校验 + 报告存档 + 优先规则咨询</td><td>多孩 / 多赛季家庭</td></tr>
+      <tr><td class="dim">学校年费套餐</td><td>3,000–5,000 元 / 年</td><td>不限队伍批量校验、全校风险看板、advisor 名单管理、规则更新推送</td><td>国际学校 / 国际部</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 class="heading">1.5 团队优势</h2>
+<div class="doc-section">
+  <p class="paragraph">创始人兼具<b>大学生美赛（MCM/ICM）实战经验</b>与<b>国际高中算法合作背景</b>，深刻理解两端规则差异与中国本土化特征：既懂"国内大学生打美赛 = 保研加分认定"的推免逻辑，也懂"国际高中生打 HiMCM = 美本申请背景"的升学逻辑，能把 COMAP 英文规则原文翻译成中国家长和学校老师可直接执行的判定清单。</p>
+</div>
+
+<div class="divider"><span class="line"></span><span class="diamond"></span><span class="line"></span></div>
+
+<!-- ================= 二、市场分析 ================= -->
+<h1 class="heading">二、市场分析</h1>
+
+<h2 class="heading">2.1 市场规模</h2>
+<div class="doc-section">
+  <p class="paragraph">中国国际学校 / 国际部约 1,200 所，G9–G12 在校生约 60 万人；每年参加 HiMCM 的队伍约 800–1,000 支（中国队伍占全球约 85%）。MCM/ICM 中国参赛队伍约 2.5 万支（2026 年）<a class="cite" href="#source-3">[3]</a>，其中有留学意向的大学生约 5,000–8,000 支可作为次级市场；其余为国内保研加分导向的主流参赛群体。合规校验渗透率目前接近 0%，属于典型增量市场。</p>
+  <div class="stat-grid">
+    <div class="stat"><div class="num">1,200 所</div><div class="label">中国国际学校 / 国际部</div></div>
+    <div class="stat"><div class="num">~1,000 支</div><div class="label">HiMCM 年参赛队伍（中国占 85%）</div></div>
+    <div class="stat"><div class="num">2.5 万支</div><div class="label">MCM/ICM 中国参赛队伍（2026）</div></div>
+    <div class="stat"><div class="num">≈ 0%</div><div class="label">合规校验工具渗透率</div></div>
+  </div>
+</div>
+
+<h3 class="heading">学生生命周期：同一个学生可以覆盖 6–8 个赛季</h3>
+<div class="doc-section">
+  <ol class="timeline">
+    <li><strong>初中阶段（≤14.5 岁）</strong><p>MidMCM（初中生美赛）：全员年龄不超过 14 岁半、初中及更低年级、同一学校 / 机构 / 项目<a class="cite" href="#source-2">[2]</a>。</p></li>
+    <li><strong>高中阶段（G9–G12）</strong><p>HiMCM（高中生美赛）：9–12 年级为主，最多 4 人，同一学校 / 机构 / 官方批准的项目<a class="cite" href="#source-1">[1]</a><a class="cite" href="#source-2">[2]</a>。</p></li>
+    <li><strong>大学阶段（本科在读）</strong><p>MCM/ICM（大学生美赛）：1–3 人同校组队、不允许跨校，在校高中生亦可参赛<a class="cite" href="#source-6">[6]</a>。</p></li>
+    <li><strong>出口分岔</strong><p>国际路线 → 留学申请背景；国内路线 → 保研 / 推免综测加分认定<a class="cite" href="#source-3">[3]</a>。两条出口都以"成绩有效"为前提。</p></li>
+  </ol>
+  <p class="paragraph">这意味着 C 端获客成本可被 6–8 个赛季摊薄：一个 13 岁孩子的家庭从 MidMCM 开始使用，可连续服务到本科毕业打 MCM/ICM，天然形成高 LTV / 低 CAC 结构。</p>
+</div>
+
+<h3 class="heading">TAM / SAM / SOM 测算</h3>
+<div class="table-wrap">
+  <div class="table-caption">表 2-1 · 市场分层测算（年度口径，估算值）</div>
+  <table class="table" data-caption="TAM/SAM/SOM 测算">
+    <colgroup><col style="width:14%"><col style="width:44%"><col style="width:20%"><col style="width:22%"></colgroup>
+    <thead><tr><th>层级</th><th>构成</th><th>规模（年）</th><th>渗透假设</th></tr></thead>
+    <tbody>
+      <tr><td class="dim">TAM</td><td>1,200 所学校 × 3,000–5,000 元 + HiMCM/美赛合计约 2.6 万队次 × 99 元</td><td>约 600–850 万元</td><td>—</td></tr>
+      <tr><td class="dim">SAM</td><td>一线 / 新一线城市国际学校约 400 所 + HiMCM 与美赛双赛家庭</td><td>约 250–300 万元</td><td>—</td></tr>
+      <tr><td class="dim">SOM（第 1 年）</td><td>种子学校 + 赛季冲刺期 C 端付费</td><td>约 20–25 万元</td><td>SAM 的 8% 左右</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 class="heading">2.2 竞争格局</h2>
+<div class="doc-section">
+  <p class="paragraph"><b>直接竞争：空白。</b>目前没有专注"参赛资格合规校验"的自动化产品，渗透率接近 0%。间接竞争来自四类替代方案：</p>
+</div>
+<div class="table-wrap">
+  <div class="table-caption">表 2-2 · 间接竞争分析</div>
+  <table class="table" data-caption="间接竞争分析">
+    <colgroup><col style="width:16%"><col style="width:20%"><col style="width:30%"><col style="width:34%"></colgroup>
+    <thead><tr><th>竞争者类型</th><th>代表</th><th>他们的优势</th><th>结构性短板</th></tr></thead>
+    <tbody>
+      <tr><td class="dim">培训机构</td><td>国际竞赛机构、数模班</td><td>免费人工把关报名，与培训收入捆绑</td><td>2026 新规明确"以短期竞赛培训为主要使命的机构"不被视为合格组队主体<a class="cite" href="#source-2">[2]</a>；机构口径陈旧、无责任承担能力</td></tr>
+      <tr><td class="dim">辅助报名平台</td><td>赛氪、数模乐园等</td><td>解决"报名流程繁琐"，用户量大</td><td>只解决"怎么交表"，不校验"这支队资格对不对"；无规则版本管理</td></tr>
+      <tr><td class="dim">学校老师</td><td>数学组长 / 竞赛协调员</td><td>信任度最高，掌握报名入口</td><td>Excel 人肉管理 10–30 支队，规则靠个人经验，无人担责、无判例沉淀</td></tr>
+      <tr><td class="dim">留学顾问</td><td>申请规划顾问</td><td>家长信任入口</td><td>规则知识二手转译、更新滞后，且不为此承担后果</td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="doc-section">
+  <p class="paragraph"><b>定位一句话：报名平台帮你把表交上去，我们帮你确认"这支队到底能不能打"。</b>与辅助报名平台是互补关系而非替代关系——远期可向其输出校验 API，成为行业基础设施。对培训机构的差异化恰好在 2026 新规上：新规把"机构挂名组队"推入高风险区，我们是市场上唯一把这条规则做成自动判定的产品。</p>
+</div>
+
+<h2 class="heading">2.3 目标用户画像</h2>
+<div class="card-grid" data-cols="3">
+  <div class="card">
+    <h3>竞赛协调员 / 数学组长</h3>
+    <p><b>决策者（B 端）。</b>管理全校 10–30 支队伍，最怕"报名出错要担责"。需要批量校验、风险看板和留痕工具，3,000–5,000 元年费在学校预算内属低门槛采购。</p>
+  </div>
+  <div class="card">
+    <h3>首次参赛家庭家长</h3>
+    <p><b>付费者（C 端）。</b>第一次接触 HiMCM/MidMCM，信息差巨大，分不清 MidMCM 的 14.5 岁线和 advisor 规则。99 元买的是"不被取消资格"的确定性——保险型付费心智。</p>
+  </div>
+  <div class="card">
+    <h3>机构顾问 / 升学规划师</h3>
+    <p><b>渠道与白标客户。</b>代管学生队伍，需要合规背书降低自身执业风险。接受 50–70 元 / 队的批发价与白标报告，是天然的分销网络。</p>
+  </div>
+</div>
+
+<h2 class="heading">2.4 时机判断（Why Now）</h2>
+<div class="doc-section">
+  <ol class="list">
+    <li><strong>规则刚变，认知断层最大：</strong>2026 赛季 HiMCM/MidMCM 新增组队主体政策、排除培训机构、禁止两头报名、AI 使用报告与在线投稿新流程<a class="cite" href="#source-2">[2]</a>——全市场需要重新学习规则，正是"规则翻译层"产品的引爆窗口。</li>
+    <li><strong>赛季就在眼前：</strong>HiMCM/MidMCM 2026 赛季注册截止为美东时间 2026 年 11 月 4 日 14:00（北京时间 11 月 5 日凌晨 03:00），窗口 11 月 4 日 15:01 至 11 月 17 日 20:00（美东）<a class="cite" href="#source-1">[1]</a>——距现在仅两周，痛点即时可验证。</li>
+    <li><strong>参赛基数持续增长：</strong>HiMCM 中国队伍占比约 85%，美赛中国队伍 2.5 万支且保研认定需求刚性<a class="cite" href="#source-3">[3]</a><a class="cite" href="#source-5">[5]</a>。</li>
+    <li><strong>数据合规倒逼工具化：</strong>《个人信息保护法》对未成年人信息的单独同意与最小必要要求，使学校与机构更倾向使用合规工具而非个人微信收集学生出生日期等信息。</li>
+  </ol>
+</div>
+
+<div class="divider"><span class="line"></span><span class="diamond"></span><span class="line"></span></div>
+
+<!-- ================= 三、规则知识库 ================= -->
+<h1 class="heading">三、规则知识库：平台的地基</h1>
+
+<h2 class="heading">3.1 四大赛事规则要点对比（2026–27 赛季）</h2>
+<div class="table-wrap">
+  <div class="table-caption">表 3-1 · MidMCM / HiMCM / MCM / ICM 规则对比（依据 2026 赛季官方规则及公开通知整理）</div>
+  <table class="table" data-caption="四大赛事规则要点对比">
+    <colgroup><col style="width:15%"><col style="width:27%"><col style="width:29%"><col style="width:29%"></colgroup>
+    <thead><tr><th>维度</th><th>MidMCM（初中生）</th><th>HiMCM（高中生）</th><th>MCM / ICM（大学生）</th></tr></thead>
+    <tbody>
+      <tr><td class="dim">主办</td><td>COMAP（美国数学及其应用联合会）</td><td>COMAP</td><td>COMAP</td></tr>
+      <tr><td class="dim">面向对象</td><td>初中生及更低年级</td><td>9–12 年级高中生（及以下）</td><td>在校本科生；在校高中生亦可参赛，研究生不可</td></tr>
+      <tr><td class="dim">年龄线</td><td><span class="tag bad">全员 ≤14.5 岁</span>（以开赛时点计算）<a class="cite" href="#source-2">[2]</a></td><td>无上限年龄线；≤14.5 岁初中生更适合 MidMCM</td><td>无年龄线，以学籍身份为准</td></tr>
+      <tr><td class="dim">队伍人数</td><td>最多 4 人</td><td>最多 4 人</td><td>1–3 人（部分高校内部要求 2–3 人）<a class="cite" href="#source-4">[4]</a></td></tr>
+      <tr><td class="dim">组队主体</td><td>同一学校 / 机构 / 官方批准的项目</td><td>同一学校 / 机构 / 官方批准的项目；跨校组队仅限全员属于同一官方批准的项目<a class="cite" href="#source-2">[2]</a></td><td>同一学校（院校），不允许跨校组队<a class="cite" href="#source-6">[6]</a></td></tr>
+      <tr><td class="dim">关键排除项</td><td colspan="2">以短期教学或竞赛培训为主要使命的辅导班 / 竞赛培训 / STEM 学习中心，不被视为合格"学校 / 机构 / 项目"；同一学生不得同时以学校名义和机构名义两边报名<a class="cite" href="#source-2">[2]</a></td><td>跨校组队、已毕业学生、研究生身份</td></tr>
+      <tr><td class="dim">指导老师</td><td>每队 1 名顾问，须为该学校 / 主体教职人员；1 名顾问可带多队；注册由顾问完成<a class="cite" href="#source-1">[1]</a></td><td>同 MidMCM</td><td>每队配 1 名指导老师（本校）</td></tr>
+      <tr><td class="dim">赛季时间</td><td colspan="2">注册截止：美东 2026-11-04 14:00；窗口：2026-11-04 15:01 → 11-17 20:00；提交截止：11-17 21:00（美东）<a class="cite" href="#source-1">[1]</a></td><td>2026 赛季已举行：北京时间 2026-01-30 06:00 → 02-03 09:00<a class="cite" href="#source-3">[3]</a>；2027 赛季预计 1 月下旬–2 月初，以官方公告为准</td></tr>
+      <tr><td class="dim">注册费</td><td colspan="2">100 美元 / 队，不予退还<a class="cite" href="#source-1">[1]</a></td><td>100 美元 / 队（经官方渠道）</td></tr>
+      <tr><td class="dim">成果物红线</td><td colspan="2">全英文 PDF ≤20MB；总页数 ≤25 页（摘要 + 最多 24 页正文）；可读字体 ≥12 磅；全文匿名（不得出现学生 / 顾问 / 机构名称）；AI 使用须在报告中声明并附 AI 使用报告（不计页数）<a class="cite" href="#source-1">[1]</a></td><td>同源红线：25 页限制含摘要 / 目录 / 附录 / 代码；匿名；AI 政策同 COMAP 统一口径</td></tr>
+      <tr><td class="dim">奖项结构</td><td colspan="2">O 奖 &lt;1%、F 奖约 4.5%、M 奖约 13%、H 奖约 29%、Successful Participant 约 53%<a class="cite" href="#source-5">[5]</a></td><td>O / F / M / H / SP 五级，获奖率量级相近</td></tr>
+    </tbody>
+  </table>
+</div>
+<aside class="callout" data-variant="warning">
+  <p>注：上表为平台规则库 2026–27 赛季快照的整理版。COMAP 为所有规则的最终仲裁者，且每年存在微调；平台每一项判定都附带官方原文出处，并以"规则包版本号"管理年度变化。</p>
+</aside>
+
+<h2 class="heading">3.2 十大高频失格判例（判例库种子）</h2>
+<div class="doc-section">
+  <ol class="list">
+    <li><strong>年龄线误判：</strong>MidMCM 队伍中一名成员开赛时超过 14.5 岁（哪怕超几天）——整队应改报 HiMCM，误报将被取消资格。</li>
+    <li><strong>跨校组队：</strong>普通情况下跨校拼队不合规；HiMCM 仅当全员属于同一官方批准的项目时才允许跨校；MCM/ICM 完全不允许跨校。</li>
+    <li><strong>机构挂名：</strong>以竞赛培训机构名义组队——2026 新规明确此类主体不被认可。</li>
+    <li><strong>两头报名：</strong>同一学生既挂本校队又挂机构队，二选一规则被违反。</li>
+    <li><strong>advisor 不合规：</strong>顾问非本校 / 本主体教职人员（外校老师、机构老师、家长挂名）。</li>
+    <li><strong>学籍身份：</strong>已毕业学生或研究生出现在 MCM/ICM 队伍中。</li>
+    <li><strong>窗口期换人：</strong>比赛窗口开启后变更团队成员名单。</li>
+    <li><strong>匿名违规：</strong>论文出现学生姓名、学校名或顾问姓名（应仅含控制号）。</li>
+    <li><strong>竞赛行为：</strong>比赛期间在社交媒体发布题目 / 解法，或向队外任何人（包括顾问）求助。</li>
+    <li><strong>三段式截止混淆：</strong>注册截止、窗口关闭、提交截止是三个不同时点，错过提交截止同样可能导致取消资格或降级<a class="cite" href="#source-1">[1]</a>。</li>
+  </ol>
+</div>
+
+<h2 class="heading">3.3 三层规则模型（引擎架构的关键洞察）</h2>
+<div class="doc-section">
+  <p class="paragraph">中国市场的合规风险实际上是三层叠加，而现有解决方案只覆盖第 1 层的模糊版本：</p>
+  <ul class="list">
+    <li><strong>L1 · COMAP 官方规则（失格级）：</strong>年龄线、组队主体、advisor、匿名、AI 政策——违反即取消资格，本平台的核心判定层。</li>
+    <li><strong>L2 · 学校内部规则（门槛级）：</strong>例如部分高校要求"必须参加过全国大学生数学建模竞赛方可报名美赛"、"每队仅限 3 人必须三人组队"<a class="cite" href="#source-4">[4]</a>——比官方更严，属于可配置校验项（学校面板自定义规则包）。</li>
+    <li><strong>L3 · 报名通道规则（流程级）：</strong>辅助报名平台 / 机构的材料口径、时间节点与费用差异——作为提醒与提示层，不做硬判定。</li>
+  </ul>
+  <p class="paragraph">这一分层让同一引擎同时服务 C 端（只跑 L1）与 B 端（叠加 L2/L3），是产品的可扩展性来源。</p>
+</div>
+
+<h2 class="heading">3.4 规则条目的结构化与版本化</h2>
+<pre class="code" data-lang="json"><code>{
+  "rule_id": "MIDMCM-AGE-001",
+  "contest": "MidMCM",
+  "category": "年龄",
+  "season": "2026-27",
+  "fields": ["birth_date", "contest_start"],
+  "logic": "age_years(member, contest_start) &lt;= 14.5 for ALL members",
+  "on_violation": "FAIL",
+  "evidence": "2026 HiMCM/MidMCM 组队政策：MidMCM 一队最多 4 人，所有人年龄 14 岁半及以下",
+  "source_url": "（COMAP 官方规则原文链接）",
+  "updated": "2026-05"
+}</code></pre>
+<div class="doc-section">
+  <p class="paragraph">每个赛季规则包发布前执行 diff 审查（与上一赛季逐条比对），变化项推送订阅用户；报告中的每条判定均可回溯到规则条目与官方出处。规则版本史本身构成内容资产与竞争壁垒。</p>
+</div>
+
+<div class="divider"><span class="line"></span><span class="diamond"></span><span class="line"></span></div>
+
+<!-- ================= 四、产品设计 ================= -->
+<h1 class="heading">四、产品设计</h1>
+
+<h2 class="heading">4.1 产品形态与原则</h2>
+<div class="doc-section">
+  <ul class="list">
+    <li><strong>双端形态：</strong>Web 单页应用 + 微信小程序（家长端主入口）；另保留离线单文件版用于 B 端内网部署与市场演示。</li>
+    <li><strong>三分钟出报告：</strong>从录入到拿到判定不超过 3 分钟，无注册墙即可试用（付费解锁完整报告与提醒）。</li>
+    <li><strong>敏感数据最小化：</strong>出生日期等字段默认在前端本地计算，可开启"校验即焚"不留存。</li>
+    <li><strong>可解释性优先：</strong>每个结论都带官方依据，不做黑箱判定——这是与"问顾问"最大的体验差异。</li>
+  </ul>
+</div>
+
+<h2 class="heading">4.2 核心功能模块</h2>
+<div class="table-wrap">
+  <div class="table-caption">表 4-1 · 功能模块清单（MVP 优先级）</div>
+  <table class="table" data-caption="功能模块清单">
+    <colgroup><col style="width:22%"><col style="width:12%"><col style="width:52%"><col style="width:14%"></colgroup>
+    <thead><tr><th>模块</th><th>优先级</th><th>说明</th><th>对应痛点</th></tr></thead>
+    <tbody>
+      <tr><td class="dim">F1 资格校验引擎</td><td><span class="tag bad">P0</span></td><td>年龄线 / 学籍年级 / 队伍人数 / 组队主体一致性 / advisor 身份 / 两头报名 / 时间线，逐项判定并给出官方依据</td><td>14.5 岁线、跨校、advisor</td></tr>
+      <tr><td class="dim">F2 合规报告</td><td><span class="tag bad">P0</span></td><td>报告编号 + 时间戳 + 检查明细 + 风险分级 + 交稿前清单；支持打印导出 PDF、分享 H5</td><td>留痕与担责转移</td></tr>
+      <tr><td class="dim">F3 赛季日历与提醒</td><td><span class="tag ok">P1</span></td><td>注册截止 / 开赛 / 提交截止 / 出分四段式提醒（HiMCM 与美赛双线），微信推送</td><td>三段式截止混淆</td></tr>
+      <tr><td class="dim">F4 学校批量与看板</td><td><span class="tag ok">P1</span></td><td>Excel 批量导入全校队伍、风险看板、advisor 名单管理、L2 校规则配置</td><td>协调员管理压力</td></tr>
+      <tr><td class="dim">F5 规则知识库 / 判例查询</td><td><span class="tag info">P2</span></td><td>公开规则速查页与判例复盘，作为 SEO 与内容获客入口</td><td>信息噪音</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 class="heading">4.3 校验引擎工作流</h2>
+<div class="doc-section">
+  <ol class="timeline">
+    <li><strong>① 信息录入</strong><p>选择赛事（MidMCM / HiMCM / MCM·ICM）→ 录入成员（姓名拼音、出生日期、年级、学校 / 机构、学籍状态）→ 选择报名主体（本校 / 机构·项目）→ 选择 advisor 身份。</p></li>
+    <li><strong>② 标准化</strong><p>出生日期换算为"以开赛时点计"的精确年龄（X 岁 Y 月 Z 天），并计算与年龄线的差值天数。</p></li>
+    <li><strong>③ 规则匹配</strong><p>按赛事加载当前赛季规则包（L1 官方规则 + 可选 L2 学校规则）。</p></li>
+    <li><strong>④ 逐项判定</strong><p>三态输出：通过（PASS）/ 风险（RISK，需人工确认或口径待官方确认）/ 不合规（FAIL，构成失格事由）；距离年龄线 ±60 天内自动升级为风险提示。</p></li>
+    <li><strong>⑤ 报告生成</strong><p>报告编号 + 生成时间 + 判定明细 + 官方依据 + 建议动作（如"改报 HiMCM"或"邮件 himcm@comap.org 确认口径"）。</p></li>
+    <li><strong>⑥ 存档与提醒</strong><p>保存队伍档案，订阅四段式赛季提醒；临近注册截止 7 天内黄色预警。</p></li>
+  </ol>
+</div>
+
+<h2 class="heading">4.4 判定输出规范</h2>
+<div class="table-wrap">
+  <div class="table-caption">表 4-2 · 三态判定与风险分级</div>
+  <table class="table" data-caption="三态判定与风险分级">
+    <colgroup><col style="width:16%"><col style="width:34%"><col style="width:24%"><col style="width:26%"></colgroup>
+    <thead><tr><th>状态</th><th>定义</th><th>典型触发</th><th>建议动作</th></tr></thead>
+    <tbody>
+      <tr><td><span class="tag ok">PASS 通过</span></td><td>全部硬性规则满足</td><td>年龄 / 学籍 / 主体 / advisor 全绿</td><td>放心注册，进入赛季提醒</td></tr>
+      <tr><td><span class="tag warn">RISK 风险</span></td><td>存在需人工确认的口径问题或流程风险</td><td>年龄距线 ±60 天、9 年级中美学制口径差、以机构项目报名待核验、距注册截止不足 7 天</td><td>按报告建议邮件官方确认或补充材料</td></tr>
+      <tr><td><span class="tag bad">FAIL 不合规</span></td><td>构成明确失格事由</td><td>超 14.5 岁报 MidMCM、跨校拼队、机构挂名、两头报名、advisor 非本校教职、研究生身份</td><td>按建议改报赛事 / 调整队伍构成后再注册</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h2 class="heading">4.5 界面与交互风格</h2>
+<div class="doc-section">
+  <p class="paragraph">工具类页面采用<b>白底淡蓝主色 + 紧凑布局 + 简洁线条图标</b>，合规报告预览使用毛玻璃弹窗；判定结果用绿 / 橙 / 红三色语义色直观区分。界面与随附可运行原型完全一致（见 4.6），原型即 MVP 的视觉基线。</p>
+</div>
+
+<h2 class="heading">4.6 可运行原型（随本方案交付）</h2>
+<aside class="callout" data-variant="tip">
+  <p>同目录文件<b>《国际数学竞赛合规校验引擎-可运行原型.html》</b>：单文件、零依赖、双击即可在浏览器打开。已内置 2026–27 赛季规则包，完整演示 F1（三态校验 + 年龄精确计算）→ F2（报告生成与打印导出）→ F3（赛季倒计时）→ localStorage 队伍档案管理 的核心闭环，可直接用于向学校与种子用户演示。</p>
+</aside>
+
+<div class="divider"><span class="line"></span><span class="diamond"></span><span class="line"></span></div>
+
+<!-- ================= 五、技术方案 ================= -->
+<h1 class="heading">五、技术方案</h1>
+
+<h2 class="heading">5.1 总体架构：轻资产、可离线</h2>
+<div class="doc-section">
+  <ul class="list">
+    <li><strong>规则包：</strong>JSON 版本化管理（见 3.4），赛季粒度发布，前后端共用同一份规则源。</li>
+    <li><strong>校验引擎：</strong>纯前端本地计算（与原型同构），出生日期等敏感字段可不离开设备，天然满足"本地处理"卖点。</li>
+    <li><strong>轻后端：</strong>仅承担账号、支付、报告存证、提醒推送与学校面板；云函数 + 对象存储，边际成本近零。</li>
+    <li><strong>学校端：</strong>批量 Excel 导入 + 风险看板 + L2 规则配置；支持私有化单文件部署选项。</li>
+  </ul>
+  <p class="paragraph">架构刻意避开重后端与大数据组件：单位边际成本 &lt;5 元 / 队次，是 94% 以上毛利率的技术基础。</p>
+</div>
+
+<h2 class="heading">5.2 数据安全与隐私合规（PIPL）</h2>
+<div class="doc-section">
+  <ul class="list">
+    <li><strong>最小必要：</strong>仅收集姓名拼音、出生日期、年级、学校 / 机构名称；不收集身份证号、证件照片。</li>
+    <li><strong>未成年人特别保护：</strong>监护人单独同意流程；报告与档案默认 90 天自动删除，可选"校验即焚"。</li>
+    <li><strong>境内存储与加密：</strong>报告存证数据境内存储、传输加密、学校租户隔离；判例库仅保存脱敏案例。</li>
+    <li><strong>免责与溯源：</strong>平台输出为参考意见，规则最终解释权在 COMAP；每份报告附官方原文链接与规则包版本号。</li>
+  </ul>
+</div>
+
+<h2 class="heading">5.3 MVP 范围与迭代路线</h2>
+<div class="doc-section">
+  <ol class="timeline">
+    <li><strong>第 1–2 周</strong><p>规则包 V1 + 校验引擎（复用本次交付原型代码）。</p></li>
+    <li><strong>第 3–4 周</strong><p>报告中心 + 分享 H5 + 微信提醒接入。</p></li>
+    <li><strong>第 5–6 周</strong><p>小程序 + 支付（99 / 299 两档 C 端 SKU）。</p></li>
+    <li><strong>第 7–8 周</strong><p>学校批量导入与风险看板 Beta（3,000 元首年种子价）。</p></li>
+    <li><strong>迭代方向</strong><p>论文格式自查（25 页 / 匿名 / AI 报告 / ≤20MB）→ IMMC 等赛事规则包 → 多赛事矩阵。</p></li>
+  </ol>
+</div>
+
+<div class="divider"><span class="line"></span><span class="diamond"></span><span class="line"></span></div>
+
+<!-- ================= 六、商业模式 ================= -->
+<h1 class="heading">六、商业模式与财务测算</h1>
+
+<h2 class="heading">6.1 单位经济模型</h2>
+<div class="doc-section">
+  <div class="stat-grid">
+    <div class="stat"><div class="num">&gt;94%</div><div class="label">单队次毛利率（边际成本 &lt;5 元）</div></div>
+    <div class="stat"><div class="num">&lt;30 元</div><div class="label">C 端 CAC 目标（内容自然流量为主）</div></div>
+    <div class="stat"><div class="num">6–8 季</div><div class="label">单学生生命周期覆盖赛季数</div></div>
+    <div class="stat"><div class="num">80%</div><div class="label">学校年费续费率目标</div></div>
+  </div>
+  <p class="paragraph">付费心理锚点：一支队伍的显性投入即培训费 + 100 美元注册费（不退）≈ 4,000 元以上；99 元校验费 ≈ 投入的 2.5%，属于典型的"保险型付费"——用户为"不被取消资格"付费，而非为软件付费。</p>
+</div>
+
+<h2 class="heading">6.2 三年收入预测</h2>
+<div class="table-wrap">
+  <div class="table-caption">表 6-1 · 收入预测（万元；第 1 年 = 2026.10–2027.9；假设见表下注）</div>
+  <table class="table" data-caption="三年收入预测">
+    <colgroup><col style="width:24%"><col style="width:15%"><col style="width:15%"><col style="width:15%"><col style="width:31%"></colgroup>
+    <thead><tr><th>收入项</th><th>第 1 年</th><th>第 2 年</th><th>第 3 年</th><th>关键假设</th></tr></thead>
+    <tbody>
+      <tr><td class="dim">单队校验（99 元）</td><td>7.9</td><td>29.7</td><td>59.4</td><td>付费队次 800 → 3,000 → 6,000（占 HiMCM+美赛双线队次的 3%–15%）</td></tr>
+      <tr><td class="dim">年度会员（299 元）</td><td>9.0</td><td>35.9</td><td>89.7</td><td>会员数 300 → 1,200 → 3,000</td></tr>
+      <tr><td class="dim">学校年费</td><td>6.0</td><td>32.0</td><td>81.0</td><td>签约 20 → 80 → 180 所，均价 3,000 → 4,000 → 4,500 元</td></tr>
+      <tr><td class="dim">机构白标 / API</td><td>—</td><td>—</td><td>15.0</td><td>第 3 年起向报名平台 / 机构输出校验能力</td></tr>
+      <tr><td class="dim"><b>合计</b></td><td><b>22.9</b></td><td><b>97.6</b></td><td><b>245.1</b></td><td>—</td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="doc-section">
+  <div class="chart-row">
+    <div class="bar" style="height:12%;background:linear-gradient(180deg,#b79a4a,#f2e6c2);"></div>
+    <div class="bar" style="height:42%;background:linear-gradient(180deg,#9c8438,#e4dcc3);"></div>
+    <div class="bar" style="height:100%;background:linear-gradient(180deg,#22374f,#c9d2ea);"></div>
+  </div>
+  <div class="chart-labels">
+    <span>第 1 年</span><span>第 2 年</span><span>第 3 年</span>
+  </div>
+  <div class="stat-inline">
+    <div class="item"><div class="v">22.9 万</div><div class="l">第 1 年收入</div></div>
+    <div class="item"><div class="v">97.6 万</div><div class="l">第 2 年收入</div></div>
+    <div class="item"><div class="v">245.1 万</div><div class="l">第 3 年收入</div></div>
+    <div class="item"><div class="v">+325%</div><div class="l">第 2→3 年增速</div></div>
+  </div>
+</div>
+
+<h2 class="heading">6.3 成本结构与盈亏平衡</h2>
+<div class="doc-section">
+  <ul class="list">
+    <li><strong>第 1 年现金成本约 7–8 万元：</strong>服务器与域名 1.5 万 + 支付通道 0.3 万 + 内容与投放 4 万 + 合规杂项 1.5 万——首年即接近现金流打平（人力按创始人自研计）。</li>
+    <li><strong>若计入全职机会成本（约 20 万 / 年）：</strong>约 2,000 个付费队次 + 40 所签约学校即可覆盖，对应 SAM 渗透率约 10%。</li>
+    <li><strong>边际成本曲线：</strong>规则包年更新为固定成本，队伍数增长几乎不增加成本——收入增长几乎全部转化为毛利。</li>
+  </ul>
+</div>
+
+<div class="divider"><span class="line"></span><span class="diamond"></span><span class="line"></span></div>
+
+<!-- ================= 七、GTM ================= -->
+<h1 class="heading">七、市场进入策略（GTM）</h1>
+
+<h2 class="heading">7.1 冷启动：HiMCM 2026 赛季两周冲刺</h2>
+<div class="doc-section">
+  <ol class="timeline">
+    <li><strong>T-14 天（现在）</strong><p>发布内容《2026 HiMCM 新规解读：机构挂名队为什么危险》+ 上线免费校验 500 队（换口碑与种子判例）。HiMCM/MidMCM 注册截止为美东 11 月 4 日 14:00<a class="cite" href="#source-1">[1]</a>，紧迫感即转化率。</p></li>
+    <li><strong>T-7 天</strong><p>定向触达 10–20 所种子学校数学组，提供全校免费"合规体检"，签约 3,000 元首年种子价。</p></li>
+    <li><strong>11 月 4 日（注册截止日）</strong><p>赛季日历提醒服务全量推送，打造"关键时刻在场"的品牌记忆。</p></li>
+    <li><strong>11 月 17 日（提交截止日）</strong><p>免费论文格式自查清单（25 页 / 匿名 / AI 报告），承接第二波流量。</p></li>
+    <li><strong>2027 年 1 月</strong><p>MCM/ICM 赛季版上线，主打保研叙事：资格瑕疵 = 加分认定失效；切入 2.5 万支美赛队伍市场。</p></li>
+    <li><strong>2027 年 2 月</strong><p>HiMCM 出分季内容复盘（获奖率分析<a class="cite" href="#source-5">[5]</a>），将 C 端流量转化为学校年费与次年会员。</p></li>
+  </ol>
+</div>
+
+<h2 class="heading">7.2 渠道与内容策略</h2>
+<div class="doc-section">
+  <ul class="list">
+    <li><strong>内容 SEO：</strong>"HiMCM 规则 / MidMCM 年龄 / 美赛 参赛资格 / HiMCM 报名截止"等关键词的规则速查页，规则版本史形成长期内容壁垒。</li>
+    <li><strong>顾问 KOL 分销：</strong>留学顾问与机构以白标报告形式转售，批发价 50–70 元 / 队。</li>
+    <li><strong>裂变机制：</strong>报告页带平台水印，家长转发班主任 / 顾问即完成自然传播。</li>
+    <li><strong>判例复盘系列：</strong>每赛季脱敏复盘失格案例，是获客内容也是产品信任状。</li>
+  </ul>
+</div>
+
+<h2 class="heading">7.3 B 端打法</h2>
+<div class="doc-section">
+  <p class="paragraph">决策链短（数学组长 / 竞赛协调员即可拍板 3,000–5,000 元预算），打法为"免费全校体检 → 试点学期 → 年费续约"。核心卖点是<b>担责转移与留痕</b>：学校用平台完成校验即形成书面记录，出错责任从个人经验判断转为可追溯的规则版本。学校套餐还包含 L2 校规则配置（如"须打过国赛才可报美赛"这类校级门槛的自动拦截）。</p>
+</div>
+
+<h2 class="heading">7.4 壁垒构建</h2>
+<div class="doc-section">
+  <ul class="list">
+    <li><strong>判例库：</strong>脱敏失格案例 + 官方往来邮件存档，越运营越厚。</li>
+    <li><strong>规则版本史：</strong>逐年 diff 与推送，构成"规则领域唯一连续记录者"的心智。</li>
+    <li><strong>学校采购绑定：</strong>年费制 + 看板工作流嵌入协调员日常。</li>
+    <li><strong>反向基础设施化：</strong>开放校验 API 给报名平台，把潜在竞争者变成渠道。</li>
+  </ul>
+</div>
+
+<div class="divider"><span class="line"></span><span class="diamond"></span><span class="line"></span></div>
+
+<!-- ================= 八、风险 ================= -->
+<h1 class="heading">八、风险与应对</h1>
+<div class="table-wrap">
+  <div class="table-caption">表 8-1 · 风险矩阵与应对</div>
+  <table class="table" data-caption="风险矩阵与应对">
+    <colgroup><col style="width:18%"><col style="width:12%"><col style="width:34%"><col style="width:36%"></colgroup>
+    <thead><tr><th>风险</th><th>等级</th><th>描述</th><th>应对</th></tr></thead>
+    <tbody>
+      <tr><td class="dim">官方规则年度变动</td><td><span class="tag warn">中</span></td><td>COMAP 每赛季可能微调规则（如 2026 组队新政）</td><td>赛季前规则包 diff 审查流程 + 订阅推送 + 报告附官方原文出处</td></tr>
+      <tr><td class="dim">规则解释权</td><td><span class="tag warn">中</span></td><td>边界案例（9 年级口径、机构项目认定）官方有裁量权</td><td>免责声明 + 内置"官方确认邮件模板"；RISK 级判定明确标注需人工确认</td></tr>
+      <tr><td class="dim">消费低频</td><td><span class="tag warn">中</span></td><td>单赛事一年一次，复购周期长</td><td>学生生命周期 6–8 赛季覆盖 + 学校订阅制 + 多赛事矩阵（IMMC 等）</td></tr>
+      <tr><td class="dim">未成年人数据合规</td><td><span class="tag bad">高</span></td><td>PIPL 对未成年人信息要求严格</td><td>最小必要 + 监护人单独同意 + 前端本地计算 + 90 天删除 + 境内加密存储</td></tr>
+      <tr><td class="dim">大平台入场</td><td><span class="tag info">低</span></td><td>报名平台自行加校验功能</td><td>先发判例库与学校关系；开放 API 化竞争为渠道</td></tr>
+      <tr><td class="dim">赛事热度波动</td><td><span class="tag info">低</span></td><td>国际教育周期影响参赛量</td><td>国内保研导向的美赛市场与留学导向的 HiMCM 市场互补对冲</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="divider"><span class="line"></span><span class="diamond"></span><span class="line"></span></div>
+
+<!-- ================= 九、里程碑 ================= -->
+<h1 class="heading">九、里程碑路线图</h1>
+<div class="doc-section">
+  <ol class="timeline">
+    <li><strong>2026 年 10 月</strong><p>规则包 V1（2026–27 赛季）+ 可运行原型交付（本方案随附）。</p></li>
+    <li><strong>2026 年 11 月 4 日</strong><p>HiMCM/MidMCM 赛季服务上线（Web），免费校验 500 队冷启动。</p></li>
+    <li><strong>2026 年 12 月</strong><p>学校批量看板 Beta + 20 所种子学校签约。</p></li>
+    <li><strong>2027 年 1 月</strong><p>MCM/ICM 赛季版 + C 端支付上线。</p></li>
+    <li><strong>2027 年 2 月</strong><p>判例库公开页（SEO）+ HiMCM 出分季内容运营。</p></li>
+    <li><strong>2027 年 6 月</strong><p>微信小程序 + IMMC 规则包。</p></li>
+    <li><strong>2027 年 9 月</strong><p>2027–28 赛季规则包更新与全量推送，验证版本化运营模型。</p></li>
+    <li><strong>2028 年</strong><p>多赛事矩阵 + 机构 API 渠道，复核盈亏平衡与学校续费率。</p></li>
+  </ol>
+</div>
+
+<div class="divider"><span class="line"></span><span class="diamond"></span><span class="line"></span></div>
+
+<!-- ================= 附录 ================= -->
+<h1 class="heading">附录 A · 校验引擎判定规则表（2026–27 赛季）</h1>
+<div class="table-wrap">
+  <div class="table-caption">表 A-1 · 判定规则表（与可运行原型内置逻辑一致）</div>
+  <table class="table" data-caption="校验引擎判定规则表">
+    <colgroup><col style="width:13%"><col style="width:13%"><col style="width:14%"><col style="width:36%"><col style="width:24%"></colgroup>
+    <thead><tr><th>规则 ID</th><th>赛事</th><th>检查项</th><th>触发条件 → 判定</th><th>官方依据摘要</th></tr></thead>
+    <tbody>
+      <tr><td class="dim">AGE-001</td><td>MidMCM</td><td>年龄上限</td><td>任一成员开赛时年龄 &gt;14.5 岁 → FAIL（建议改报 HiMCM）；距线 ±60 天内 → RISK</td><td>MidMCM 全员 14 岁半及以下<a class="cite" href="#source-2">[2]</a></td></tr>
+      <tr><td class="dim">AGE-002</td><td>HiMCM</td><td>年龄适配</td><td>成员 ≤14.5 岁且初中在读 → PASS（附提示：MidMCM 亦可选）</td><td>HiMCM 面向高中及以下学生<a class="cite" href="#source-1">[1]</a></td></tr>
+      <tr><td class="dim">GRADE-001</td><td>MidMCM</td><td>年级</td><td>高一及以上 → FAIL；初三 / 9 年级 → RISK（中美学制口径差异，建议邮件官方确认）</td><td>初中生及更低年级<a class="cite" href="#source-2">[2]</a></td></tr>
+      <tr><td class="dim">GRADE-002</td><td>HiMCM</td><td>年级 / 学籍</td><td>本科在读 → FAIL（应报 MCM/ICM）；已毕业 → FAIL</td><td>高中（或以下）学生<a class="cite" href="#source-1">[1]</a></td></tr>
+      <tr><td class="dim">GRADE-003</td><td>MCM/ICM</td><td>学籍身份</td><td>本科在读 / 高中在读 → PASS；初中及以下 → FAIL；研究生 → FAIL；已毕业 → FAIL</td><td>1–3 名在校高中生、本科生<a class="cite" href="#source-6">[6]</a></td></tr>
+      <tr><td class="dim">TEAM-001</td><td>全部</td><td>人数</td><td>HiMCM/MidMCM &gt;4 人 → FAIL；MCM/ICM &gt;3 人 → FAIL；1 人队 → RISK（建议 2 人以上）</td><td>最多 4 人 / 1–3 人<a class="cite" href="#source-1">[1]</a><a class="cite" href="#source-6">[6]</a></td></tr>
+      <tr><td class="dim">SCHOOL-001</td><td>HiMCM/MidMCM</td><td>主体一致</td><td>以本校报名但成员学校不一致 → FAIL；以机构·项目报名 → RISK（核验项目类型，短期竞赛培训机构被排除）</td><td>同一学校 / 机构 / 项目；跨校仅限同一官方批准的项目<a class="cite" href="#source-2">[2]</a></td></tr>
+      <tr><td class="dim">SCHOOL-002</td><td>MCM/ICM</td><td>同校</td><td>成员院校不一致 → FAIL</td><td>不允许跨校组队<a class="cite" href="#source-6">[6]</a></td></tr>
+      <tr><td class="dim">DUAL-001</td><td>HiMCM/MidMCM</td><td>两头报名</td><td>有成员同时以本校名义和机构名义报名 → FAIL</td><td>二选一，不能两头都报<a class="cite" href="#source-2">[2]</a></td></tr>
+      <tr><td class="dim">ADV-001</td><td>HiMCM/MidMCM</td><td>advisor</td><td>本校教师 / 本校职工 → PASS；外校教师 / 机构教师（本校报名时）/ 家长 / 暂无 → FAIL 或 RISK</td><td>每队须有该校教职顾问；顾问完成注册<a class="cite" href="#source-1">[1]</a></td></tr>
+      <tr><td class="dim">ADV-002</td><td>MCM/ICM</td><td>advisor</td><td>本校指导老师 → PASS；非本校 / 暂无 → FAIL 或 RISK</td><td>每队配 1 名指导老师<a class="cite" href="#source-6">[6]</a></td></tr>
+      <tr><td class="dim">TIME-001</td><td>全部</td><td>时间线</td><td>当前时间晚于注册截止 → FAIL（流程）；距注册截止 ≤7 天 → RISK；窗口开启后名单锁定提示</td><td>注册截止 / 窗口 / 提交三段式时点<a class="cite" href="#source-1">[1]</a></td></tr>
+      <tr><td class="dim">PAPER-001</td><td>全部</td><td>交稿清单（提示级）</td><td>25 页 / 匿名 / ≥12 磅 / ≤20MB / AI 使用报告 / 控制号页眉 → 逐项提示</td><td>解决方案文档要求<a class="cite" href="#source-1">[1]</a></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<h1 class="heading">附录 B · 交付物清单</h1>
+<div class="doc-section">
+  <ul class="list">
+    <li><strong>① 本文档：</strong>《国际数学竞赛合规校验平台-商业计划书与产品设计.html》——完整商业计划与产品设计。</li>
+    <li><strong>② 可运行原型：</strong>《国际数学竞赛合规校验引擎-可运行原型.html》——单文件零依赖，双击打开即用；内置 2026–27 赛季规则包，支持三态判定、精确年龄计算、报告打印导出、赛季倒计时与 localStorage 队伍档案。</li>
+  </ul>
+</div>
+
+<h1 class="heading">免责声明与数据来源</h1>
+<aside class="callout" data-variant="warning">
+  <p>本方案中的规则整理自公开渠道，仅供商业计划与产品设计参考；COMAP 为全部赛事规则的最终仲裁者，一切以 contest.comap.com 官方原文为准。平台产品的输出亦为参考意见，不构成官方资格认定。市场规模与财务数据为创始团队估算。</p>
+</aside>
+<div class="source-list">
+  <ol class="list">
+    <li id="source-1"><span class="src-id">[1]</span> <a class="source-link" href="https://himcm.org.cn/instructions/" target="_blank">HiMCM 官方赛事说明（COMAP 规则中文转译，2026-10-20 更新）</a>——2026 赛季注册截止（美东 11-04 14:00）、比赛窗口（11-04 15:01 至 11-17 20:00）、提交截止（11-17 21:00）、100 美元注册费不退、队伍与顾问规则、论文格式与匿名要求。</li>
+    <li id="source-2"><span class="src-id">[2]</span> <a class="source-link" href="https://mp.weixin.qq.com/s?__biz=MzIzOTAyOTgzNA==&mid=2247748841&idx=2&sn=dc66fc79125ede41853436b7ec62c7a7&chksm=e8341c3bb64eccf328a8e18b64a3a2fee080f9aedd2f554a4caa635b4d358dbabf95b59a0f30&scene=27" target="_blank">翰林课程《可跨校组队？2026 HiMCM 数模竞赛新规》（2026-05-08）</a>——组队主体新政（同一学校 / 机构 / 项目）、MidMCM 全员 14 岁半及以下、两头报名二选一、跨校组队限定、AI 使用政策与在线投稿更新。</li>
+    <li id="source-3"><span class="src-id">[3]</span> <a class="source-link" href="https://cxcy.squ.edu.cn/info/1007/2082.htm" target="_blank">苏州科技大学《关于组织参加 2026 年美国大学生数学建模竞赛的通知》（2025-12）</a>及西北农林科技大学同名通知——MCM/ICM 2026 比赛时间（北京时间 2026-01-30 06:00 至 02-03 09:00）、三人一组、保研加分属性。</li>
+    <li id="source-4"><span class="src-id">[4]</span> <a class="source-link" href="https://xkjs.wmu.edu.cn/info/1004/3033.htm" target="_blank">温州医科大学 2026 年 MCM/ICM 报名通知（2026-01）</a>及中国农业大学同名通知——校级内部规则示例（须参加过国赛、每队 2–3 人），佐证"三层规则模型"中的 L2 层。</li>
+    <li id="source-5"><span class="src-id">[5]</span> <a class="source-link" href="https://mp.weixin.qq.com/s?__biz=MzIzOTAyOTgzNA==&mid=2247760699&idx=2&sn=801b6fe87e96abfe2c2637d2d227c3aa&chksm=e8c4de9fedee3b8afbe447123f7f8d788ef71cb767781d5137bb309eaa6b8ed365e2cc130848&scene=27" target="_blank">翰林课程《2026 HiMCM 数模报名倒计时》（2026-10-18）</a>及知乎 HiMCM 专栏（2025-08）——奖项分布（O &lt;1%、F 约 4.5%、M 约 13%、H 约 29%）、全球参赛规模与中国占比口径。</li>
+    <li id="source-6"><span class="src-id">[6]</span> <a class="source-link" href="https://mp.weixin.qq.com/s?__biz=MzA5ODEzODI2Mg==&mid=2660877580&idx=4&sn=e60186cab0076e40a9011a85be7f7605&chksm=8a0c8785865cce3f87e17f44a214db7f8caed8e806c256b5fde7141dbf7eb7564715ba54bdf6&scene=27" target="_blank">赛氪《2025 年美赛 MCM/ICM 报名图文版流程》（2024-11）</a>及网易 2023 年美赛参赛指南——MCM/ICM 组队口径：1–3 名在校高中生、本科生，配 1 名指导老师，不允许跨校组队。</li>
+  </ol>
+</div>
+
+<!-- ================= 尾页 ================= -->
+<section class="title end_page">
+  <h1>把"不被取消资格"做成一门生意</h1>
+  <p>规则每年都在变，焦虑每年都在发生——而判定，可以自动化。</p>
+  <p style="margin-top:12px;">MathCheck · 国际数学竞赛合规校验平台 · 商业计划书与产品设计 V1.0</p>
+</section>
+
+</body>
+</html>
