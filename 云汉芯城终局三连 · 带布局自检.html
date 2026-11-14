@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>云汉芯城A6 终局三连 · 带布局自检</title>
+<style>
+/* ---------- 全局重置 ---------- */
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+    background: #eee;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    font-family: "Source Han Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+}
+
+/* ---------- A6 卡片容器 ---------- */
+.card {
+    width: 210mm;          /* A4宽度，横向拼版用；实际单张A6用105mm */
+    height: 296mm;         /* A4高度，纵向拼版用；实际单张A6用148mm */
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+/* 单张A6卡片（正面或反面） */
+.page {
+    width: 105mm;
+    height: 148mm;
+    padding: 7mm 6.5mm;
+    position: relative;
+    font-size: 9pt;
+    line-height: 1.35;
+    color: #171A28;
+    page-break-after: always;
+    border: 0.5pt dashed #ccc;  /* 仅用于屏幕预览，打印时不显示 */
+}
+
+/* ---------- 样式 ---------- */
+h3 {
+    font-size: 9.5pt;
+    color: #E86117;
+    letter-spacing: 0.5pt;
+    margin: 3.2mm 0 1.6mm;
+    font-weight: 700;
+}
+p { margin-bottom: 1.1mm; }
+b, strong { font-size: 10.5pt; }
+.arrow { color: #E86117; font-weight: 700; }
+hr {
+    border: 0;
+    border-top: 0.4pt solid #c9ccd6;
+    margin: 2.4mm 0;
+}
+.foot {
+    position: absolute;
+    bottom: 7mm;
+    left: 6.5mm;
+    right: 18mm;   /* 给二维码留空间 */
+    font-size: 7.5pt;
+    color: #5b6070;
+    line-height: 1.5;
+}
+.qr {
+    position: absolute;
+    bottom: 7mm;
+    right: 6.5mm;
+    width: 8mm;
+    height: 8mm;
+    border: 0.4pt solid #171A28;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 5pt;
+    color: #5b6070;
+    background: #fff;
+}
+.back {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 85%;
+}
+.big {
+    font-size: 12pt;
+    font-weight: 700;
+    line-height: 1.65;
+}
+.center { text-align: center; }
+
+/* ---------- 打印优化 ---------- */
+@media print {
+    body { background: none; padding: 0; }
+    .card { box-shadow: none; margin: 0; }
+    .page { border: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- 提示信息 -->
+<div style="max-width:800px; margin-bottom:20px; background:#fffbe6; padding:12px 16px; border-left:4px solid #faad14; font-size:14px;">
+    <strong>布局自检</strong>：页面加载后将自动运行 5 项检查，结果以弹窗显示。<br>
+    如果自检通过，再按 Ctrl+P 打印 PDF。<br>
+    GitHub 链接已纠正为：<code>github.com/D2023091001000325/bom-cleaner-20261112</code>
+</div>
+
+<!-- 卡片区域 -->
+<div class="card" id="cardContainer">
+
+    <!-- 正面：三连话术 -->
+    <div class="page" id="frontPage">
+        <h3>一 · 浮动节日</h3>
+        <p>我把世界大会当浮动节日过——从大一开始，每年一天，不放假但有仪式感。</p>
+        <p>高考那年不过：本科是基本盘，盘没稳不谈仪式<br>考研这年停一天：基本盘站住了，才有资格过节</p>
+        <p><span class="arrow">▸</span> 我所有"奢侈"的动作，都挂在基本盘下面<br><span class="arrow">▸</span> 今天来面贵司，也是挂在下面的那一个</p>
+
+        <h3>二 · 守信</h3>
+        <p>考公热里我往产业侧挤。外行看是硬挤高薪，内行看得见每一行都有 GitHub 号和驳回记录撑着。</p>
+        <p><span class="arrow">▸</span> 大部分人不是不守信，是没有东西可以守<br><span class="arrow">▸</span> 我的每一行，您都能挖到底</p>
+
+        <h3>三 · 对手分析</h3>
+        <p>您说有的是人干、肯低头的是学历更高的那批——我认输三条：体系 / 信任 / 容错额度。</p>
+        <p>但他们放下来的是"姿态"，不是"交付物"。追问三层就到头：评测集在哪？误判率多少？答不上来——因为终点是课程验收，不是用户骂人。</p>
+        <p><span class="arrow">▸</span> 他们卖折现券，我卖已验货的库存<br><span class="arrow">▸</span> 下行周期里，采购只买能当场拆箱点数的</p>
+        <hr>
+        <p><b>架子：放下"应届生该被怎么对待"，不放下"我交付的东西该被怎么验"。前者我不要了，后者您随便拆。</b></p>
+
+        <div class="foot">
+            <span style="display:block;">丁凡钧 · 华东交通大学 · 2027届</span>
+            <span style="display:block;">终局前三连 · 摸胸卡里层，按格下滑</span>
+            <span style="display:block; margin-top:1mm;">github.com/D2023091001000325/bom-cleaner-20261112</span>
+        </div>
+        <div class="qr">QR<br>8mm</div>
+    </div>
+
+    <!-- 反面：终局表态 -->
+    <div class="page back" id="backPage">
+        <h3 style="margin-bottom:2mm;">终局表态</h3>
+        <div class="big">
+            如果您给我这个机会，<br>
+            半年后您回头看，<br>
+            会发现当初招这个人，<br>
+            是您今年做过<br>
+            <strong>最划算的决定之一。</strong>
+        </div>
+        <hr style="margin:3mm 0;">
+        <p>我不是来要一份 10K 的。<br>
+        我是来把这半年攒的"可反查性"，<br>
+        存进贵司那 <strong>5797 万条 SPU</strong> 旁边。</p>
+
+        <div class="foot" style="right:18mm;">
+            <span>github.com/D2023091001000325/bom-cleaner-20261112</span>
+        </div>
+        <div class="qr">QR<br>8mm</div>
+    </div>
+
+</div>
+
+<script>
+(function() {
+    // 等待 DOM 完全渲染
+    window.addEventListener('load', function() {
+        var errors = [];
+
+        // 工具函数：获取元素实际高度（包括 padding，不包括 border/margin）
+        function getRealHeight(el) {
+            return el.getBoundingClientRect().height;
+        }
+
+        // 正面卡片
+        var front = document.getElementById('frontPage');
+        var back = document.getElementById('backPage');
+
+        // 1. 正面内容不溢出
+        // 计算所有子元素（包括文本节点）的总高度近似值：取第一个子元素到最后一个子元素的底部距离
+        var frontChildren = front.children;
+        if (frontChildren.length > 0) {
+            var firstChild = frontChildren[0];
+            var lastChild = frontChildren[frontChildren.length - 1];
+            var topPos = firstChild.getBoundingClientRect().top;
+            var bottomPos = lastChild.getBoundingClientRect().bottom;
+            var contentHeight = bottomPos - topPos;
+            var availableHeight = 148 - 14; // mm，上下边距各7mm
+            // 转换为像素近似：1mm ≈ 3.78px (96dpi)
+            var availablePx = availableHeight * 3.779527559;
+            if (contentHeight > availablePx) {
+                errors.push('正面内容可能溢出（内容高 ' + contentHeight.toFixed(1) + 'px，可用高 ' + availablePx.toFixed(1) + 'px）');
+            }
+        }
+
+        // 2. 反面内容不溢出（类似）
+        var backChildren = back.children;
+        if (backChildren.length > 0) {
+            var firstB = backChildren[0];
+            var lastB = backChildren[backChildren.length - 1];
+            var topB = firstB.getBoundingClientRect().top;
+            var bottomB = lastB.getBoundingClientRect().bottom;
+            var contentHB = bottomB - topB;
+            var availableHB = 148 - 14;
+            var availablePxB = availableHB * 3.779527559;
+            if (contentHB > availablePxB) {
+                errors.push('反面内容可能溢出（内容高 ' + contentHB.toFixed(1) + 'px，可用高 ' + availablePxB.toFixed(1) + 'px）');
+            }
+        }
+
+        // 3. 二维码安全区：检查二维码与底部文字是否重叠
+        var qrFront = front.querySelector('.qr');
+        var footFront = front.querySelector('.foot');
+        if (qrFront && footFront) {
+            var qrRect = qrFront.getBoundingClientRect();
+            var footRect = footFront.getBoundingClientRect();
+            // 垂直方向：二维码顶部应高于底部文字底部？实际上二维码在右下，文字在左下，检查水平重叠
+            // 简单检查：二维码左侧是否与文字右侧有交集
+            if (qrRect.left < footRect.right && qrRect.top < footRect.bottom) {
+                // 可能有重叠，进一步检查
+                if (qrRect.top < footRect.bottom) {
+                    errors.push('正面二维码与底部文字垂直重叠');
+                }
+            }
+        }
+        // 反面同理
+        var qrBack = back.querySelector('.qr');
+        var footBack = back.querySelector('.foot');
+        if (qrBack && footBack) {
+            var qrRectB = qrBack.getBoundingClientRect();
+            var footRectB = footBack.getBoundingClientRect();
+            if (qrRectB.left < footRectB.right && qrRectB.top < footRectB.bottom) {
+                if (qrRectB.top < footRectB.bottom) {
+                    errors.push('反面二维码与底部文字垂直重叠');
+                }
+            }
+        }
+
+        // 4. 标题完整性：检查正面三个 h3 是否存在
+        var titles = front.querySelectorAll('h3');
+        var titleTexts = [];
+        titles.forEach(function(t) { titleTexts.push(t.textContent.trim()); });
+        var requiredTitles = ['一 · 浮动节日', '二 · 守信', '三 · 对手分析'];
+        requiredTitles.forEach(function(req) {
+            if (!titleTexts.some(function(t) { return t.indexOf(req) !== -1; })) {
+                errors.push('缺少标题：' + req);
+            }
+        });
+
+        // 5. 金句存在性：反面必须包含“最划算的决定之一”
+        var backText = back.textContent || '';
+        if (backText.indexOf('最划算的决定之一') === -1) {
+            errors.push('反面缺少金句"最划算的决定之一"');
+        }
+
+        // 输出结果
+        if (errors.length === 0) {
+            alert('✅ 布局自检通过！所有检查项均正常。\n可按 Ctrl+P 打印 PDF。');
+        } else {
+            alert('❌ 布局自检未通过，发现 ' + errors.length + ' 个问题：\n\n' + errors.join('\n'));
+        }
+    });
+})();
+</script>
+
+</body>
+</html>
